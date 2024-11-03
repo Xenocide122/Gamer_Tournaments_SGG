@@ -1,0 +1,305 @@
+<.container id={"player-dashboard-#{@tournament.id}"}>
+  <:side_menu>
+    <.live_component
+      id={"side-menu-#{@tournament.id}"}
+      module={StridentWeb.TournamentManagement.Components.SideMenu}
+      can_manage_tournament={@can_manage_tournament}
+      tournament={@tournament}
+      number_of_participants={
+        Enum.count(@tournament.participants, &(&1.status in Tournaments.on_track_statuses()))
+      }
+      current_user={@current_user}
+      live_action={@team_site}
+      timezone={@timezone}
+      locale={@locale}
+    />
+  </:side_menu>
+
+  <div class="px-4 md:px-32">
+    <section id={"#{@tournament.id}-tournament-info-section"} class="mb-8">
+      <div class="items-center justify-between md:flex">
+        <h3><%= @tournament.title %></h3>
+
+        <.link
+          :if={@tournament_discord_link}
+          href={@tournament_discord_link.user_input}
+          class="flex items-center"
+        >
+          <.svg icon={:discord} width="24" height="24" class="mr-2 fill-brands-discord" />
+          <p class="uppercase text-brands-discord">Join Tournament Discord</p>
+        </.link>
+      </div>
+    </section>
+    <!-- Entry fee progression for [:chip_in_to_entry_fee, :contribution_to_entry_fee] -->
+    <section
+      :if={
+        @tournament.status in [:scheduled, :registrations_open] and
+          @tournament_participant.status in [:chip_in_to_entry_fee, :contribution_to_entry_fee]
+      }
+      class="mb-8"
+    >
+      <h4 class="mb-4">Entry Fee Progress</h4>
+      <div>
+        <p>Contribution Progress:</p>
+        <.progress_bar
+          id="my-tournament-section-contribution-progress-bar"
+          procentage={@entry_fee_progress}
+          color={
+            if(@tournament_participant.status == :chip_in_to_entry_fee,
+              do: "bg-grilla-pink",
+              else: "bg-primary"
+            )
+          }
+        />
+
+        <div class="flex justify-between">
+          <p>
+            Paid: <%= Money.sub!(
+              @tournament.buy_in_amount,
+              @tournament_participant.current_open_contribution_amount
+            ) %>
+          </p>
+          <p>Remaining: <%= @tournament.buy_in_amount %></p>
+        </div>
+      </div>
+    </section>
+
+    <section
+      :if={
+        @tournament.status in [:registrations_open, :scheduled] and
+          @tournament_participant.status in [:chip_in_to_entry_fee, :contribution_to_entry_fee]
+      }
+      class="mb-8"
+    >
+      <h4 class="mb-4">Sharing</h4>
+      <div class="flex flex-col items-center justify-center mt-4">
+        <h4>You&apos;re ready to play! Get the word out!</h4>
+
+        <div class="flex justify-center mt-8">
+          <button
+            class="flex items-center justify-center p-2 px-4 border rounded-md inner-glow border-primary text-primary"
+            phx-click={show_modal("share-my-contribution-page")}
+          >
+            Share contribution page
+            <.svg icon={:share} width="14" height="16" class="ml-2 fill-primary" />
+          </button>
+
+          <.live_component
+            id="share-my-contribution-page"
+            module={StridentWeb.Components.SocialMediaShareComponent}
+            current_user={@current_user}
+            page_link={@my_contribution_link}
+            timezone={@timezone}
+            locale={@locale}
+          />
+        </div>
+      </div>
+    </section>
+
+    <section
+      :if={
+        @tournament.status in [:registrations_closed, :in_progress] and @show_check_in_component
+      }
+      id={"#{@tournament.id}-participant-check-in-section"}
+      class="mb-8 "
+    >
+      <%= live_render(
+        @socket,
+        StridentWeb.CheckInLive,
+        id: "check-in-process",
+        session: %{
+          "participant_id" => @tournament_participant.id,
+          "tournament_starts_at" => @tournament.starts_at,
+          "current_user_id" => @current_user.id,
+          "timezone" => @timezone,
+          "check_timezone" => @check_timezone,
+          "locale" => @locale
+        }
+      ) %>
+    </section>
+
+    <section id={"#{@tournament.id}-challenges-and-reports-section"} class="mb-8">
+      <div class="flex flex-col justify-between md:flex-row">
+        <div :if={@show_report_score_component} class="md:w-128">
+          <.live_component
+            id="match-score-report"
+            module={StridentWeb.PlayerDashboardLive.Components.ReportScore}
+            tournament={@tournament}
+            participant={@tournament_participant}
+            next_match={@next_match}
+            current_user={@current_user}
+            timezone={@timezone}
+            locale={@locale}
+          />
+        </div>
+      </div>
+    </section>
+
+    <section
+      :if={
+        @tournament.status == :in_progress and !!@next_match and
+          @next_match.stage.type != :battle_royale and not @show_check_in_component
+      }
+      id={"#{@tournament.id}-match-chats-section"}
+      class="mb-8"
+    >
+      <%= live_render(
+        @socket,
+        StridentWeb.ChatLive,
+        id: "match-chat-#{@next_match.id}",
+        session: %{
+          "tournament_id" => @tournament.id,
+          "current_user_id" => Map.get(@current_user || %{}, :id),
+          "timezone" => @timezone,
+          "locale" => @locale
+        }
+      ) %>
+    </section>
+
+    <section :if={!!@party && @tournament.players_per_participant > 1} class="mb-8">
+      <div class="flex justify-between items-center mb-4">
+        <div>
+          <h3 class=""><%= @party.name %> - Roster</h3>
+        </div>
+        <div>
+          <div
+            :if={
+              show_manage_payouts?(@tournament_participant, @party, @current_user, @tournament)
+            }
+            class="flex justify-center"
+          >
+            <.link
+              id={"manage-roster-#{@party.id}"}
+              navigate={
+                Routes.live_path(@socket, StridentWeb.PartyManagementLive.Show, @party,
+                  tournament: @tournament,
+                  participant: @tournament_participant
+                )
+              }
+              class="btn btn--primary"
+            >
+              Manage Payouts
+            </.link>
+          </div>
+
+          <div :if={show_manage_roster?(@party, @current_user, @tournament)} class="my-2">
+            <.link
+              id={"manage-roster-#{@party.id}"}
+              navigate={
+                Routes.live_path(@socket, StridentWeb.PartyManagementLive.Index, @party,
+                  tournament: @tournament
+                )
+              }
+              class="text-primary hover:underline"
+            >
+              Manage Roster
+            </.link>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-col flex-wrap flex-auto gap-8 md:flex-row">
+        <.live_component
+          :for={party_member <- @party.party_members}
+          id={"team-roster-party-member-#{@party.id}-#{party_member.id}"}
+          module={StridentWeb.TournamentManagementLive.TournamentPage.Components.PartyMemberCard}
+          item={party_member}
+        />
+
+        <.live_component
+          :for={invitation <- @party.party_invitations}
+          :if={invitation.status == :pending}
+          id={"party-invitation-#{@party.id}-#{invitation.id}"}
+          module={StridentWeb.TournamentManagementLive.TournamentPage.Components.PartyMemberCard}
+          item={invitation}
+        />
+      </div>
+
+      <.button
+        :if={@my_party_member.type not in [:manager, :captain]}
+        id={"drop-from-team-button-#{@party.id}"}
+        button_type={:primary_ghost}
+        class="mt-4 rounded"
+        phx-click={show_modal("leave-team-modal-#{@party.id}")}
+      >
+        Leave Team
+      </.button>
+
+      <.leave_team_modal
+        :if={@my_party_member.type not in [:manager, :captain]}
+        id={"leave-team-modal-#{@party.id}"}
+        party_name={@party.name}
+        party_member_id={@my_party_member.id}
+      />
+    </section>
+
+    <section
+      :if={@tournament_participant.status == :confirmed}
+      id={"#{@tournament.id}-participant-share-section"}
+      class="mb-8"
+    >
+      <h4 class="mb-4">Sharing</h4>
+      <div class="flex flex-col items-center justify-center gap-4 mt-8">
+        <h4>You&apos;re ready to play! Get the word out!</h4>
+
+        <.button
+          id={"#{@tournament.id}-share-tournament-page-button"}
+          button_type={:primary_ghost}
+          class="flex items-center justify-center gap-2 rounded-md inner-glow"
+          phx-click={show_modal("share-tournament-page-modal")}
+        >
+          Share tournament page <.svg icon={:share} width="14" height="16" class="fill-primary" />
+        </.button>
+      </div>
+
+      <.live_component
+        id="share-tournament-page-modal"
+        module={StridentWeb.Components.SocialMediaShareComponent}
+        current_user={@current_user}
+        page_link={@tournament_link}
+        timezone={@timezone}
+        locale={@locale}
+      />
+    </section>
+
+    <section id={"#{@tournament.id}-tournament-rules"} class="mb-8">
+      <h4 class="">Tournament Rules</h4>
+
+      <div class="my-4">
+        <p :for={stage <- @tournament.stages}>
+          <span class="text-grey-light">Stage <%= stage.round + 1 %>:</span>
+          <%= Phoenix.Naming.humanize(stage.type) %>
+        </p>
+      </div>
+
+      <div class="markdown">
+        <%= Strident.MarkdownTransformations.to_html(@tournament.rules) %>
+      </div>
+    </section>
+
+    <section :if={
+      @tournament.status in [:scheduled, :registrations_open, :registrations_closed] and
+        @tournament.players_per_participant == 1
+    }>
+      <h4 class="mb-4 uppercase">Drop From Tournament</h4>
+      <p class="mb-4 text-grey-light">
+        You can drop from the tournament if you need to using the button below.
+      </p>
+
+      <.button
+        id={"drop-participant-button-#{@tournament_participant.id}"}
+        button_type={:primary_ghost}
+        class="uppercase rounded"
+        phx-click={show_modal("drop-myself-from-tournament-modal-#{@tournament_participant.id}")}
+      >
+        Drop From Tournament
+      </.button>
+
+      <.drop_myself_from_tournament_modal
+        id={"drop-myself-from-tournament-modal-#{@tournament_participant.id}"}
+        tournament_name={@tournament.title}
+        participant_id={@tournament_participant.id}
+      />
+    </section>
+  </div>
+</.container>

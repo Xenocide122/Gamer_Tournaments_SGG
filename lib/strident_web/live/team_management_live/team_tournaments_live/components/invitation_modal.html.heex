@@ -1,0 +1,230 @@
+<div x-data="modal">
+  <div class="modal__overlay">
+    <div class="modal__frame">
+      <div
+        class="modal__backdrop"
+        phx-capture-click="close-invitation"
+        phx-value-invitation={@invitation.id}
+      >
+      </div>
+
+      <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">
+        &#8203;
+      </span>
+
+      <div class="my-24 modal__dialog modal__dialog--medium">
+        <.card colored={true} class={if(@open_terms_and_condition, do: "hidden", else: "")}>
+          <div class="flex justify-between mb-4">
+            <div>
+              <h3>
+                <%= @tournament.title %>
+              </h3>
+
+              <.localised_datetime
+                datetime={@tournament.starts_at}
+                timezone={@timezone}
+                locale={@locale}
+                class="block mb-4 text-sm text-grey-light"
+              />
+            </div>
+
+            <div
+              class="hidden lg:flex"
+              phx-click="close-invitation"
+              phx-value-invitation={@invitation.id}
+            >
+              <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+                <path
+                  fill-rule="evenodd"
+                  d={StridentWeb.Common.SvgUtils.path(:x_circle)}
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </div>
+          </div>
+
+          <.flash flash={@flash} phx-target={@myself} class="absolute top-0" />
+
+          <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
+            <div class="col-span-1">
+              <div class="mb-4">
+                <div class="font-display text-grey-light">
+                  Game
+                </div>
+                <%= @tournament.game.title %>
+              </div>
+
+              <div class="mb-4">
+                <div class="font-display text-grey-light">
+                  Prize pool
+                </div>
+
+                <.live_component
+                  id={"tournament-prize-pool-#{@tournament.id}"}
+                  module={
+                    case @tournament.prize_strategy do
+                      :prize_pool -> StridentWeb.Components.PrizePool
+                      :prize_distribution -> StridentWeb.Components.PrizeDistribution
+                    end
+                  }
+                  prize_strategy={@tournament.prize_strategy}
+                  prize_pool={@tournament.prize_pool}
+                  prize_distribution={@tournament.prize_distribution}
+                  position={:vertical}
+                  timezone={@timezone}
+                  locale={@locale}
+                />
+              </div>
+            </div>
+
+            <div class="col-span-1">
+              <div class="mb-4">
+                <div class="mb-2 font-display text-grey-light">
+                  Roster
+                </div>
+
+                <.live_component
+                  id="search-teams-and-parties"
+                  module={StridentWeb.Live.Components.SearchForm}
+                  search_term={@search_term}
+                  results={@search_results}
+                  placeholder="Write teammate's name..."
+                  target={@myself}
+                  timezone={@timezone}
+                  locale={@locale}
+                />
+              </div>
+
+              <div class="flex flex-wrap">
+                <%= for user <- @selected_roster do %>
+                  <div class="mb-2 mr-2">
+                    <div class="p-1 border border-solid rounded shadow">
+                      <div class="flex items-center text-xs">
+                        <%= user.display_name %>
+                        <div phx-click="remove" phx-value-item={user.id} phx-target={@myself}>
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="#FFFFFF">
+                            <path d={StridentWeb.Common.SvgUtils.path(:x)}></path>
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+
+              <div class="mb-4">
+                <div class="mb-2 font-display text-grey-light">
+                  Split with contributors
+                </div>
+
+                <div class="text-xs text-grey-light">
+                  Contributors %
+                </div>
+                <.form
+                  :let={f}
+                  for={to_form(%{}, as: :new_roster)}
+                  phx-change="validate-participant-stake"
+                  phx-submit="accept-invitation"
+                  phx-target={@myself}
+                  class="mb-2"
+                >
+                  <%= number_input(f, :stake_percentage,
+                    class: "form-input",
+                    min: get_mininum_split_stake(@tournament),
+                    max: 100,
+                    value: @stake_percentage
+                  ) %>
+                </.form>
+
+                <div class="text-xs text-grey-light">
+                  Your team takes home <%= @stake_percentage %> %
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex flex-col justify-end lg:flex-row">
+            <button
+              class="mb-4 font-bold btn btn--primary-ghost text-grey-light border-grey-light lg:mr-4"
+              phx-click="close-invitation"
+              phx-value-invitation={@invitation.id}
+            >
+              Cancel
+            </button>
+
+            <button
+              class="mb-4 btn btn--wide btn--primary md:px-24"
+              phx-click="open-consent"
+              phx-target={@myself}
+            >
+              Join Tournament
+            </button>
+          </div>
+        </.card>
+
+        <.wide_card
+          colored={true}
+          class={if(not @open_terms_and_condition, do: "hidden", else: "")}
+        >
+          <div class="flex justify-center">
+            <h3>Terms & Condition</h3>
+          </div>
+
+          <div class="p-8">
+            <StridentWeb.Components.TermsOfUse.tournament_registration_terms />
+          </div>
+
+          <.form
+            :let={f}
+            for={to_form(%{}, as: :terms_and_condition)}
+            phx-change="terms-and-condition-consent"
+            phx-target={@myself}
+            class="mb-8 text-xl"
+          >
+            <div class="flex justify-end">
+              <div class="flex items-center mb-2 mr-4">
+                <div class="flex items-center justify-center flex-shrink-0 w-5 h-5 mr-2 bg-transparent border-2 border-primary">
+                  <%= checkbox(f, :consent,
+                    class: "opacity-0 absolute h-10 w-10",
+                    checked: @consent
+                  ) %>
+
+                  <svg
+                    class="hidden w-4 h-4 transition pointer-events-none text-primary"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path d={StridentWeb.Common.SvgUtils.path(:solid_check)} />
+                  </svg>
+                </div>
+
+                <div>I have read and accepted the terms & agreements</div>
+              </div>
+            </div>
+          </.form>
+
+          <div class="flex flex-col justify-end lg:flex-row">
+            <button
+              class="mb-4 font-bold btn btn--primary-ghost text-grey-light border-grey-light lg:mr-4"
+              phx-click="close-invitation"
+              phx-value-invitation={@invitation.id}
+            >
+              Cancel
+            </button>
+
+            <button
+              class={
+                "btn btn--wide btn--primary md:px-24 mb-4 #{if(not @consent, do: "cursor-not-allowed bg-primary-dark text-black border-none")}"
+              }
+              disabled={not @consent}
+              phx-click="accept-invitation"
+              phx-target={@myself}
+            >
+              Join Tournament
+            </button>
+          </div>
+        </.wide_card>
+      </div>
+    </div>
+  </div>
+</div>

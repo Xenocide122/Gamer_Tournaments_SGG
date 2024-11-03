@@ -1,0 +1,149 @@
+<div>
+  <%!-- <.container id={"tournament-participants-#{@tournament.id}"}> --%>
+
+  <div class="min-h-[10vh]"></div>
+  <div class="px-4 lg:px-8">
+    <div :if={
+      Accounts.is_staff_member?(@current_user) and
+        not (Application.get_env(:strident, :env) == :prod and
+               is_nil(System.get_env("IS_STAGING"))) and
+        @tournament.status in [:registrations_open]
+    }>
+      <span
+        class="mb-2 text-xs underline capitalize text-secondary hover:cursor-pointer"
+        phx-click={JS.toggle(to: "#staff-menu-dashboard")}
+      >
+        Staff
+      </span>
+
+      <div
+        id="staff-menu-dashboard"
+        class="hidden w-auto px-4 py-5 border-2 rounded-md border-secondary-dark"
+      >
+        <h3 class="text-2xl font-medium leading-6 text-secondary">STAFF ONLY - TESTING</h3>
+
+        <.form
+          :let={f}
+          :if={Accounts.is_staff_member?(@current_user)}
+          id="register-n-random-users-in-tournament-form"
+          for={@form}
+          phx-submit="register-n-random-users"
+        >
+          <div class="p-2 space-y-4">
+            <.form_text_input form={f} field={:n} placeholder="how many participants?" />
+            <.form_text_input
+              form={f}
+              field={:number_party_members}
+              placeholder="how many members per party?"
+            />
+
+            <%= submit("REGISTER PARTIES",
+              class: "btn btn--block btn--primary-ghost capitalize"
+            ) %>
+          </div>
+        </.form>
+      </div>
+    </div>
+
+    <section class="mt-8 mb-8">
+      <div class="flex flex-col lg:flex-row justify-between">
+        <div class="">
+          <div class="flex flex-col justify-start gap-2">
+            <h1>
+              Tournament Participants
+            </h1>
+          </div>
+        </div>
+        <div class="">
+          <.participants_filters
+            :if={@number_of_participants > 0 or @can_manage_tournament}
+            tournament_type={@tournament.type}
+            status_filters={@filtered_statuses}
+            search_term={@search_term}
+            can_manage_tournament={@can_manage_tournament}
+            phx_target={@myself}
+          />
+        </div>
+      </div>
+    </section>
+
+    <section class="relative mt-2 md:mt-8">
+      <.send_invitation_form
+        :if={@can_manage_tournament and @tournament.type == :invite_only}
+        valid_invitation_email={@validation_invite_email == ""}
+        invitation_email_error={@validation_invite_email}
+        phx_target={@myself}
+      />
+
+      <div class="sticky z-10 w-full top-28 md:top-24 md:border-b md:border-grey-light bg-blackish/90">
+        <div
+          :if={Enum.any?(@paginated_participants)}
+          id="participant-pagination-controls"
+          class="flex w-full overflow-x-auto text-lg flex-nowrap gap-x-4"
+        >
+          <div
+            :for={page_number <- 1..@paginated_participants.total_pages//1}
+            phx-click="click-participant-page-number"
+            phx-target={@myself}
+            phx-value-page-number={page_number}
+            phx-throttle="2000"
+            class={[
+              "cursor-pointer hover:underline break-keep whitespace-nowrap",
+              if(page_number == @paginated_participants.page_number, do: "text-primary")
+            ]}
+          >
+            <%= 1 + @paginated_participants.page_size * (page_number - 1) %>-<%= min(
+              @paginated_participants.page_size *
+                page_number,
+              @paginated_participants.total_entries
+            ) %>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-2 divide-y divide-grey-light">
+        <.participant_card
+          :for={participant <- @paginated_participants.entries}
+          tournament_type={@tournament.type}
+          id={participant.id}
+          name={participant.inferred_name || TournamentParticipants.participant_name(participant)}
+          status={participant.status}
+          tournament_status={@tournament.status}
+          rank={participant.rank}
+          ranks_frequency={@ranks_frequency}
+          email={
+            TournamentParticipants.participant_email(participant,
+              show_email: @can_manage_tournament
+            )
+          }
+          invitation_status={
+            if(@tournament.type == :invite_only and !!participant.active_invitation,
+              do: participant.active_invitation.status
+            )
+          }
+          invitation_token={
+            if(@tournament.type == :invite_only and !!participant.active_invitation,
+              do: participant.active_invitation.invitation_token
+            )
+          }
+          registration_fields={participant.registration_fields}
+          free_tournament={Tournaments.is_free_buy_in_tournament?(@tournament)}
+          can_manage_tournament={@can_manage_tournament}
+          roster_members={TournamentParticipants.get_roster_members(participant)}
+          roster_invitations={
+            participant
+            |> TournamentParticipants.get_roster_invitations()
+            |> Enum.filter(&(&1.status == :pending))
+          }
+          prize_money={
+            if(@tournament.prize_strategy == :prize_pool,
+              do: Map.get(@tournament.prize_pool, participant.rank),
+              else: Map.get(@tournament.distribution_prize_pool, participant.rank)
+            )
+          }
+        />
+      </div>
+    </section>
+    <%!-- </.container> --%>
+  </div>
+</div>

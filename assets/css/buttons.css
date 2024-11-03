@@ -1,0 +1,109 @@
+@layer components {
+  .btn {
+    @apply inline-block cursor-pointer font-medium border rounded py-2.5 px-4 select-none;
+  }
+
+  .btn--block {
+    @apply block w-full text-center;
+  }
+
+  .btn--primary {
+    @apply text-black uppercase bg-primary border-primary;
+  }
+
+  .btn--primary-dark {
+    @apply text-white uppercase bg-primary-dark border-primary;
+  }
+
+  .btn--primary-ghost {
+    @apply border-primary text-primary;
+  }
+
+  .btn--secondary {
+    @apply text-black uppercase bg-secondary border-secondary;
+  }
+
+  .btn--secondary-ghost {
+    @apply border-secondary text-secondary;
+  }
+
+  .btn--secondary-muted {
+    @apply border-grey-light text-grey-light;
+  }
+
+  .btn--large {
+    @apply py-4 text-3xl leading-none uppercase font-display px-9;
+  }
+
+  .btn--sm {
+    @apply px-2 py-1 text-sm font-light leading-none uppercase;
+  }
+
+  .btn--wide {
+    @apply font-semibold uppercase py-2.5 px-8;
+  }
+
+  .btn--social {
+    @apply bg-primary border-primary text-black rounded p-[7px];
+  }
+
+  .btn--participant-stake-status {
+    @apply h-10 uppercase border rounded cursor-pointer w-44 font-display;
+  }
+
+  .btn--neon-pink {
+    @apply font-semibold text-white border-[3px] rounded-lg border-grilla-pink;
+    box-shadow: 0 0 10px #03d5fb, inset 0 0 10px #03d5fb;
+  }
+
+  .btn--neon-green {
+    @apply font-semibold text-white border-[3px] rounded-lg border-primary;
+    box-shadow: 0 0 10px #03d5fb, inset 0 0 10px #03d5fb;
+  }
+
+  .toggle {
+    @apply relative flex items-center content-center justify-center flex-none cursor-pointer;
+    aspect-ratio: 5/3;
+    width: 30px;
+  }
+  .toggle--back {
+    @apply flex-none rounded-full opacity-50 bg-grey-light;
+    height: 66.6667%;
+    aspect-ratio: 2;
+  }
+  [on].toggle .toggle--back {
+    @apply bg-primary;
+  }
+  .toggle--button {
+    @apply absolute top-0 left-0 flex-none rounded-full bg-grey-light;
+    height: 100%;
+    aspect-ratio: 1;
+  }
+  [on].toggle .toggle--button {
+    @apply right-0 left-auto bg-primary;
+  }
+
+  .radio {
+    @apply relative flex items-center content-center justify-center flex-none;
+    width: 20px;
+    aspect-ratio: 1;
+  }
+  .radio--border {
+    @apply rounded-full border-grey-light border-[1px] flex-none;
+    height: 100%;
+    width: 100%;
+  }
+  .radio--inner {
+    @apply absolute flex-none rounded-full;
+    height: 57.142857%;
+    width: 57.142857%;
+  }
+
+  [on].radio .radio--border {
+    @apply border-primary;
+  }
+
+  [on].radio .radio--inner {
+    @apply bg-primary;
+  }
+}

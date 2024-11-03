@@ -1,0 +1,20 @@
+<div id="cheatcodes" phx-hook="Cheatcodes" class={if @konami, do: "", else: "hidden"}>
+  <%= if @konami do %>
+    <div
+      id="konami-cheatcode-result"
+      class="fixed top-0 left-0 w-screen h-screen flex justify-center items-center bg-blackish/75"
+    >
+      <canvas id="konami-canvas" width="600px" height="400px" class="absolute z-40"></canvas>
+      <div class="z-50 flex-col justify-center">
+        <img src={safe_static_url("/images/hacking.gif")} alt="hacking" />
+        <button
+          phx-click="stop_cheat_konami"
+          phx-target={@myself}
+          class="btn btn--block btn--primary mt-8 uppercase font-display"
+        >
+          Cancel hack
+        </button>
+      </div>
+    </div>
+  <% end %>
+</div>

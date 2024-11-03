@@ -1,0 +1,16 @@
+<mj-section>
+  <mj-column>
+    <mj-social font-size="16px" icon-size="30px" mode="horizontal" border-radius='2px' align='left' padding-bottom='0' padding-left='20px'>
+      <mj-social-element href="https://www.twitch.tv/esports_stride" src='https://strident-games.s3.amazonaws.com/brand-logo-twitch.png'>
+      </mj-social-element>
+      <mj-social-element href="https://twitter.com/esports_stride" src='https://strident-games.s3.amazonaws.com/brand-logo-twitter.png' padding='0 10px'>
+      </mj-social-element>
+      <mj-social-element href="https://discord.gg/Stride" src='https://strident-games.s3.amazonaws.com/brand-logo-discord.png'>
+      </mj-social-element>
+    </mj-social>
+    <mj-text mj-class='text-xs text-lightgray' padding-top='0' line-height='16px'>
+      © 2023 Stride.<br />
+      All rights reserved.<br />
+    </mj-text>
+  </mj-column>
+</mj-section>

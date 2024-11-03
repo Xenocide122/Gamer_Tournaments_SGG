@@ -1,0 +1,32 @@
+<div phx-click-away="click-away" phx-target={@target}>
+  <input
+    class="form-input"
+    id="search-input"
+    autocomplete="off"
+    type="text"
+    phx-window-keyup="search"
+    phx-target={@target}
+    value={@search_term}
+    placeholder={@placeholder}
+    phx-debounce={@phx_debounce}
+  />
+
+  <%= if @search_results != [] do %>
+    <div class="relative" phx-window-keydown="set-focus" phx-target={@myself}>
+      <div class="absolute z-40 left-0 right-0 rounded border border-gray-100 shadow py-2 bg-gray-800">
+        <%= for {search_result, idx} <- Enum.with_index(@search_results) do %>
+          <div
+            class={
+              "cursor-pointer p-2 hover:bg-gray-200 focus:bg-gray-200 #{if idx == @current_focus, do: "bg-gray-200"}"
+            }
+            phx-click="pick"
+            phx-value-id={search_result.id}
+            phx-target={@target}
+          >
+            <%= @render_result_fn.(%{search_result: search_result, phx_target: @target}) %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>

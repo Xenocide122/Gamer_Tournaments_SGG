@@ -1,0 +1,23 @@
+<div>
+  <%= if @email_sent_to do %>
+    <p class="text-lg font-bold text-primary">
+      Please check the inbox at <%= @email_sent_to %> for the confirmation email from Stride.
+    </p>
+  <% else %>
+    <p class="font-bold text-secondary">
+      Your email has still not been confirmed
+    </p>
+
+    <button
+      type="button"
+      id="confirm-email-button"
+      phx-click="click"
+      phx-target={@myself}
+      class="mt-6 btn btn--primary"
+    >
+      Confirm Email
+    </button>
+  <% end %>
+
+  <.flash flash={@flash} phx-target={@myself} class="relative top-2" />
+</div>

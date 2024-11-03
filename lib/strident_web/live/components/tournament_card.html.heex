@@ -1,0 +1,85 @@
+<div class="tournament-card max-w-[300px]">
+  <.link navigate={@link_to}>
+    <div class="relative flex items-center justify-center overflow-hidden max-h-48">
+      <img src={@image_url} alt="Tournament" />
+
+      <div class="absolute bottom-0 left-0 flex items-center">
+        <div class="tournament-card__status">
+          <%= @label_text %>
+        </div>
+
+        <svg
+          width="20"
+          height="28"
+          viewBox="0 0 20 28"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path d="M20 32H0V0L20 32Z" fill="#03d5fb" />
+        </svg>
+      </div>
+    </div>
+  </.link>
+
+  <div class="px-5 py-6">
+    <div class="h-[100px]">
+      <.link navigate={@link_to}>
+        <div class="text-center heading-4">
+          <%= @title %>
+        </div>
+      </.link>
+
+      <.localised_datetime
+        datetime={@starts_at}
+        timezone={@timezone}
+        locale={@locale}
+        class="block text-sm text-center text-grey-light"
+      />
+    </div>
+
+    <div class="flex content-center my-2">
+      <div class="mt-0.5 mr-2">
+        <svg width="16" height="17" viewBox="0 0 24 24" class="fill-primary">
+          <path d={StridentWeb.Common.SvgUtils.path(:gamepad)}></path>
+        </svg>
+      </div>
+      <p>
+        <%= Strident.Games.get_game_by(id: @game_id).title %>
+      </p>
+    </div>
+
+    <div class="flex content-center my-2">
+      <div class="mt-1 mr-2">
+        <svg width="16" height="16" viewBox="0 0 24 24" class="fill-primary">
+          <path d={StridentWeb.Common.SvgUtils.path(:money_bill)}></path>
+        </svg>
+      </div>
+      <p>
+        <%= @buy_in_amount %>
+      </p>
+    </div>
+
+    <div class="flex content-center my-2">
+      <div class="mt-1 mr-2">
+        <svg width="16" height="16" viewBox="0 0 24 24" class="fill-primary">
+          <path d={StridentWeb.Common.SvgUtils.path(:trophy)}></path>
+        </svg>
+      </div>
+    </div>
+
+    <div class="flex content-center my-2">
+      <div class="mt-1 mr-2">
+        <svg width="16" height="16" viewBox="0 0 24 24" class="fill-primary">
+          <path d={StridentWeb.Common.SvgUtils.path(:users)}></path>
+        </svg>
+      </div>
+      <p>
+        <%= "#{Enum.count(@participants)} Participants" %>
+      </p>
+    </div>
+
+    <.link navigate={@link_to} class={@call_to_action_classes}>
+      <%= @call_to_action %>
+    </.link>
+  </div>
+</div>

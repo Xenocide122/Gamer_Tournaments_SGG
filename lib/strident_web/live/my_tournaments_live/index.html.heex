@@ -1,0 +1,83 @@
+<div class="py-20">
+  <div
+    class="relative bg-cover bg-top before:absolute before:inset-0 before:bg-blackish/60 before:content-['']"
+    style={
+      "background-image: url('#{safe_static_url("/images/tournaments-header-bg.jpg")}')"
+    }
+  >
+    <div class="relative bg-gradient-to-r from-indigo-500/25 via-purple-500/25 to-pink-500/25 py-28">
+      <div class="max-w-xl mx-auto text-center text-white">
+        <h1 class="uppercase">My Tournaments</h1>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider--horizontal" />
+
+  <div
+    class="container py-14"
+    x-data="profileScroll"
+    x-init={"position = #{@filtered_user_relation_index};"}
+  >
+    <div class="flex justify-between py-1 mb-4 space-x-4 border-b border-grey-dark profile-menu md:justify-start">
+      <%= for {filter, index} <- Enum.with_index(user_relation_filters()) do %>
+        <h5
+          phx-click="filter-user-relation"
+          phx-value-filter-type={index}
+          class={
+            "relative uppercase " <>
+              if index == @filtered_user_relation_index,
+                do: "text-primary",
+                else: "link text-white"
+          }
+        >
+          <%= filter %>
+        </h5>
+      <% end %>
+    </div>
+
+    <.form
+      :let={f}
+      for={to_form(%{}, as: :filter_status_form)}
+      id="my-tournamets-filter_by_status"
+      phx-change="filter-status"
+    >
+      <.form_select
+        form={f}
+        field={:filter}
+        values={status_filters()}
+        selected={@filtered_status}
+        class="max-w-xs mb-10"
+      />
+    </.form>
+
+    <%= for index <- 0..Enum.count(user_relation_filters()) - 1 do %>
+      <div x-bind="pane" position={index}>
+        <%= if index == @filtered_user_relation_index do %>
+          <div class="grid gap-8 mb-12 sm:grid-cols-2 lg:grid-cols-4">
+            <%= for tournament <- @tournaments.entries do %>
+              <div id={"my-tournaments-tournament-card-#{tournament.id}"}>
+                <.live_component
+                  id={"tournament-#{tournament.id}"}
+                  module={StridentWeb.Components.NewTournamentCard}
+                  tournament={tournament}
+                  current_user={@current_user}
+                  timezone={@timezone}
+                  locale={@locale}
+                />
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+
+    <%= if @tournaments.total_pages > 1 do %>
+      <div class="text-center">
+        <button phx-click="load-more" class="w-full max-w-xs font-semibold btn btn--primary">
+          Load More
+        </button>
+      </div>
+    <% end %>
+  </div>
+</div>

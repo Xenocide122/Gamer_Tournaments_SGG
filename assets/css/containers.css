@@ -1,0 +1,131 @@
+@layer components {
+  .card {
+    @apply p-10 rounded bg-blackish;
+  }
+
+  .card--wide {
+    @apply p-5 rounded bg-blackish;
+  }
+
+  .card--tall {
+    @apply p-6 rounded bg-blackish;
+  }
+
+  .card--slim {
+    @apply px-4 rounded bg-blackish;
+  }
+
+  .card--colored {
+    @apply rounded p-0.5;
+    background: linear-gradient(
+        120deg,
+        var(--color-grilla-blue) 0%,
+        var(--color-grilla-pink) 100%
+      )
+      0% 0%;
+  }
+
+  .card--colored > .card__inner {
+    @apply p-1 bg-blackish xl:p-10;
+  }
+
+  .card--colored.card--wide > .card__inner {
+    @apply p-1 bg-blackish xl:p-5;
+  }
+
+  .card--colored.card--tall > .card__inner {
+    @apply p-1 bg-blackish xl:p-5;
+  }
+
+  .card--colored.card--slim > .card__inner {
+    @apply p-4 bg-blackish;
+  }
+
+  .card--colored--thin {
+    border-radius: 0.5rem;
+    padding: 1px;
+    background: linear-gradient(
+        120deg,
+        var(--color-grilla-blue) 0%,
+        var(--color-grilla-pink) 100%
+      )
+      0% 0%;
+  }
+
+  .card--colored--thin > .card__inner {
+    @apply bg-blackish;
+    border-radius: calc(0.5rem - 1px);
+  }
+
+  .card--glowing-hoverable > .card__inner {
+    @apply rounded-md;
+  }
+
+  .card--glowing-hoverable {
+    @apply relative p-2 bg-blackish rounded-lg shadow-grilla-two-colors-pink hover:shadow-grilla-two-colors-blue;
+  }
+
+  .card--glowing-two-tone {
+    @apply relative p-1 rounded-2xl bg-blackish xl:p-2;
+  }
+
+  .card--glowing-two-tone::before {
+    @apply absolute filter blur-[6px] z-[-1] h-full w-full top-0 left-0 rounded-2xl;
+    content: '';
+    background: linear-gradient(
+      90deg,
+      var(--color-grilla-blue) 0%,
+      var(--color-grilla-pink) 100%
+    );
+  }
+
+  .divider {
+    @apply w-0.5;
+    background: transparent
+      linear-gradient(
+        180deg,
+        var(--color-grilla-blue-transparent) 0%,
+        var(--color-grilla-blue) 10%,
+        var(--color-grilla-pink) 90%,
+        var(--color-grilla-pink-transparent) 100%
+      );
+  }
+
+  .divider--horizontal {
+    @apply w-auto h-0.5;
+    background: transparent
+      linear-gradient(
+        90deg,
+        var(--color-grilla-blue-transparent) 0%,
+        var(--color-grilla-blue) 10%,
+        var(--color-grilla-pink) 90%,
+        var(--color-grilla-pink-transparent) 100%
+      );
+  }
+  .shadow--right {
+    box-shadow: -2px 0px 6px var(--color-primary);
+  }
+
+  @media (min-width: 768px) {
+    .grid-tournaments > :nth-child(2n) {
+      @apply justify-self-end;
+    }
+    .grid-tournaments > :nth-child(2n + 1) {
+      @apply justify-self-start;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .grid-tournaments > :nth-child(3n) {
+      @apply justify-self-end;
+    }
+
+    .grid-tournaments > :nth-child(3n + 1) {
+      @apply justify-self-start;
+    }
+
+    .grid-tournaments > :nth-child(3n + 2) {
+      @apply justify-self-center;
+    }
+  }
+}

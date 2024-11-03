@@ -1,0 +1,424 @@
+<div class="pt-32">
+  <div class="container">
+    <div class="flex flex-col items-start md:flex-row">
+      <div class="md:mr-24 md:w-80 w-full mb-2">
+        <.card colored class="card--glowing-two-tone p-0.5">
+          <ul class="wizard-steps">
+            <li class={setup_class_wizard_steps(@current_step, 1)}>
+              Team Info
+            </li>
+
+            <li class={setup_class_wizard_steps(@current_step, 2)}>
+              Register Players
+            </li>
+
+            <li class={setup_class_wizard_steps(@current_step, 3)}>
+              Confirmation
+            </li>
+          </ul>
+        </.card>
+      </div>
+
+      <div class="flex-1">
+        <.card
+          colored
+          class={"
+                #{if(@current_step == 1, do: "mb-14", else: "hidden")}
+                card--glowing-two-tone 
+                p-0.5
+                "}
+        >
+          <h3 class="mb-5 text-center uppercase">
+            Team Information
+          </h3>
+
+          <p class="mb-16 whitespace-pre-line text-grey-light">
+            Looking to build your dream team? Get started with a few details and have premium management features at your fingertips.
+            Manage your team's profile, roster, winnings and tournaments all in one place.
+          </p>
+
+          <div class="flex flex-col md:flex-row md:space-x-28">
+            <div class="flex-1">
+              <.form
+                :let={f}
+                for={@changeset}
+                id="team-input"
+                phx-change="validate-team-info-step"
+              >
+                <div class="form-group">
+                  <div class="flex">
+                    <.form_label form={f} field={:name} label="Team Name" />
+                    <p class="text-primary">
+                      *
+                    </p>
+                  </div>
+                  <.form_text_input form={f} field={:name} />
+                  <.form_feedback form={f} field={:name} />
+                </div>
+
+                <div class="form-group">
+                  <div class="flex">
+                    <.form_label form={f} field={:email} label="Team Email" />
+                    <p class="text-primary">
+                      *
+                    </p>
+                  </div>
+
+                  <.form_text_input form={f} field={:email} />
+                  <.form_feedback form={f} field={:email} />
+                </div>
+
+                <div class="form-group">
+                  <.form_label form={f} field={:social_media} label="Social Media" />
+                  <%= for i <- inputs_for(f, :social_media_link_teams) do %>
+                    <%= for x <- inputs_for(i, :social_media_link) do %>
+                      <div class="mb-2">
+                        <.form_text_input
+                          form={x}
+                          field={:user_input}
+                          class="form-input"
+                          placeholder="e.g. twitter.com/Stride"
+                        />
+                        <%= if Map.has_key?(x.source.changes, :user_input) do %>
+                          <.form_feedback form={x} field={:handle} />
+                        <% end %>
+                      </div>
+                    <% end %>
+                  <% end %>
+
+                  <div class="flex justify-end">
+                    <div
+                      class="flex items-center text-primary"
+                      phx-click="add-new-social-media"
+                      style="cursor: pointer;"
+                    >
+                      <span class="mr-1">
+                        Add another
+                      </span>
+
+                      <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                        <path d={StridentWeb.Common.SvgUtils.path(:add_fill)} />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <.form_label form={f} field={:description} label="Team Bio" />
+                  <.form_textarea form={f} field={:description} rows="3" />
+                  <.form_feedback form={f} field={:description} />
+                </div>
+              </.form>
+            </div>
+
+            <div class="flex-1">
+              <label for="uploadBox">
+                Team Logo
+              </label>
+
+              <.live_component
+                timezone={@timezone}
+                locale={@locale}
+                id="profile-picture-form-initial"
+                module={StridentWeb.Components.UploadImageForm}
+                upload_for={@changeset}
+                modalized={true}
+              >
+                <div class={
+                  if(is_logo_url_valid?(@changeset),
+                    do: "",
+                    else: "upload-box grid place-items-center py-10"
+                  )
+                }>
+                  <img
+                    class={
+                      if(is_logo_url_valid?(@changeset),
+                        do: "w-100 h-100 mb-1",
+                        else: "w-20 h-15 mb-1"
+                      )
+                    }
+                    src={show_image_if_valid(@changeset)}
+                  />
+                  <p class={if(is_logo_url_valid?(@changeset), do: "hidden", else: "mb-1")}>
+                    Drag and Drop Your File
+                  </p>
+
+                  <div class="flex text-xs text-grey-light">
+                    <p class={if(is_logo_url_valid?(@changeset), do: "hidden", else: "mr-1")}>
+                      Or
+                    </p>
+                    <p class="mr-1 link clickable">
+                      Select new file
+                    </p>
+                    <p class={if(is_logo_url_valid?(@changeset), do: "hidden")}>
+                      from your computer
+                    </p>
+                  </div>
+                </div>
+              </.live_component>
+            </div>
+          </div>
+        </.card>
+
+        <.card
+          colored
+          class={"
+                      #{if(@current_step == 2, do: "mb-14", else: "hidden")}
+                      card--glowing-two-tone 
+                      p-0.5
+                      "}
+        >
+          <h3 class="mb-5 text-center uppercase">
+            Player Registration
+          </h3>
+
+          <p class="mb-12 whitespace-pre-line text-grey-light">
+            Enter player email addresses, we'll add the registered Stride users to you roster and email the rest for a quick player registration.
+            Additional players can be added to your roster later.
+          </p>
+
+          <div class="flex flex-col md:flex-row md:space-x-28">
+            <div class="flex-1">
+              <.form
+                :let={f}
+                for={@changeset}
+                id="team-user-invitations"
+                phx-change="validate-team-user-invitations-step"
+              >
+                <.form_label form={f} field={:team_user_invitation} label="Player's Email" />
+                <%= for i <- inputs_for(f, :team_user_invitations) do %>
+                  <.form_text_input
+                    form={i}
+                    field={:email}
+                    class="mb-2 form-input"
+                    placeholder="e.g. player@stride.gg"
+                  />
+                  <%= if Map.has_key?(i.source.changes, :email) do %>
+                    <.form_feedback form={i} field={:email} />
+                  <% end %>
+                <% end %>
+
+                <div class="flex justify-end">
+                  <div
+                    class="flex items-center mt-1 text-primary"
+                    phx-click="add-new-team-user-invitation"
+                    style="cursor: pointer;"
+                  >
+                    <span class="mr-1">
+                      Add another
+                    </span>
+
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                      <path d={StridentWeb.Common.SvgUtils.path(:add_fill)} />
+                    </svg>
+                  </div>
+                </div>
+              </.form>
+            </div>
+
+            <div class="flex-1"></div>
+          </div>
+        </.card>
+
+        <.card
+          colored
+          class={"
+            #{if(@current_step == 3, do: "mb-14", else: "hidden")}
+            card--glowing-two-tone 
+            p-0.5
+            "}
+        >
+          <h3 class="mb-5 text-center uppercase">
+            Confirm your team details
+          </h3>
+          <p class="mb-12 text-grey-light">
+            This is it! You're almost ready to create your team. Double check all your details here, then plant your flag on Stride!
+          </p>
+
+          <div class="flex flex-col md:flex-row md:space-x-12">
+            <div class="flex-1">
+              <h4 class="mb-3 uppercase">
+                Team Info
+              </h4>
+
+              <div class="mb-5">
+                <div class="text-xl font-bold font-display text-grey-light">
+                  Team Logo
+                </div>
+
+                <%= if Ecto.Changeset.get_change(@changeset, :logo_url) != nil do %>
+                  <img src={Ecto.Changeset.get_change(@changeset, :logo_url)} alt="Team name" />
+                <% else %>
+                  <p class="text-sm text-grey-light">
+                    No image
+                  </p>
+                <% end %>
+              </div>
+
+              <div class="mb-5">
+                <div class="text-xl font-bold font-display text-grey-light">
+                  Team Name
+                </div>
+
+                <div>
+                  <%= Ecto.Changeset.get_change(@changeset, :name) %>
+                </div>
+              </div>
+
+              <div class="mb-5">
+                <div class="text-xl font-bold font-display text-grey-light">
+                  Team Email
+                </div>
+                <div class="text-grey-light">
+                  <%= Ecto.Changeset.get_change(@changeset, :email) %>
+                </div>
+              </div>
+
+              <div class="mb-5">
+                <div class="text-xl font-bold font-display text-grey-light">
+                  Social Media
+                </div>
+
+                <%= for social_media <- Ecto.Changeset.get_field(@changeset, :social_media_link_teams, []) do %>
+                  <div class="text-primary">
+                    <%= social_media.social_media_link.user_input %>
+                  </div>
+                <% end %>
+              </div>
+
+              <div class="mb-5">
+                <div class="text-xl font-bold font-display text-grey-light">
+                  Team Bio
+                </div>
+
+                <div>
+                  <%= Ecto.Changeset.get_change(@changeset, :description) %>
+                </div>
+              </div>
+            </div>
+
+            <.divider class="hidden md:block" />
+
+            <div class="flex-1">
+              <h4 class="mb-3 uppercase">
+                Players
+              </h4>
+
+              <div class="mb-5">
+                <div class="mb-2 text-xl font-bold font-display text-grey-light">
+                  Already on site
+                </div>
+
+                <%= for %{email: email, team_user_invitation_user: %{user_id: user_id}} <-
+                      Ecto.Changeset.get_field(@changeset, :team_user_invitations, []) do %>
+                  <div class="flex items-center mb-2">
+                    <img
+                      src={get_users_img(user_id)}
+                      alt="User"
+                      class="w-8 h-8 rounded-full mr-2.5"
+                    />
+                    <div>
+                      <%= get_users_name(user_id) %>
+                      <span class="text-grey-light">
+                        <%= email %>
+                      </span>
+                    </div>
+                  </div>
+                <% end %>
+
+                <div class="mb-2 text-xl font-bold font-display text-grey-light">
+                  Will be invited to your team
+                </div>
+                <%= for invitation <- Ecto.Changeset.get_field(@changeset, :team_user_invitations, []) do %>
+                  <%= unless Map.has_key?(invitation.team_user_invitation_user, :user_id) do %>
+                    <div class="mb-2 text-grey-light">
+                      <%= invitation.email %>
+                    </div>
+                  <% end %>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </.card>
+
+        <.card
+          colored
+          class={"
+            #{if(@current_step == 4, do: "mb-14", else: "hidden")}
+            card--glowing-two-tone 
+            p-0.5
+            "}
+        >
+          <div class="flex flex-col pt-32 md:flex-row md:space-x-12">
+            <div class="flex-1">
+              <div class="flex flex-col items-center justify-center">
+                <svg class="w-24 h-24 text-primary" viewBox="0 -8 528 528" fill="currentColor">
+                  <path d={StridentWeb.Common.SvgUtils.path(:circle_check)} />
+                </svg>
+
+                <p class="font-bold uppercase font-display text-primary text-7xl">
+                  Welcome To Stride
+                </p>
+                <p class="font-bold font-display text-primary text-7xl">
+                  <%= Ecto.Changeset.get_change(@changeset, :name) %>
+                </p>
+              </div>
+
+              <div class="flex items-center justify-center mt-16">
+                <.link
+                  navigate={
+                    Routes.live_path(
+                      StridentWeb.Endpoint,
+                      StridentWeb.TeamProfileLive.Show,
+                      Ecto.Changeset.get_change(@changeset, :slug) || "/"
+                    )
+                  }
+                  class="btn btn--block btn--primary btn--large font-bold md:inline-block md:w-auto"
+                >
+                  Team Management
+                </.link>
+              </div>
+            </div>
+          </div>
+        </.card>
+
+        <div class="flex items-end justify-between">
+          <%= if @current_step > 1 and @current_step != 4 do %>
+            <button
+              id="back-step"
+              class="btn btn--wide btn--primary-ghost"
+              phx-click="back"
+              phx-hook="ScrollToTop"
+            >
+              Back
+            </button>
+          <% end %>
+
+          <%= if @current_step == 3 do %>
+            <button
+              id="go-to-team"
+              class="px-12 text-3xl font-bold btn btn--primary font-display"
+              phx-click="register-team"
+              phx_disable_with="Registering..."
+              phx-hook="ScrollToTop"
+            >
+              Create team
+            </button>
+          <% else %>
+            <%= if @current_step != 4 do %>
+              <button
+                id="next-step"
+                class="btn btn--wide btn--primary disabled:opacity-50"
+                phx-click="next"
+                phx-hook="ScrollToTop"
+                disabled={is_page_invalid?(@current_step, @changeset)}
+              >
+                Next
+              </button>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

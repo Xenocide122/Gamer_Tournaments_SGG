@@ -1,0 +1,382 @@
+<div class="p-0 m-0">
+  <.card colored id="create-tournament-tournament-info" class="p-0.5 card--glowing-two-tone">
+    <div class="px-2 xl:px-12">
+      <h3 class="w-full py-2 text-center text-white uppercase">
+        Roster
+      </h3>
+      <.form
+        :let={f}
+        for={@changeset}
+        id="tournament-participant-party-form"
+        phx-change="validate"
+        phx-target={@myself}
+      >
+        <%= hidden_input(f, :email) %>
+        <div class="grid gap-y-4">
+          <div class="xl:w-1/2">
+            <h4 class="w-full py-2 text-white uppercase">
+              Team Information
+            </h4>
+
+            <.form_label
+              form={f}
+              field={:name}
+              label="Team Name"
+              class="mt-5 mb-0 font-light tracking-wider"
+            />
+            <.form_text_input form={f} field={:name} phx_debounce="300" />
+            <.form_feedback form={f} field={:name} />
+          </div>
+
+          <div class="xl:w-1/2">
+            <.form_label
+              form={f}
+              field={:logo_url}
+              label="Team Logo/Image (Optional)"
+              class="mb-0 font-light tracking-wider"
+            />
+            <.form_text_input form={f} field={:logo_url} class="hidden" />
+            <%= label(class: "#{if(Enum.count(@uploads.party_photo.entries) > 0, do: "hidden")}" ) do %>
+              <div phx-drop-target={@uploads.party_photo.ref}>
+                <%= live_file_input(@uploads.party_photo, class: "hidden") %>
+                <div class="flex justify-start">
+                  <div class="grid w-full px-8 py-10 upload-box place-items-center">
+                    <img class="w-20 mb-1 h-15" src="/images/file_group.png" />
+                    <p class="mb-1">
+                      Drag and Drop Your File
+                    </p>
+
+                    <div class="flex text-xs text-grey-light">
+                      <p class="mr-1">
+                        Or
+                      </p>
+                      <p class="mr-1 link clickable">
+                        Select File
+                      </p>
+                      <p>
+                        from your computer
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <p class="text-xs font-light tracking-wider text-grey-light">
+                  Recommended: 1024x1024px PNG with transparent background
+                </p>
+              </div>
+            <% end %>
+
+            <%= for entry <- @uploads.party_photo.entries do %>
+              <div class="flex flex-col">
+                <div class="relative">
+                  <div phx-click="remove-photo" phx-value-ref={entry.ref} phx-target={@myself}>
+                    <.svg
+                      icon={:x}
+                      class="absolute z-10 fill-primary top-2 right-2"
+                      height="20"
+                      width="20"
+                    />
+                  </div>
+
+                  <.live_img_preview entry={entry} width={500} />
+                </div>
+
+                <div class="mt-2 progress-bar">
+                  <div
+                    class="progress-bar__fill"
+                    style={"transform: translateX(-#{100 - entry.progress}%)"}
+                  >
+                  </div>
+                </div>
+              </div>
+
+              <%= for error <- upload_errors(@uploads.party_photo, entry) do %>
+                <p class="alert alert-danger">
+                  <%= error_to_string(error) %>
+                </p>
+              <% end %>
+            <% end %>
+          </div>
+
+          <h4 class="w-full py-2 text-white uppercase">
+            Create Your Roster
+          </h4>
+          <p class="py-2">
+            You need to have <%= @tournament.players_per_participant %> people in your roster in order to participate in this tournament.
+          </p>
+          <div>
+            <.live_component
+              id="search-users"
+              module={StridentWeb.Live.Components.SearchForm}
+              search_term={@users_search_term}
+              results={@users_search_results}
+              placeholder="Search for a user to invite..."
+              target={@myself}
+              phx_debounce={300}
+              render_result_fn={&render_user_search_result/1}
+            />
+          </div>
+
+          <%= if Enum.count(@recently_played_users) > 0 do %>
+            <h4 class="mt-4 text-base text-muted">Players You Recently Played With:</h4>
+            <div class="grid grid-cols-2 gap-4 mt-2">
+              <%= for user <- @recently_played_users do %>
+                <% is_member_selected = is_member_selected?(user, @changeset) %>
+                <div class="flex items-center">
+                  <div class={
+                      "flex items-center justify-center flex-shrink-0 w-5 h-5 mr-2 bg-transparent border-2 #{if(is_member_selected, do: "border-primary", else: "border-grey-light")}"
+                    }>
+                    <%= checkbox(f, :member,
+                      id: "recent-party-member-#{user.id}",
+                      name: user.id,
+                      class: "opacity-0 absolute",
+                      selected: is_member_selected,
+                      value: is_member_selected,
+                      phx_change: "select-recent-member",
+                      phx_target: @myself,
+                      disabled:
+                        are_all_invitations_filled?(@changeset) and
+                          not is_member_selected
+                    ) %>
+
+                    <.svg
+                      icon={:solid_check}
+                      width="16"
+                      height="16"
+                      class={
+                          "transition pointer-events-none fill-primary #{if(not is_member_selected, do: "hidden")}"
+                        }
+                    />
+                  </div>
+
+                  <img
+                    src={Accounts.avatar_url(user)}
+                    alt="User"
+                    class={
+                        "w-8 h-8 rounded-full mr-2.5 #{if(is_member_selected, do: "border-2 border-primary")}"
+                      }
+                  />
+                  <p class={
+                      "truncate #{if(is_member_selected, do: "text-primary")} #{if(are_all_invitations_filled?(@changeset) and not is_member_selected, do: "opacity-50")}"
+                    }>
+                    <%= Accounts.user_display_name(user) %>
+                  </p>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+
+          <div class="xl:w-1/2">
+            <%= for {fm, idx} <- Enum.with_index(inputs_for(f, :party_members)) do %>
+              <%= hidden_input(fm, :user_id, value: @current_user.id) %>
+              <div class="flex items-center mb-4">
+                <div class="mr-4 "><%= "#{idx + 1}." %></div>
+                <div class="grid w-full align-middle">
+                  <div class="flex items-center gap-x-4">
+                    <.image
+                      id={"user-search-result-avatar-#{@current_user.id}"}
+                      image_url={Accounts.avatar_url(@current_user)}
+                      alt="logo"
+                      class="rounded-full"
+                      width={40}
+                      height={40}
+                    />
+                    <div>
+                      <%= @current_user.display_name %>
+                      <div class="flex items-center">
+                        <div class="text-grey-light">Team Manager</div>
+
+                        <button
+                          type="button"
+                          class="relative inline-flex items-center justify-center flex-shrink-0 w-10 h-5 mx-4 rounded-full cursor-pointer group focus:outline-none "
+                          role="switch"
+                          aria-checked="false"
+                        >
+                          <%= checkbox(
+                            fm,
+                            :type,
+                            id: "switch",
+                            checked: input_value(fm, :type) == :manager,
+                            checked_value: "manager",
+                            unchecked_value: "captain",
+                            class: "opacity-0 absolute"
+                          ) %>
+                          <!-- Enabled: "bg-primary", Not Enabled: "bg-gray-200" -->
+                          <span
+                            aria-hidden="true"
+                            class={
+                          "#{if input_value(fm, :type) == :manager, do: "bg-primary", else: "bg-gray-200"} pointer-events-none absolute mx-auto h-4 w-9 rounded-full transition-colors duration-200 ease-in-out"
+                        }
+                          >
+                          </span>
+                          <!-- Enabled: "translate-x-5", Not Enabled: "translate-x-0" -->
+                          <span
+                            id="btn"
+                            aria-hidden="true"
+                            class={
+                          "#{if input_value(fm, :type) == :manager, do: "translate-x-5", else: "translate-x-0"} pointer-events-none absolute left-0 inline-block h-5 w-5 transform rounded-full border border-gray-200 bg-white shadow ring-0 transition-transform duration-200 ease-in-out"
+                        }
+                          >
+                          </span>
+                        </button>
+                        <div
+                          x-data="modal"
+                          x-init="show = false"
+                          @click="show = !show"
+                          @click.away="show = false"
+                          title="Click for info"
+                          class="relative flex-shrink text-base cursor-help text-primary"
+                          data-phx-component="2"
+                          id="phx-FxZ6sNKNzapXgH9C-2-0"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="w-5 h-5"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fill-rule="evenodd"
+                              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z"
+                              clip-rule="evenodd"
+                            >
+                            </path>
+                          </svg>
+                          <div
+                            x-show="show"
+                            class="absolute z-40 w-64 p-6 text-sm text-white rounded-md shadow-md bg-grey-medium "
+                            style="display: none;"
+                          >
+                            Managers do not play in the tournament. They can edit the roster and disperse any prize winnings to the team.
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+
+            <%= for {fi, idx} <- Enum.with_index(inputs_for(f, :party_invitations)) do %>
+              <% user_id = input_value(fi, :user_id) %>
+              <%= if idx == 0 do %>
+                <%= hidden_input(fi, :user_id, value: @current_user.id) %>
+                <%= hidden_input(fi, :status, value: :accepted) %>
+              <% else %>
+                <div id={"roster-member-invitation-#{idx}"} class="flex items-center mb-4">
+                  <%= hidden_input(fi, :user_id) %>
+                  <%= hidden_input(fi, :status, value: :pending) %>
+                  <div class="mr-4 "><%= "#{idx + 1}." %></div>
+                  <div :if={StringUtils.is_empty?(user_id)} class="grid w-full">
+                    <.form_text_input
+                      form={fi}
+                      field={:email}
+                      phx_debounce="300"
+                      placeholder="Players email address"
+                    />
+                    <.form_feedback form={fi} field={:email} />
+                  </div>
+                  <div :if={not StringUtils.is_empty?(user_id)} class="w-full">
+                    <% user = Enum.find(@selected_users, &(&1.id == user_id)) %>
+                    <div :if={not is_nil(user)} class="flex items-center gap-x-4">
+                      <.image
+                        id={"user-search-result-avatar-#{user_id}"}
+                        image_url={Accounts.avatar_url(user)}
+                        alt="logo"
+                        class="rounded-full"
+                        width={40}
+                        height={40}
+                      />
+                      <div>
+                        <%= user.display_name %>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="w-10 p-2">
+                    <div
+                      :if={idx > 0}
+                      id={"remove-roster-member-#{idx}"}
+                      phx-click="remove-invitation"
+                      phx-target={@myself}
+                      phx-value-idx={idx}
+                      class="cursor-pointer opacity-70 hover:opacity-100"
+                      title="Remove roster member"
+                    >
+                      <.svg icon={:x} width="20" height="20" class="fill-grey-light" />
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+            <% end %>
+            <div
+              class="flex justify-end px-10 mt-6 text-primary"
+              phx-click="add-invitation"
+              phx-target={@myself}
+              style="cursor: pointer;"
+            >
+              <span class="justify-end mr-1">
+                Add another
+              </span>
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M0 10C0 4.4766 4.4766 0 10 0s10 4.4766 10 10-4.4766 10-10 10S0 15.5234 0 10zm10 4.375c.5195 0 .9375-.418.9375-.9375v-2.5h2.5c.5195 0 .9375-.418.9375-.9375s-.418-.9375-.9375-.9375h-2.5v-2.5c0-.5195-.418-.9375-.9375-.9375s-.9375.418-.9375.9375v2.5h-2.5c-.5195 0-.9375.418-.9375.9375s.418.9375.9375.9375h2.5v2.5c0 .5195.418.9375.9375.9375z">
+                </path>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </.form>
+    </div>
+  </.card>
+  <div class="flex flex-col justify-between mt-10 xl:flex-row gap-x-6 gap-y-6">
+    <%= if is_nil(@previous) do %>
+      <button
+        id="back-button"
+        type="button"
+        class="font-bold px-2 md:px-8 py-3 text-base !no-underline uppercase border-white border-2 rounded-lg btn--primary font-display md:text-3xl text-center align-center"
+        phx-click="cancel"
+        phx-value-to={@return_to}
+        phx-hook="ScrollToTop"
+      >
+        Cancel
+      </button>
+    <% else %>
+      <button
+        id="back-button"
+        type="button"
+        class="font-bold px-2 md:px-8 py-3 text-base !no-underline uppercase border-white border-2 rounded-lg btn--primary font-display md:text-3xl text-center align-center"
+        phx-click="back"
+        phx-value-current_page={@current_page}
+        phx-hook="ScrollToTop"
+      >
+        Back
+      </button>
+    <% end %>
+
+    <div :if={StringUtils.is_empty?(@current_user.email)} class="text-secondary text-xl">
+      You can not create a team because your Stride account does not have an associated email.
+    </div>
+
+    <%= if @changeset.valid? do %>
+      <button
+        type="button"
+        id={"#{@next}-button"}
+        class="font-normal tracking-wide btn btn--wide btn--primary disabled:opacity-50 px-10 py-1.5"
+        phx-click="next"
+        phx-target={@myself}
+        phx-value-current-page={@current_page}
+        phx-hook="ScrollToTop"
+      >
+        Next
+      </button>
+    <% else %>
+      <button
+        type="button"
+        id={"#{@next}-button"}
+        class="font-normal tracking-wide btn btn--wide btn--primary disabled:opacity-50 px-10 py-1.5"
+        phx-hook="ScrollToTop"
+        disabled={true}
+      >
+        Next
+      </button>
+    <% end %>
+  </div>
+</div>

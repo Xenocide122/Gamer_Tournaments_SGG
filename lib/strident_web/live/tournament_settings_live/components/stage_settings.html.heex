@@ -1,0 +1,144 @@
+<div id="stage-settings-page">
+  <.flash flash={@flash} phx-target={@myself} />
+  <.socket_suspense show_inner_block={@is_connected}>
+    <div
+      :if={@tournament.status == :in_progress}
+      id="stage-settings-warning"
+      class="mb-6 text-xl text-secondary"
+    >
+      <p>
+        Changing any Stage settings after the tournament is in progress will reset the bracket.
+      </p>
+      <p>
+        Please record your match scores and winners before changing any settings.
+      </p>
+    </div>
+    <div
+      :for={stage <- Enum.sort_by(@tournament.stages, & &1.round)}
+      class="flex flex-col items-stretch xl:flex-row"
+    >
+      <div :if={!!stage.round && stage.round > 0} class="hidden mx-16 md:block gradient-separator">
+      </div>
+
+      <div class="flex-1">
+        <h4 class="mb-4 font-display text-grey-light">
+          <%= capitalize_each_word(stage.type) %> Settings
+        </h4>
+        <.form
+          :let={f}
+          :for={
+            {%{data: %{name: name, value: {value, _type}}} = changeset, index} <-
+              @stage_setting_changesets
+              |> Map.get(stage.id)
+              |> Enum.with_index()
+              |> Enum.reject(fn {changeset, _index} ->
+                changeset.data.name in StageSetting.match_settings_names()
+              end)
+              |> Enum.sort_by(fn {changeset, _index} -> sort_order(changeset.data.name) end)
+          }
+          for={changeset}
+          id={"stage-#{stage.id}-setting-#{index}"}
+          phx-change="change-stage-setting"
+          class="mb-4"
+        >
+          <%= hidden_input(f, :index, value: index) %>
+          <%= hidden_input(f, :stage_id, value: stage.id) %>
+          <%= case name do %>
+            <% name when name in [:match_games, :final_games, :do_finals_reset, :has_first_round_losers, :do_randomize_pairing] -> %>
+              <label class="mb-0 text-sm">
+                <%= get_form_label(name) %>
+              </label>
+              <% options = get_select_options(name) %>
+              <% selected = selected_for_select_with_custom_input(changeset, name) %>
+              <%= select(f, :setting, options,
+                class: "form-input xl:max-w-xs disabled:opacity-70",
+                selected: selected,
+                disabled: @cancelled
+              ) %>
+              <div :if={selected == :enable_custom_input} class="mt-4">
+                <label class="mb-0 text-sm">
+                  <%= get_custom_input_label(name) %>
+                </label>
+                <.form_text_input
+                  form={f}
+                  field={:custom_input}
+                  phx-debounce="100"
+                  value={get_stage_setting_html_value_from_changeset(changeset)}
+                  class="xl:max-w-xs"
+                  disabled={@cancelled}
+                />
+              </div>
+            <% :use_match_scores_for_ranking -> %>
+              <div class={"flex items-center #{if @cancelled, do: "opacity-70"}"}>
+                <%= checkbox(f, :setting,
+                  class: "h-4 w-4 text-primary focus:ring-indigo-500 border-gray-300 rounded",
+                  phx_debounce: "100",
+                  value: get_stage_setting_html_value_from_changeset(changeset),
+                  disabled: @cancelled
+                ) %>
+                <span class="block mb-0 ml-2">
+                  Use match scores for ranking
+                </span>
+              </div>
+            <% name when name in [:number_groups, :number_rounds, :points_per_score, :points_per_match, :points_per_bye, :number_to_advance_per_group, :number_upper_to_advance_per_group, :number_lower_to_advance_per_group, :number_to_advance, :number_upper_to_advance, :number_lower_to_advance] -> %>
+              <label class="mb-0 text-sm">
+                <%= get_form_label(name) %>
+              </label>
+              <.form_text_input
+                form={f}
+                field={:setting}
+                phx-debounce="100"
+                value={get_stage_setting_html_value_from_changeset(changeset)}
+                class="mb-4 xl:max-w-xs"
+                disabled={@cancelled}
+              />
+            <% :number_times_players_meet -> %>
+              <label class="mb-0 text-sm">
+                <%= get_form_label(name) %>
+              </label>
+              <div class={"flex #{if @cancelled, do: "opacity-70"}"}>
+                <div class="flex items-center grilla-radio">
+                  <%= label(class: "control-label m-0") do %>
+                    <%= radio_button(f, :setting, 1, checked: value == 1, disabled: @cancelled) %>
+                    <span class="mb-0">
+                      Once
+                    </span>
+                  <% end %>
+                </div>
+
+                <div class="flex items-center grilla-radio">
+                  <%= label(class: "control-label m-0") do %>
+                    <%= radio_button(f, :setting, 2, checked: value == 2, disabled: @cancelled) %>
+                    <span class="mb-0">
+                      Twice
+                    </span>
+                  <% end %>
+                </div>
+              </div>
+          <% end %>
+        </.form>
+
+        <.form
+          :let={f}
+          :if={Enum.find(@tiebreaker_strategy_changesets, &(&1.data.stage_id == stage.id))}
+          for={Enum.find(@tiebreaker_strategy_changesets, &(&1.data.stage_id == stage.id))}
+          id={"stage-#{stage.id}-ties"}
+          phx-change="change-ties"
+        >
+          <%= hidden_input(f, :stage_id, value: stage.id) %>
+          <%= for {{step, possibles}, tie_index} <-
+                Enum.with_index(tiebreak_possibilities(Ecto.Changeset.get_field(Enum.find(@tiebreaker_strategy_changesets, &(&1.data.stage_id == stage.id)), :type), stage.type)) do %>
+            <label class="mb-0 text-sm">
+              <%= "Tie Break ##{tie_index + 1}" %>
+            </label>
+            <%= select(f, "#{tie_index}", possibles,
+              class: "form-input xl:max-w-xs mb-4 disabled:opacity-70",
+              selected: step,
+              disabled: @cancelled
+            ) %>
+          <% end %>
+        </.form>
+      </div>
+    </div>
+  </.socket_suspense>
+</div>

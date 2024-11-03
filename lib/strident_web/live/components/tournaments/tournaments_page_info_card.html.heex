@@ -1,0 +1,18 @@
+<div
+  class="w-full aspect-video rounded-lg flex flex-col items-center justify-end px-8 md:px-40 py-4 md:pb-16"
+  style={
+  "background-image: url(#{@card.background_image_url})"
+  }
+>
+  <h2 class="uppercase text-outline-blur select-none cursor-default text-center">
+    <%= @card.header %>
+  </h2>
+  <p class="card-body pb-8 pt-2 text-base text-outline-blur select-none cursor-default">
+    <%= @card.body %>
+  </p>
+  <.link href={@card.button_url} class="btn btn--primary">
+    <h4>
+      <%= @card.button_text %>
+    </h4>
+  </.link>
+</div>

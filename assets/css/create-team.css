@@ -1,0 +1,53 @@
+@layer components {
+  .wizard-steps {
+    @apply grid md:grid-cols-1 grid-rows-1 grid-flow-col auto-cols-fr md:grid-flow-row overflow-hidden overflow-x-hidden;
+    counter-reset: step;
+  }
+
+  .wizard-steps li {
+    @apply grid gap-2 grid-cols-1 md:grid-rows-[auto] auto-rows-fr place-items-center text-center md:justify-items-start min-h-[4rem] text-grey-medium order-3 relative;
+
+    grid-template-rows: 40px 1fr;
+  }
+
+  @media (min-width: 768px) {
+    .wizard-steps li {
+      grid-template-columns: 40px 1fr;
+      grid-template-rows: none;
+    }
+  }
+
+  .wizard-steps li:before {
+    @apply w-full h-1 top-0 left-0 mt-[20px] md:h-full md:w-1 md:ml-[50%] row-start-1 col-start-1 md:top-0 bg-grey-medium -translate-y-1/2 -translate-x-1/2 absolute md:static;
+    content: '';
+  }
+
+  .wizard-steps li:after {
+    @apply w-8 h-8 grid row-start-1 col-start-1 place-items-center place-self-center relative z-10 bg-grey-medium rounded-full border-2 border-grey-medium order-2 text-grey-dark;
+    content: counter(step);
+    counter-increment: step;
+  }
+
+  .wizard-steps li:first-of-type::before {
+    content: none;
+  }
+
+  .wizard-steps li.active {
+    @apply text-white;
+  }
+
+  .wizard-steps li.completed {
+    @apply text-white;
+  }
+
+  .wizard-steps li.active:after,
+  .wizard-steps li.completed:after {
+    @apply border-primary text-white;
+  }
+
+  .wizard-steps li.active:before,
+  .wizard-steps li.completed:before,
+  .wizard-steps li.completed:after {
+    @apply bg-primary text-black;
+  }
+}

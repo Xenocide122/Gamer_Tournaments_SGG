@@ -1,0 +1,53 @@
+<div class="pt-32">
+  <div class="flex">
+    <div class="container space-y-8 text-gray-light">
+      <.back_button phx-click={JS.navigate(~p"/tournament/#{@tournament.slug}/player-dashboard")}>
+        Back To Player Dashboard
+      </.back_button>
+
+      <div class="flex items-center">
+        <h3 class="text-4xl leading-none tracking-normal font-display">
+          Tournament Result
+        </h3>
+      </div>
+
+      <div class="flex items-center">
+        <.wide_card colored={true}>
+          <div class="flex space-x-8">
+            <div class="items-center text-primary">
+              <div class="flex items-center justify-around">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="64"
+                  height="64"
+                  fill="none"
+                  viewBox="-1 0 28 24"
+                  stroke="currentColor"
+                  stroke-width="1"
+                >
+                  <path d={StridentWeb.Common.SvgUtils.path(:trophy)}></path>
+                </svg>
+              </div>
+            </div>
+            <div class="grid">
+              <div class="text-xs text-grey-light">Place</div>
+              <div class="">
+                <h4 class="text-4xl leading-none tracking-normal font-display">
+                  <%= Prizes.format_prize_rank(@participant.rank) %>
+                </h4>
+              </div>
+            </div>
+            <div class="grid">
+              <div class="text-xs text-grey-light">Prize Pool</div>
+              <div class="">
+                <h4 class="text-4xl leading-none tracking-normal font-display">
+                  <%= @prize_pool %>
+                </h4>
+              </div>
+            </div>
+          </div>
+        </.wide_card>
+      </div>
+    </div>
+  </div>
+</div>

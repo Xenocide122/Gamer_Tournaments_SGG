@@ -1,0 +1,26 @@
+<div class="relative">
+  <.flash
+    id={"match-participant-score-input-#{@match_participant.id}"}
+    flash={@flash}
+    myself={@myself}
+    lifespan_info={3000}
+    lifespan_error={5000}
+    class="absolute !inset-auto !-top-24 w-max p-1"
+  />
+  <.form
+    :let={f}
+    id={"match-participant-score-input-#{@match_participant.id}-form"}
+    for={@form}
+    phx-change="update-score"
+    phx-target={@myself}
+  >
+    <.form_text_input
+      form={f}
+      field={:score}
+      value={@match_participant.score}
+      phx-debounce="700"
+      id={"match-participant-score-input-#{@match_participant.id}-input"}
+      class="w-12 px-1 font-normal text-center"
+    />
+  </.form>
+</div>

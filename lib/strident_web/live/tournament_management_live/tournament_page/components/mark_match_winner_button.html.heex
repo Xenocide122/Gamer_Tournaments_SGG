@@ -1,0 +1,30 @@
+<div class="relative">
+  <.flash
+    flash={@flash}
+    phx-target={@myself}
+    lifespan_info={3000}
+    lifespan_error={5000}
+    class="absolute !inset-auto !-top-10 w-max p-1"
+  />
+  <button
+    id={"mark-match-winner-button-#{@match_participant.id}"}
+    class="btn btn--primary text-sm font-semibold py-2 whitespace-nowrap"
+    phx-click="mark-winner-clicked"
+    phx-target={@myself}
+  >
+    Mark winner
+  </button>
+
+  <%= if @show_confirmation do %>
+    <.live_component
+      id="mark-match-winner-confirmation"
+      module={StridentWeb.Components.Confirmation}
+      target={@myself}
+      confirm_event={@confirmation_confirm_event}
+      confirm_values={@confirmation_confirm_values}
+      message={@confirmation_message}
+      timezone={@timezone}
+      locale={@locale}
+    />
+  <% end %>
+</div>

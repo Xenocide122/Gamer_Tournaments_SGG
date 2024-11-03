@@ -1,0 +1,50 @@
+<div class="max-w-md">
+  <.form
+    :let={f}
+    for={@changeset}
+    id="update-email-form"
+    phx-change="validate_email"
+    phx-submit="update_email"
+    phx-target={@myself}
+  >
+    <%= if @changeset.action && @changeset.action != :validate do %>
+      <div class="alert alert-danger mb-5">
+        <p>Oops, something went wrong! Please check the errors below.</p>
+      </div>
+    <% end %>
+    <%= if @confirmation do %>
+      <div class="alert alert-info mb-5">
+        <p>A link to confirm your email has been sent to the new address.</p>
+      </div>
+    <% end %>
+
+    <%= hidden_input(f, :action, name: "action", value: "update_email") %>
+
+    <div class="my-2 text-grey-light">
+      Currently using <%= @current_user.email %>
+    </div>
+    <div class="form-group">
+      <.form_label form={f} field={:email} label="New Email" />
+      <.form_email_input form={f} field={:email} required="true" phx-debounce="300" />
+      <.form_feedback form={f} field={:email} />
+    </div>
+
+    <div class="form-group">
+      <.form_label form={f} field={:current_password} for="current_password_for_email" />
+      <.form_password_input
+        form={f}
+        field={:current_password}
+        required="true"
+        name="current_password"
+        id="current_password_for_email"
+        phx-debounce="blur"
+        value={@current_password}
+      />
+      <.form_feedback form={f} field={:current_password} />
+    </div>
+
+    <div>
+      <%= submit("Change email", class: "btn btn--primary") %>
+    </div>
+  </.form>
+</div>

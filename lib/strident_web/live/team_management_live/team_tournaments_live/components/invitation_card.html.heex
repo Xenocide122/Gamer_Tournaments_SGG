@@ -1,0 +1,78 @@
+<div id={@id} class="tournament-card">
+  <%= if @open_invitation do %>
+    <.live_component
+      timezone={@timezone}
+      locale={@locale}
+      id={"invitation-modal-#{@invitation.id}"}
+      module={StridentWeb.TeamTournamentsLive.Components.InvitationModal}
+      invitation={@invitation}
+      tournament={@tournament}
+      team={@team}
+      current_user={@current_user}
+    />
+  <% end %>
+
+  <div class="px-5 py-6">
+    <div class="">
+      <.link navigate={Routes.tournament_show_pretty_path(@socket, :show, @tournament.slug, [])}>
+        <div class="text-center heading-4">
+          <%= @tournament.title %>
+        </div>
+      </.link>
+
+      <.localised_datetime
+        datetime={@tournament.starts_at}
+        timezone={@timezone}
+        locale={@locale}
+        class="block mb-4 text-sm text-center text-grey-light"
+      />
+    </div>
+
+    <div class="mb-4">
+      <div class="font-display text-grey-light">
+        Game
+      </div>
+      <%= @tournament.game.title %>
+    </div>
+
+    <div class="mb-4">
+      <div class="font-display text-grey-light">
+        Prize pool
+      </div>
+
+      <.live_component
+        id={"tournament-prize-pool-#{@tournament.id}"}
+        module={
+          case @tournament.prize_strategy do
+            :prize_pool -> StridentWeb.Components.PrizePool
+            :prize_distribution -> StridentWeb.Components.PrizeDistribution
+          end
+        }
+        prize_strategy={@tournament.prize_strategy}
+        prize_pool={@tournament.prize_pool}
+        prize_distribution={@tournament.prize_distribution}
+        position={:vertical}
+        timezone={@timezone}
+        locale={@locale}
+      />
+    </div>
+
+    <div class="flex flex-col justify-between 2xl:flex-row">
+      <button
+        class="mb-2 font-bold btn btn--primary-ghost text-grey-light border-grey-light"
+        phx-value-invitation={@invitation.id}
+        phx-click="decline-invitation"
+      >
+        Decline
+      </button>
+
+      <button
+        class="mb-2 font-bold btn btn--primary"
+        phx-value-invitation={@invitation.id}
+        phx-click="open-invitation"
+      >
+        Accept
+      </button>
+    </div>
+  </div>
+</div>

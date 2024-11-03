@@ -1,0 +1,11 @@
+<div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mt-8 mb-12">
+  <%= for tournament <- @tournaments do %>
+    <.live_component
+      id={"#{@myself}-#{tournament.id}"}
+      module={StridentWeb.Components.NewTournamentCard}
+      tournament={tournament}
+      timezone={@timezone}
+      locale={@locale}
+    />
+  <% end %>
+</div>

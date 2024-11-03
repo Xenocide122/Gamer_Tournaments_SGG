@@ -1,0 +1,171 @@
+<div class="my-16">
+  <h4 class="pb-10 text-left">ALL TOURNAMENTS</h4>
+
+  <div class="flex">
+    <button phx-click="prev" phx-target={@myself} class="mx-4">prev</button>
+    <button phx-click="next" phx-target={@myself} class="mx-4">next</button>
+  </div>
+
+  <div class="flex justify-evenly">
+    <!-- pre-2 -->
+    <div class="w-96 scale-60 opacity-75">
+      <%= unless @featured_tournaments == [] do %>
+        <.live_component
+          timezone={@timezone}
+          locale={@locale}
+          id={"feat-tournament-live-#{get_tur_by_index(@idx - 2, @featured_tournaments).id}"}
+          module={StridentWeb.Components.TournamentCard}
+          link_to={
+            Routes.tournament_show_pretty_path(
+              @socket,
+              :show,
+              get_tur_by_index(@idx - 2, @featured_tournaments).slug,
+              []
+            )
+          }
+          image_url={
+            get_tur_by_index(@idx - 2, @featured_tournaments).thumbnail_image_url ||
+              safe_static_url("/images/tournament-image-placeholder.jpg")
+          }
+          title={get_tur_by_index(@idx - 2, @featured_tournaments).title}
+          status={get_tur_by_index(@idx - 2, @featured_tournaments).status}
+          starts_at={get_tur_by_index(@idx - 2, @featured_tournaments).starts_at}
+          registrations_open_at={
+            get_tur_by_index(@idx - 2, @featured_tournaments).registrations_open_at
+          }
+          buy_in_amount={get_tur_by_index(@idx - 2, @featured_tournaments).buy_in_amount}
+          participants={get_tur_by_index(@idx - 2, @featured_tournaments).participants}
+          game_id={get_tur_by_index(@idx - 2, @featured_tournaments).game_id}
+        />
+      <% end %>
+    </div>
+    <!-- pre-1 -->
+    <div class="w-96 scale-80 opacity-90 pr-16">
+      <%= unless @featured_tournaments == [] do %>
+        <.live_component
+          timezone={@timezone}
+          locale={@locale}
+          id={"feat-tournament-live-#{get_tur_by_index(@idx - 1, @featured_tournaments).id}"}
+          module={StridentWeb.Components.TournamentCard}
+          link_to={
+            Routes.tournament_show_pretty_path(
+              @socket,
+              :show,
+              get_tur_by_index(@idx - 1, @featured_tournaments).slug,
+              []
+            )
+          }
+          image_url={
+            get_tur_by_index(@idx - 1, @featured_tournaments).thumbnail_image_url ||
+              safe_static_url("/images/tournament-image-placeholder.jpg")
+          }
+          title={get_tur_by_index(@idx - 1, @featured_tournaments).title}
+          status={get_tur_by_index(@idx - 1, @featured_tournaments).status}
+          starts_at={get_tur_by_index(@idx - 1, @featured_tournaments).starts_at}
+          registrations_open_at={
+            get_tur_by_index(@idx - 1, @featured_tournaments).registrations_open_at
+          }
+          buy_in_amount={get_tur_by_index(@idx - 1, @featured_tournaments).buy_in_amount}
+          participants={get_tur_by_index(@idx - 1, @featured_tournaments).participants}
+          game_id={get_tur_by_index(@idx - 1, @featured_tournaments).game_id}
+        />
+      <% end %>
+    </div>
+    <!-- main -->
+    <div class="w-96">
+      <%= unless @featured_tournaments == [] do %>
+        <.live_component
+          timezone={@timezone}
+          locale={@locale}
+          id={"feat-tournament-live-#{get_tur_by_index(@idx, @featured_tournaments).id}"}
+          module={StridentWeb.Components.TournamentCard}
+          link_to={
+            Routes.tournament_show_pretty_path(
+              @socket,
+              :show,
+              get_tur_by_index(@idx, @featured_tournaments).slug,
+              []
+            )
+          }
+          image_url={
+            get_tur_by_index(@idx, @featured_tournaments).thumbnail_image_url ||
+              safe_static_url("/images/tournament-image-placeholder.jpg")
+          }
+          title={get_tur_by_index(@idx, @featured_tournaments).title}
+          status={get_tur_by_index(@idx, @featured_tournaments).status}
+          starts_at={get_tur_by_index(@idx, @featured_tournaments).starts_at}
+          registrations_open_at={
+            get_tur_by_index(@idx, @featured_tournaments).registrations_open_at
+          }
+          buy_in_amount={get_tur_by_index(@idx, @featured_tournaments).buy_in_amount}
+          participants={get_tur_by_index(@idx, @featured_tournaments).participants}
+          game_id={get_tur_by_index(@idx, @featured_tournaments).game_id}
+        />
+      <% end %>
+    </div>
+    <!-- ante-1 -->
+    <div class="w-96 scale-80 opacity-90 pl-16">
+      <%= unless @featured_tournaments == [] do %>
+        <.live_component
+          timezone={@timezone}
+          locale={@locale}
+          id={"feat-tournament-live-#{get_tur_by_index(@idx + 1, @featured_tournaments).id}"}
+          module={StridentWeb.Components.TournamentCard}
+          link_to={
+            Routes.tournament_show_pretty_path(
+              @socket,
+              :show,
+              get_tur_by_index(@idx + 1, @featured_tournaments).slug,
+              []
+            )
+          }
+          image_url={
+            get_tur_by_index(@idx + 1, @featured_tournaments).thumbnail_image_url ||
+              safe_static_url("/images/tournament-image-placeholder.jpg")
+          }
+          title={get_tur_by_index(@idx + 1, @featured_tournaments).title}
+          status={get_tur_by_index(@idx + 1, @featured_tournaments).status}
+          starts_at={get_tur_by_index(@idx + 1, @featured_tournaments).starts_at}
+          registrations_open_at={
+            get_tur_by_index(@idx + 1, @featured_tournaments).registrations_open_at
+          }
+          buy_in_amount={get_tur_by_index(@idx + 1, @featured_tournaments).buy_in_amount}
+          participants={get_tur_by_index(@idx + 1, @featured_tournaments).participants}
+          game_id={get_tur_by_index(@idx + 1, @featured_tournaments).game_id}
+        />
+      <% end %>
+    </div>
+    <!-- ante-2 -->
+    <div class="w-96 scale-60 opacity-75">
+      <%= unless @featured_tournaments == [] do %>
+        <.live_component
+          timezone={@timezone}
+          locale={@locale}
+          id={"feat-tournament-live-#{get_tur_by_index(@idx + 2, @featured_tournaments).id}"}
+          module={StridentWeb.Components.TournamentCard}
+          link_to={
+            Routes.tournament_show_pretty_path(
+              @socket,
+              :show,
+              get_tur_by_index(@idx + 2, @featured_tournaments).slug,
+              []
+            )
+          }
+          image_url={
+            get_tur_by_index(@idx + 2, @featured_tournaments).thumbnail_image_url ||
+              safe_static_url("/images/tournament-image-placeholder.jpg")
+          }
+          title={get_tur_by_index(@idx + 2, @featured_tournaments).title}
+          status={get_tur_by_index(@idx + 2, @featured_tournaments).status}
+          starts_at={get_tur_by_index(@idx + 2, @featured_tournaments).starts_at}
+          registrations_open_at={
+            get_tur_by_index(@idx + 2, @featured_tournaments).registrations_open_at
+          }
+          buy_in_amount={get_tur_by_index(@idx + 2, @featured_tournaments).buy_in_amount}
+          participants={get_tur_by_index(@idx + 2, @featured_tournaments).participants}
+          game_id={get_tur_by_index(@idx + 2, @featured_tournaments).game_id}
+        />
+      <% end %>
+    </div>
+  </div>
+</div>

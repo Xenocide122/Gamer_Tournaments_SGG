@@ -1,0 +1,269 @@
+<div>
+  <.live_component
+    id={"side-menu-#{@tournament.id}"}
+    module={StridentWeb.TournamentManagement.Components.SideMenu}
+    tournament={@tournament}
+    number_of_participants={
+      Enum.count(@tournament.participants, &(&1.status in Tournaments.on_track_statuses()))
+    }
+    live_action={@live_action}
+    current_user={@current_user}
+    can_manage_tournament={@can_manage_tournament}
+    timezone={@timezone}
+    locale={@locale}
+  />
+  <.live_component
+    :if={@can_manage_tournament and @show_confirmation}
+    id="tournament-page-confirmation"
+    module={StridentWeb.Components.Confirmation}
+    confirm_event={@confirmation_confirm_event}
+    confirm_values={@confirmation_confirm_values}
+    message={@confirmation_message}
+    confirm_prompt={@confirmation_confirm_prompt}
+    cancel_prompt={@confirmation_cancel_prompt}
+    timezone={@timezone}
+    locale={@locale}
+  />
+
+  <.live_component
+    :if={@live_action == :participants}
+    id={"participants-#{@tournament.id}"}
+    module={StridentWeb.TournamentParticipantsLive}
+    tournament={@tournament}
+    debug_mode={@debug_mode}
+    current_user={@current_user}
+    can_manage_tournament={@can_manage_tournament}
+    timezone={@timezone}
+    locale={@locale}
+    number_of_participants={@number_of_participants}
+    ranks_frequency={@ranks_frequency}
+  />
+
+  <.live_component
+    :if={@live_action == :bracket_and_seeding}
+    id={"bracket-and-seeding-#{@tournament.id}"}
+    module={StridentWeb.TournamentBracketAndSeedingLive}
+    tournament={@tournament}
+    debug_mode={@debug_mode}
+    current_user={@current_user}
+    can_manage_tournament={@can_manage_tournament}
+    timezone={@timezone}
+    locale={@locale}
+  />
+  <.container_bg_image
+    :if={@live_action == :show}
+    id={"tournament-page-#{@tournament.id}"}
+    width={2400}
+    height={1350}
+    image_url={
+      cond do
+        !!@tournament.cover_image_url ->
+          @tournament.cover_image_url
+
+        !@tournament.cover_image_url and !!@tournament.game.default_game_banner_url ->
+          @tournament.game.default_game_banner_url
+
+        true ->
+          safe_static_url("/images/OG Image background@2x.png")
+      end
+    }
+    show_stream={
+      @tournament.status in [:in_progress, :under_review, :finished] and !!@twitch_channel_name
+    }
+    twitch_channel_name={@twitch_channel_name}
+  >
+    <:side_menu>
+      <.live_component
+        :if={@can_manage_tournament}
+        id="upload-new-banner"
+        module={StridentWeb.Components.UploadPhotoModal}
+        upload_button_text="Upload New Banner"
+        current_user={@current_user}
+        update_function={
+          fn photos, fnx ->
+            Tournaments.update_tournament_cover_image(@tournament, photos, fnx)
+          end
+        }
+        aws_bucket_subfolder="tournaments"
+        parent_pid={self()}
+      >
+        <p class="py-4 text-center">
+          Banners are 16:9 aspect ratio. Recommended size is 2400x1350 pixels.
+        </p>
+      </.live_component>
+
+      <div class="min-h-[26vh] lg:min-h-[30vh]"></div>
+
+      <section class="flex flex-col gap-4 lg:justify-between lg:flex-row lg:items-center px-4 lg:px-8 2xl:container">
+        <.live_component
+          module={TitleAndSummary}
+          id="title-and-summary"
+          changeset={@changeset}
+          title={@tournament.title}
+          summary={@tournament.summary}
+          can_manage_tournament={@can_manage_tournament}
+        />
+
+        <div class="flex flex-col-reverse gap-2 lg:flex-row lg:justify-end lg:w-1/2">
+          <.button_with_caption
+            :if={@show_fund_participant_button}
+            id="fund-participant-button"
+            button_type={:primary_ghost}
+            button_class="!text-white !py-3 uppercase rounded inner-glow w-full"
+          >
+            Fund Participant
+          </.button_with_caption>
+
+          <.button_with_caption
+            :if={@show_contribution_button}
+            id="contribute-to-tournament-button"
+            button_type={:primary_ghost}
+            button_class="!text-white !py-3 uppercase rounded inner-glow w-full"
+            phx-click={JS.navigate(~p"/t/#{@tournament.slug}/contribution")}
+          >
+            Contribute To Prize Pool
+          </.button_with_caption>
+
+          <.link
+            :if={@show_registration_link}
+            id="tournament-registration-link"
+            navigate={
+              ~p"/tournament/#{@tournament.slug}/participant/registration?#{%{return_to: "/t/#{@tournament.slug}"}}"
+            }
+          >
+            <.button_with_caption
+              id="tournament-registration-button"
+              button_type={:primary}
+              button_class="w-full rounded"
+              type="button"
+            >
+              <h4 class="font-bold text-black">Register Now</h4>
+              <:caption_block>
+                Registration closes:
+                <.localised_datetime
+                  datetime={@tournament.registrations_close_at}
+                  timezone={@timezone}
+                  locale={@locale}
+                  type={:datetime}
+                />
+              </:caption_block>
+            </.button_with_caption>
+          </.link>
+
+          <.button_with_caption
+            :if={@is_watch_stream_button_shown}
+            id="watch-stream"
+            button_type={:primary}
+            button_class="w-full rounded"
+            phx-click={JS.navigate("/t/#{@tournament.slug}/stream")}
+          >
+            <h4 class="font-bold text-black">Watch Stream</h4>
+          </.button_with_caption>
+        </div>
+      </section>
+
+      <section id="tournament-details-cards-grid" class="px-4 pt-4 lg:px-8 2xl:container">
+        <.live_component
+          module={DetailCardsGrid}
+          id="details-card-grid"
+          tournament={@tournament}
+          timezone={@timezone}
+          locale={@locale}
+        />
+      </section>
+
+      <section class="flex flex-col gap-4 mt-16 lg:justify-between lg:flex-row px-4 lg:px-8 2xl:container">
+        <div class="md:w-1/2">
+          <div class="flex items-baseline gap-4">
+            <div class="">
+              <h3 class="uppercase font-bold">
+                Participants
+              </h3>
+            </div>
+
+            <.link
+              :if={@can_manage_tournament}
+              navigate={~p"/tournament/#{@tournament.slug}/participants"}
+              class="text-primary"
+            >
+              View all
+            </.link>
+          </div>
+
+          <div :if={Enum.empty?(@participants)} class="md:w-1/2">
+            Currently there are no participants registered
+          </div>
+          <div class="mt-4">
+            <div class="flex flex-row flex-wrap gap-x-4 lg:gap-x-6 gap-y-4 items-center">
+              <.player_card
+                :for={participant <- @participants}
+                id={"tournament-participant-#{participant.id}"}
+                name={
+                  TournamentParticipants.participant_name(participant,
+                    show_email: false,
+                    message: "TBD"
+                  )
+                }
+                image={TournamentParticipants.participant_logo_url(participant)}
+                navigate={
+                  TournamentParticipants.participant_page_link(%{
+                    participant
+                    | tournament: @tournament
+                  })
+                }
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="md:w-1/2 mt-6 lg:mt-0">
+          <div class="flex justify-start items-baseline gap-4">
+            <div class="">
+              <h3 class="uppercase font-bold">
+                Tournament Rules
+              </h3>
+            </div>
+
+            <.link
+              :if={@can_manage_tournament}
+              navigate={
+                Routes.live_path(@socket, StridentWeb.TournamentSettingsLive, @tournament.slug)
+              }
+              class="text-primary"
+            >
+              Edit
+            </.link>
+          </div>
+
+          <div :if={is_nil(@tournament.rules)} class="mt-3">
+            Currently there are no tournament rules. Edit now to add some
+          </div>
+          <div class="markdown mt-3 text-justify">
+            <%= Strident.MarkdownTransformations.to_html(@tournament.rules) %>
+          </div>
+        </div>
+      </section>
+
+      <section class="flex mt-16 md:justify-between 2xl:container">
+        <div :if={@tournament.location == :offline}>
+          <h3 class="mt-6 mb-2 mr-4 uppercase">
+            Tournament Location
+          </h3>
+
+          <div class="flex flex-col space-x-2">
+            <p class="mb-4"><%= @tournament.full_address %></p>
+            <div
+              class="w-full h-64"
+              id="map"
+              data-lat={@tournament.lat}
+              data-lng={@tournament.lng}
+              phx-hook="Map"
+              phx-update="ignore"
+            >
+            </div>
+          </div>
+        </div>
+      </section>
+    </:side_menu>
+  </.container_bg_image>
+</div>

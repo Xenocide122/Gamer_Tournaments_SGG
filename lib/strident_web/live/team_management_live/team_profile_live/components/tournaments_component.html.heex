@@ -1,0 +1,43 @@
+<div class="container">
+  <h3 class="mb-4 text-center uppercase md:text-left">
+    Tournaments
+  </h3>
+
+  <div class="w-full md:max-w-xs">
+    <.form
+      :let={f}
+      for={to_form(%{}, as: :tournaments)}
+      phx-change="filter"
+      phx-target={@myself}
+      class="mb-2 "
+    >
+      <%= select(f, :filter, [{"Live & Upcoming", "upcoming"}, {"Past", "past"}],
+        class: "form-input",
+        selected: @selected_filter
+      ) %>
+    </.form>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3">
+    <%= for %{tournament_participant: %{tournament: tournament}} <- @show_stakes do %>
+      <.live_component
+        id={"tournament-live-#{tournament.id}"}
+        module={StridentWeb.Components.TournamentCard}
+        link_to={Routes.tournament_show_pretty_path(@socket, :show, tournament.slug, [])}
+        image_url={
+          tournament.thumbnail_image_url ||
+            safe_static_url("/images/tournament-image-placeholder.jpg")
+        }
+        title={tournament.title}
+        status={tournament.status}
+        starts_at={tournament.starts_at}
+        registrations_open_at={tournament.registrations_open_at}
+        timezone={@timezone}
+        locale={@locale}
+        game_id={tournament.game.id}
+        buy_in_amount={tournament.buy_in_amount}
+        participants={tournament.participants}
+      />
+    <% end %>
+  </div>
+</div>

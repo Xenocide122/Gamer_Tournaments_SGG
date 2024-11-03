@@ -1,0 +1,183 @@
+<div class="p-0 m-0">
+  <.card colored id="create-tournament-confirmation" class="card--glowing-two-tone p-0.5">
+    <div class="px-8">
+      <h3 class="w-full py-2 mb-4 text-center text-white uppercase">
+        <%= humanize(@stages_structure) %> Tournament
+      </h3>
+      <div class="mx-2 mb-8 text-base font-light text-center text-grey-light">
+        This is it! You're almost ready to launch your tournament. Double check all your details here and make any tweaks needed, then on to the show!
+      </div>
+
+      <div class="xl:flex gap-x-12">
+        <div class="xl:w-1/2 space-y-2">
+          <div class="flex items-end py-2">
+            <h4 class="mr-4 text-white uppercase">
+              Stages
+            </h4>
+            <div
+              class="cursor-pointer text-primary"
+              phx-click="change-page"
+              phx-value-page={:tournament_info}
+            >
+              Edit
+            </div>
+          </div>
+
+          <div class="text-xl font-bold font-display text-grey-light">
+            Tournament Type
+          </div>
+          <div class="mb-1 text-white capitalize">
+            <%= @stage_types %>
+          </div>
+
+          <div class="text-xl font-bold font-display text-grey-light">
+            Tournament Name
+          </div>
+          <div class="mb-1 text-white">
+            <%= @tournament_info.title %>
+          </div>
+
+          <div class="text-xl font-bold font-display text-grey-light">
+            Game
+          </div>
+          <div class="mb-1 text-white">
+            <%= @game_title %> ( <%= @platform %> )
+          </div>
+          <div class="text-xl font-bold font-display text-grey-light">
+            Starting Date & Time
+          </div>
+          <.localised_datetime
+            datetime={@tournament_info.starts_at}
+            timezone={@timezone}
+            locale={@locale}
+            class="block mb-4 text-sm text-grey-light"
+          />
+
+          <div class="text-xl font-bold font-display text-grey-light">
+            Location
+          </div>
+          <div class="mb-1 text-white">
+            <%= @location %>
+          </div>
+
+          <div class="text-xl font-bold font-display text-grey-light">
+            Entry Fee
+          </div>
+          <div class="mb-1 text-white">
+            <%= @tournament_info.buy_in_amount %>
+          </div>
+
+          <%= case @tournament_info.prize_strategy do %>
+            <% :prize_pool -> %>
+              <%= if Enum.any?(@tournament_info.prize_pool) do %>
+                <div class="text-xl font-bold font-display text-grey-light">
+                  Prize Pool
+                </div>
+                <%= for {rank, money} <- @tournament_info.prize_pool do %>
+                  <div>
+                    <%= Prizes.format_prize_rank(rank) %> Place = <%= money %>
+                  </div>
+                <% end %>
+              <% end %>
+            <% :prize_distribution -> %>
+              <%= if Enum.any?(@tournament_info.prize_distribution) do %>
+                <div class="text-xl font-bold font-display text-grey-light">
+                  Prize Distribution
+                </div>
+                <%= for {rank, percent} <- @tournament_info.prize_distribution do %>
+                  <div>
+                    <%= Prizes.format_prize_rank(rank) %> Place = <%= percent %>%
+                  </div>
+                <% end %>
+              <% end %>
+          <% end %>
+        </div>
+        <div class="divider"></div>
+        <div class="w-1/2">
+          <%= case @tournament_type do %>
+            <% :invite_only -> %>
+              <div class="flex items-end py-2">
+                <h4 class="mr-4 text-white uppercase">
+                  Participants
+                </h4>
+                <div
+                  class="cursor-pointer text-primary"
+                  phx-click="change-page"
+                  phx-value-page={:invites}
+                >
+                  Edit
+                </div>
+              </div>
+
+              <%= if Enum.any?(@registered_users) do %>
+                <div class="grid grid-cols-6 mb-6 gap-y-2 gap-x-10">
+                  <div class="col-span-5 text-xl font-bold font-display text-grey-light">
+                    Registered
+                  </div>
+                  <div class="col-span-1 text-xl font-bold font-display text-grey-light">
+                    Seeds
+                  </div>
+                  <%= for {user, seed_index} <- @registered_users do %>
+                    <div class="flex col-span-5 gap-x-3">
+                      <img
+                        src={Strident.Accounts.avatar_url(user)}
+                        alt="avi"
+                        class="w-8 h-8 rounded-full"
+                      />
+                      <div class="text-white">
+                        <%= user.display_name %>
+                      </div>
+                      <div class="text-white">
+                        -
+                      </div>
+                      <div class="text-white truncate">
+                        <%= user.email %>
+                      </div>
+                    </div>
+                    <div class="col-span-1">
+                      <%= seed_index %>
+                    </div>
+                  <% end %>
+                </div>
+              <% end %>
+              <%= if Enum.any?(@will_be_invited) do %>
+                <div class="grid grid-cols-6 gap-y-1 gap-x-10">
+                  <div class="col-span-5 text-xl font-bold font-display text-grey-light">
+                    Will be invited to Stride
+                  </div>
+                  <div class="col-span-1 text-xl font-bold font-display text-grey-light"></div>
+                  <%= for {email, seed_index} <- @will_be_invited do %>
+                    <div class="col-span-5 text-white truncate">
+                      <%= email %>
+                    </div>
+                    <div class="col-span-1">
+                      <%= seed_index %>
+                    </div>
+                  <% end %>
+                </div>
+              <% end %>
+            <% :casting_call -> %>
+              <div class="items-start py-2">
+                <h4 class="mb-4 text-white uppercase">
+                  Open Registration Tournament
+                </h4>
+
+                <%= if Money.zero?(@tournament_info.buy_in_amount) do %>
+                  <p class="mb-6 text-grey-light">
+                    Your tournament will be added to Stride's public tournament page. The first to register will lock in their spot.
+                  </p>
+                <% else %>
+                  <p class="mb-6 text-grey-light">
+                    Your tournament will be added to Stride's public tournament page.  The first <%= @tournament_info.number_of_participants %> players that pay their entry fee in full will lock in their spot.
+                  </p>
+                <% end %>
+                <p class="mb-6 text-grey-light">
+                  From your Tournament Dashboard, you can access a unique tournament link to share across your social channels, keep track of sign-ups and paid entry fees.
+                </p>
+              </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </.card>
+</div>

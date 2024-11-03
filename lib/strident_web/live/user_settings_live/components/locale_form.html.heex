@@ -1,0 +1,19 @@
+<div class="max-w-md">
+  <.flash id="locale-flash" flash={@flash} myself={@myself} />
+  <.form :let={f} for={@changeset} id="locale-form" phx-submit="save" phx-target={@myself}>
+    <div class="inline-flex items-center space-x-2 form-group">
+      <.form_select
+        form={f}
+        field={:locale}
+        values={@locales}
+        selected={@current_user.locale}
+        phx_debounce="300"
+        class="w-64"
+      />
+    </div>
+
+    <div>
+      <%= submit("Update", class: "btn btn--primary") %>
+    </div>
+  </.form>
+</div>

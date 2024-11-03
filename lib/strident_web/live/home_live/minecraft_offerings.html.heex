@@ -1,0 +1,36 @@
+<div>
+  <div class={[
+    "hidden",
+    "flex overflow-x-scroll justify-start md:justify-center gap-x-2 md:gap-x-6",
+    "scrollbar-hidden"
+  ]}>
+    <div
+      :for={{category, category_label} <- @category_labels}
+      class={[
+        "border border-2 border-white rounded-full text-sm md:text-xl bg-blackish py-2 px-4 md:px-12",
+        "uppercase cursor-pointer",
+        "whitespace-nowrap",
+        "hover:bg-greyish hover:border-primary"
+      ]}
+    >
+      <%= category_label %>
+    </div>
+  </div>
+
+  <div class="lg:m-8 text-center text-4xl">
+    <div class="hidden md:block">
+      <.link href="https://strideminecraft.gg/minecraft_server" type="a" target="_blank">
+        <img
+          src={safe_static_url("/images/minecraft_banner_-_desktop.png")}
+          alt="Stride"
+          class="xl:mx-auto"
+        />
+      </.link>
+    </div>
+    <div class="block md:hidden">
+      <.link href="https://strideminecraft.gg/minecraft_server" type="a" target="_blank">
+        <img src={safe_static_url("/images/minecraft_banner_-_mobile.png")} alt="Stride" />
+      </.link>
+    </div>
+  </div>
+</div>

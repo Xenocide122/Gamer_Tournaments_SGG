@@ -1,0 +1,69 @@
+<div
+  id="tournament-registration"
+  class="container flex items-center px-0 py-2 mx-auto mb-10 max-w-7xl"
+>
+  <div class="w-full pb-20 mt-20 xl:flex xl:mt-32 gap-x-6">
+    <.progress
+      id="tournament-registration-page-progress-component"
+      current_page={@current_page}
+      pages={@pages}
+      steps_completed={@steps_completed}
+    />
+    <div class="w-full">
+      <%= case @current_page do %>
+        <% nil -> %>
+          <div></div>
+        <% :accept -> %>
+          <.accept
+            id="accept-invite"
+            current_page={@current_page}
+            next={@next}
+            previous={@previous}
+            return_to={@return_to}
+            tournament={@tournament}
+            party={@party}
+            terms_and_conditions={@terms_and_conditions}
+          />
+        <% :terms -> %>
+          <.terms_and_conditions
+            id="terms-and-conditions"
+            current_page={@current_page}
+            next={@next}
+            previous={@previous}
+            return_to={@return_to}
+            terms_and_conditions={@terms_and_conditions}
+          />
+        <% :registration -> %>
+          <.live_component
+            id="registration-form"
+            module={RegistrationComponent}
+            current_page={@current_page}
+            selected_users={@selected_users}
+            next={@next}
+            previous={@previous}
+            return_to={@return_to}
+            terms_and_conditions={@terms_and_conditions}
+            tournament={@tournament}
+            current_user={@current_user}
+            user_return_to={@return_to}
+            party_attrs={@party_attrs}
+            invitation={@invitation}
+            party_changeset={@party_changeset}
+          />
+        <% :create_roster -> %>
+          <.live_component
+            id="create-roster-form"
+            module={CreateRosterForm}
+            current_page={@current_page}
+            next={@next}
+            previous={@previous}
+            tournament={@tournament}
+            current_user={@current_user}
+            user_return_to={@return_to}
+            changeset={@party_changeset}
+            party_attrs={@party_attrs}
+          />
+      <% end %>
+    </div>
+  </div>
+</div>

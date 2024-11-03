@@ -1,0 +1,14 @@
+<div class="">
+  <.form
+    :let={f}
+    for={to_form(%{}, as: :tournament)}
+    id="tournament-status-form"
+    phx-submit="update-tournament-status"
+  >
+    <h3 class="mb-4">
+      Update Status (Staff Only)
+    </h3>
+    <%= select(f, :status, @statuses, value: @status, class: "form-input mb-4") %>
+    <%= submit("Update tournament status", class: "btn btn--block btn--primary") %>
+  </.form>
+</div>

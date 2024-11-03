@@ -1,0 +1,87 @@
+@layer components {
+  .tournament-cover {
+    @apply h-28 md:h-[424px] bg-cover bg-center bg-no-repeat flex items-center mb-6;
+    background-image: var(--cover-image-url);
+  }
+
+  .tournament-heading {
+    @apply text-center md:text-left uppercase mb-6;
+  }
+
+  .tournament-player-card {
+    @apply flex flex-col bg-blackish rounded text-center;
+  }
+
+  .tournament-type-outer-card {
+    @apply p-[1px] shadow-grilla-pink;
+  }
+
+  .tournament-type-inner-card {
+    @apply !pt-3  !pb-0 !px-4 !bg-blackish rounded-2xl;
+  }
+
+  .tournament-player-card__captain {
+    @apply w-6 h-6 rounded-full absolute bottom-0 right-0 flex items-center justify-center;
+    background: linear-gradient(
+        120deg,
+        var(--color-grilla-blue) 0%,
+        #7873d5c2 49%,
+        var(--color-grilla-pink) 100%
+      )
+      0% 0%;
+  }
+
+  .tournament-player-card__name {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .tournament-card {
+    @apply bg-blackish rounded overflow-hidden;
+  }
+
+  .tournament-card__status {
+    @apply text-sm font-semibold uppercase py-1 pl-3 pr-2 gradient;
+  }
+
+  .tournament-fully-staked-participant {
+    @apply font-semibold uppercase p-3 pr-8 pl-8 rounded gradient;
+  }
+
+  svg.trophy-gold {
+    fill: var(--color-gold);
+  }
+  svg.trophy-silver {
+    fill: var(--color-silver);
+  }
+  svg.trophy-bronze {
+    fill: var(--color-bronze);
+  }
+
+  .tournament-prizes > :not([hidden]) ~ :not([hidden]) > :first-child {
+    @apply ml-8;
+  }
+
+  .comma-list:not(:last-child)::after {
+    content: ',';
+  }
+
+  [enable-interior-hover] .hover-card:hover {
+    @apply max-h-96 z-50;
+  }
+
+  [enable-interior-hover] .hover-card:hover .hover-card-title {
+    /* transform: scale(1.5, 1.5); */
+  }
+
+  [enable-interior-hover] .hover-card:hover .hover-card-unhovered-game {
+    opacity: 0;
+  }
+
+  [enable-interior-hover] .hover-card:hover .hover-card-details {
+    /* transform: translate(0, 0); */
+  }
+}

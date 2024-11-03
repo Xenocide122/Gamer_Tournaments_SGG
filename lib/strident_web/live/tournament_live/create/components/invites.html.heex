@@ -1,0 +1,92 @@
+<div class="m-0 p-0">
+  <.card
+    colored
+    id="create-tournament-invites"
+    class="card--glowing-two-tone p-0.5"
+    x-data="{inputMethod: 'single'}"
+  >
+    <div class="px-4 xl:px-12">
+      <h3 class="w-full py-2 mb-4 text-center text-white uppercase">
+        <%= humanize(@stages_structure) %> Tournament
+      </h3>
+
+      <div class="text-center text-grey-light mb-12">
+        Enter the emails for each of your participants and we'll get them set up for your tournament, regardless of whether they're registered on Stride yet or not.
+      </div>
+
+      <h4 class="w-full text-white uppercase mb-2">
+        Invite Participants
+      </h4>
+
+      <p class="text-grey-light mb-10">
+        The order you enter email addresses will be the initial seeding for the tournament bracket. This can be edited before the tournament starts.
+      </p>
+
+      <%= for f <- inputs_for(@f, :invites) do %>
+        <%= hidden_input(f, :input_method, "x-model": "inputMethod") %>
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-x-12" x-show="inputMethod === 'bulk'">
+          <div>
+            <div>1 participant per line</div>
+            <.form_textarea
+              form={f}
+              field={:bulk_input_email}
+              phx-debounce="800"
+              value={@invites.bulk_input_email}
+              class="w-full h-96"
+            />
+          </div>
+          <div class="text-grey-light">
+            <div class="my-5">
+              You can copy and paste a list of emails in the bulk form.
+            </div>
+            <div>Example:</div>
+            <div>
+              <%= "email1@gmail.com" %>
+            </div>
+            <div>
+              <%= "email2@yahoo.com" %>
+            </div>
+            <div>
+              <%= "email3@domain.net" %>
+            </div>
+            <div class="mt-12">You can click Add Single Emails to see the default seeding.</div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-x-12" x-show="inputMethod !== 'bulk'">
+          <%= for {email, index} <- Enum.with_index(@invites.emails) do %>
+            <div class="grid items-center mb-4 grid-cols-16 gap-x-3">
+              <div class="col-span-1">
+                <%= index + 1 %>
+              </div>
+              <.form_text_input
+                id={"email-#{index}"}
+                form={f}
+                field={:emails}
+                phx-debounce="800"
+                value={email}
+                class="col-span-15"
+                placeholder="Participant's email address"
+                name={input_name(@f, :invites) <> "[emails][]"}
+                autocomplete="chrome-off"
+              />
+            </div>
+          <% end %>
+        </div>
+
+        <div class="w-full mt-5 text-center">
+          <.form_feedback form={f} field={:emails} />
+        </div>
+      <% end %>
+
+      <div class="w-full text-center uppercase text-primary mt-14">
+        <div
+          class="cursor-pointer"
+          @click="inputMethod = (inputMethod === 'bulk' ? 'single' : 'bulk')"
+          x-text="inputMethod === 'bulk' ? 'Add single emails' : 'Add in bulk'"
+        >
+        </div>
+      </div>
+    </div>
+  </.card>
+</div>

@@ -1,0 +1,26 @@
+<div class="max-w-md">
+  <.form
+    :let={f}
+    for={@changeset}
+    id="email-subscription-form"
+    phx-submit="submit-subscription"
+    phx-target={@myself}
+  >
+    <%= if @updated do %>
+      <div class="alert alert-info mb-5" phx-click="close-message" phx-target={@myself}>
+        Updated successfully.
+      </div>
+    <% end %>
+
+    <div class="form-group inline-flex space-x-2 items-center">
+      <%= checkbox(f, :subscribe_to_emails,
+        class: "h-4 w-4 text-primary focus:ring-indigo-500 border-gray-300 rounded"
+      ) %>
+      <%= label(f, :subscribe_to_emails, "Subscribe to emails", class: "control-label mb-0") %>
+    </div>
+
+    <div>
+      <%= submit("Update", class: "btn btn--primary") %>
+    </div>
+  </.form>
+</div>

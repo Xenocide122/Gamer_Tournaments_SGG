@@ -1,0 +1,140 @@
+<div id="tournament-participants-page">
+  <%= unless Enum.empty?(@participants) and StringUtils.is_empty?(@search_term) and Enum.empty?(@selected_filters) do %>
+    <%= if @show_header do %>
+      <div class="flex items-center">
+        <h3 class="mr-4 tournament-heading">
+          Participants
+        </h3>
+
+        <.link
+          navigate={~p"/tournament/#{@tournament.slug}/participants"}
+          class="mb-6 text-primary"
+          hidden={not @can_manage_tournament}
+        >
+          View
+        </.link>
+      </div>
+    <% end %>
+
+    <div class="py-4" x-data="navbar">
+      <div class="flex items-center justify-end pb-2">
+        <.svg
+          id="search-participant-button"
+          icon={:search}
+          width="24"
+          height="24"
+          class="fill-primary"
+          phx-click={
+            JS.remove_class("hidden", to: "#participant-search-form")
+            |> JS.add_class("flex items-center", to: "#participant-search-form")
+            |> JS.focus(to: "#participant-serch-input")
+          }
+        />
+
+        <div id="participant-search-form" class="hidden">
+          <form phx-submit="search" phx-change="search" phx-target={@myself} class="w-full">
+            <input
+              id="participant-serch-input"
+              phx-debounce="300"
+              name="search_term"
+              type="text"
+              class="px-0 bg-transparent border-0 border-b-2 w-80 border-primary focus:border-primary focus:ring-0"
+              value={@search_term}
+              placeholder="Search for participant."
+            />
+          </form>
+
+          <.svg
+            icon={:close}
+            width="24"
+            height="24"
+            class="fill-primary"
+            phx-click={
+              JS.remove_class("flex items-center", to: "#participant-search-form")
+              |> JS.add_class("hidden", to: "#participant-search-form")
+              |> JS.push("clear-search-term", target: @myself)
+            }
+          />
+        </div>
+      </div>
+
+      <hr class="border-t-2 border-grey-medium" />
+      <div class={"flex mt-2 #{if(Enum.any?(@selected_filters), do: "", else: "hidden")}"}>
+        <div class="mr-2 border-r-2 border-grey-medium">
+          <p class="mr-2 text-grey-light">Filters</p>
+        </div>
+
+        <div class="flex justify-start">
+          <%= for filter_text <- @selected_filters do %>
+            <div class="flex mr-2 border-2 rounded-full border-primary bg-grey-medium">
+              <p class="ml-2 text-primary"><%= filter_text %></p>
+
+              <div phx-click="remove-filter" phx-value-filter={filter_text} phx-target={@myself}>
+                <svg class="w-5 h-5 mr-2 fill-primary" viewBox="0 0 20 20">
+                  <path d={StridentWeb.Common.SvgUtils.path(:x)} />
+                </svg>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+    <div x-data="profileScroll" x-init={"position = #{@current_page};"}>
+      <%= for index <- 1..@total_pages do %>
+        <div x-bind="pane" position={index}>
+          <%= if index == @current_page do %>
+            <div class="grid grid-cols-1 gap-2 lx:gap-4 2xl:gap-8 md:grid-cols-2 lg:grid-cols-3">
+              <%= for participant <- sort_participants(@participants) do %>
+                <.live_component
+                  id={"participant-#{participant.id}"}
+                  module={Participant}
+                  participant={participant}
+                  can_manage_tournament={@can_manage_tournament}
+                  tournament={@tournament}
+                  stake={participant.stake}
+                  ranks_frequency={@ranks_frequency}
+                  current_user={@current_user}
+                />
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+      <%= if @total_pages > 1 do %>
+        <div class="flex justify-between pt-4">
+          <div phx-click="previous-page" phx-target={@myself}>
+            <svg height="40" width="40" class="fill-primary" viewBox="0 0 20 20">
+              <path d={StridentWeb.Common.SvgUtils.path(:chevron_left)} />
+            </svg>
+          </div>
+
+          <div class="flex items-center justify-center">
+            <%= for index <- Enum.map(1..@total_pages, &(&1)) do %>
+              <div
+                class="mr-4 cursor-pointer"
+                phx-click="go-to-page"
+                phx-target={@myself}
+                phx-value-page={index}
+              >
+                <svg
+                  height="15"
+                  width="15"
+                  class={if(@current_page == index, do: "fill-primary", else: "fill-grey-light")}
+                  viewBox="0 0 20 20"
+                >
+                  <path d={StridentWeb.Common.SvgUtils.path(:x_circle)} />
+                </svg>
+              </div>
+            <% end %>
+          </div>
+
+          <div phx-click="next-page" phx-target={@myself}>
+            <svg height="40" width="40" class="fill-primary" viewBox="0 0 20 20">
+              <path d={StridentWeb.Common.SvgUtils.path(:chevron_right)} />
+            </svg>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>

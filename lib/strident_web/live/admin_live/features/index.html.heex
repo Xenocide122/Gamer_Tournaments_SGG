@@ -1,0 +1,56 @@
+<div class="py-16 mt-16 text-center md:text-left">
+  <div class="container space-y-4 ">
+    <div class="lg:px-3">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-6xl leading-none tracking-normal font-display">
+            New Feature Popups
+          </h3>
+        </div>
+
+        <div>
+          <.link
+            navigate={Routes.admin_features_create_path(@socket, :create)}
+            class="inline-block cursor-pointer font-medium border rounded py-2.5 px-4 select-none text-black uppercase bg-primary border-primary"
+          >
+            Add Feature
+          </.link>
+        </div>
+      </div>
+
+      <div class="pb-5 mb-4 border-b border-gray-200 sm:pb-0">
+        <div class="mt-3 sm:mt-4">
+          <div>
+            <Menus.tabs selected={:features} />
+          </div>
+        </div>
+      </div>
+
+      <section id="popups-table" class="mt-8">
+        <.table rows={@features}>
+          <:col :let={feature} label="Title">
+            <%= feature.title %>
+          </:col>
+          <:col :let={feature} label="Description">
+            <%= feature.description %>
+          </:col>
+          <:col :let={feature} label="Tags">
+            <div :for={tag <- feature.tags} class="p-2 border rounded-xl border-grey-light">
+              <%= humanize(tag) %>
+            </div>
+          </:col>
+          <:col :let={feature} label="Manage">
+            <div class="flex justify-end space-x-2">
+              <.link
+                navigate={Routes.admin_features_edit_path(@socket, :edit, feature)}
+                class="px-1 pb-1 text-sm font-medium hover:text-primary-dark whitespace-nowrap"
+              >
+                Edit
+              </.link>
+            </div>
+          </:col>
+        </.table>
+      </section>
+    </div>
+  </div>
+</div>

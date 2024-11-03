@@ -1,0 +1,138 @@
+<footer class="mb-20 md:mb-0 md:pt-6 md:pb-12 md:mt-6 text-center items-center">
+  <div class="container space-y-8">
+    <div class="flex justify-center">
+      <.link navigate={Routes.live_path(@socket, StridentWeb.HomeLive)}>
+        <img
+          src={safe_static_url("/images/stride-header-footer-logo.png")}
+          alt="Stride"
+          class="mx-auto mb-0 w-32 md:w-52 md:mb-0 md:ml-0"
+        />
+      </.link>
+    </div>
+    <div class="hidden md:flex md:justify-around text-lg uppercase">
+      <div>
+        <.link navigate={~p"/privacy-policy"}>
+          Privacy Policy
+        </.link>
+      </div>
+      <div>
+        <.link href="https://www.stridelearning.com/accessibility.html">
+          Accessibility
+        </.link>
+      </div>
+      <div>
+        <.link href="https://www.stridelearning.com/ip-policy.html">
+          IP Policy
+        </.link>
+      </div>
+      <div>
+        <.link navigate={~p"/terms-of-service"}>
+          Terms of Use
+        </.link>
+      </div>
+      <div>
+        <.link href="mailto: support@stride.gg">
+          Contact Us
+        </.link>
+      </div>
+    </div>
+
+    <div class="flex justify-around md:hidden text-sm md:text-lg uppercase">
+      <div>
+        <.link href="mailto: support@stride.gg">
+          Contact Us
+        </.link>
+      </div>
+      <div>
+        <.link href="https://www.stridelearning.com/accessibility.html">
+          Accessibility
+        </.link>
+      </div>
+    </div>
+    <hr class="flex md:hidden mt-0" />
+
+    <div class="text-[12px] md:text-base">
+      Copyright <%= DateTime.utc_now() |> Timex.Format.DateTime.Formatter.format!("{YYYY}") %> Stride, Inc. All Rights Reserved.
+    </div>
+
+    <div class="md:space-x-20">
+      <div class="mb-8 md:mb-0">
+        <div class="flex items-center justify-center space-x-5">
+          <.link
+            href="https://www.twitch.tv/esports_stride"
+            target="_blank"
+            rel="noreferrer noopener"
+          >
+            <img
+              src="https://strident-games.s3.amazonaws.com/icon_twitch-white.png"
+              alt="twitch"
+              class="w-8 h-8"
+            />
+          </.link>
+          <.link
+            href="https://www.tiktok.com/@strideesports"
+            target="_blank"
+            rel="noreferrer noopener"
+          >
+            <img
+              src="https://strident-games.s3.amazonaws.com/icon_tiktok-white.png"
+              alt="tiktok"
+              class="w-8 h-8"
+            />
+          </.link>
+          <.link
+            href="https://twitter.com/esports_stride"
+            target="_blank"
+            rel="noreferrer noopener"
+          >
+            <img
+              src="https://strident-games.s3.amazonaws.com/icon_twitter-white.png"
+              alt="twitter"
+              class="w-8 h-8"
+            />
+          </.link>
+          <.link
+            href="https://www.instagram.com/strideesports/"
+            target="_blank"
+            rel="noreferrer noopener"
+          >
+            <img
+              src="https://strident-games.s3.amazonaws.com/icon_insta-white.png"
+              alt="instagram"
+              class="w-8 h-8"
+            />
+          </.link>
+          <.link
+            href="https://www.facebook.com/esportsstride"
+            target="_blank"
+            rel="noreferrer noopener"
+          >
+            <img
+              src="https://strident-games.s3.amazonaws.com/icon_facebook-white.png"
+              alt="facebook"
+              class="w-8 h-8"
+            />
+          </.link>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex justify-around md:hidden text-sm md:text-lg uppercase">
+      <div>
+        <.link navigate={~p"/privacy-policy"}>
+          Privacy Policy
+        </.link>
+      </div>
+      <div>
+        <.link href="https://www.stridelearning.com/ip-policy.html">
+          IP Policy
+        </.link>
+      </div>
+      <div>
+        <.link navigate={~p"/terms-of-service"}>
+          Terms of Use
+        </.link>
+      </div>
+    </div>
+  </div>
+</footer>

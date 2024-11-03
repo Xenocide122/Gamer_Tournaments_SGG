@@ -1,0 +1,135 @@
+<section class="mt-4 mb-16">
+  <%= if @can_manage_photo_galery do %>
+    <!-- When in edit mode, this section should be visible -->
+    <div id="upload-photos" class="hidden mb-8 bg-blackish">
+      <.form
+        :let={_f}
+        for={@changeset}
+        phx-change="validate"
+        phx-submit="save"
+        phx-target={@myself}
+      >
+        <div class="container" phx-drop-target={@uploads.photo.ref} phx-target={@myself}>
+          <%= label(class: "#{if(Enum.count(@uploads.photo.entries) > 0, do: "hidden")}") do %>
+            <%= live_file_input(@uploads.photo, class: "hidden") %>
+            <div class="flex justify-center pt-4">
+              <div class="grid px-8 py-10 upload-box place-items-center">
+                <img class="w-20 mb-1 h-15" src="/images/file_group.png" />
+                <p class="mb-1">
+                  Drag and Drop Your File
+                </p>
+
+                <div class="flex text-xs text-grey-light">
+                  <p class="mr-1">
+                    Or
+                  </p>
+                  <p class="mr-1 link clickable">
+                    Select File
+                  </p>
+                  <p>
+                    from your computer
+                  </p>
+                </div>
+
+                <p>Max 10 files</p>
+              </div>
+            </div>
+          <% end %>
+
+          <div class="flex justify-center py-8">
+            <%= for entry <- @uploads.photo.entries do %>
+              <div class="flex flex-col">
+                <div class="relative">
+                  <div phx-click="cancel-upload" phx-value-ref={entry.ref} phx-target={@myself}>
+                    <.svg
+                      icon={:x}
+                      class="absolute z-10 fill-primary top-2 right-2"
+                      height="20"
+                      width="20"
+                    />
+                  </div>
+
+                  <.live_img_preview entry={entry} width={100} />
+                </div>
+
+                <div class="mt-2 progress-bar">
+                  <div
+                    class="progress-bar__fill"
+                    style={"transform: translateX(-#{100 - entry.progress}%)"}
+                  >
+                  </div>
+                </div>
+              </div>
+
+              <%= for error <- upload_errors(@uploads.photo, entry) do %>
+                <p class="alert alert-danger">
+                  <%= error_to_string(error) %>
+                </p>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+
+        <div class="flex justify-center pb-8">
+          <div>
+            <div
+              class="flex-1 px-16 mr-2 text-white uppercase btn btn--primary-ghost inner-glow"
+              phx-click="cancel-all"
+              phx-target={@myself}
+            >
+              Cancel
+            </div>
+            <%= submit("Save",
+              phx_disable_with: "Saving...",
+              class: "btn btn--primary flex-1 px-16"
+            ) %>
+          </div>
+        </div>
+      </.form>
+    </div>
+  <% end %>
+  <!-- This is shown when there are photos uploaded -->
+  <div id="show-photos" class="grid grid-cols-2 md:grid-cols-5 gap-0">
+    <%= for %{id: id, link: link} <- @photos do %>
+      <img
+        id={"photo-#{id}"}
+        alt="gallery"
+        class="object-cover w-full h-48 transition duration-200 hover:scale-110"
+        src={photo_url(link)}
+        phx-click={show_modal("open-photo-#{id}")}
+      />
+    <% end %>
+
+    <%= for %{id: id, link: link} <- @photos do %>
+      <.modal id={"open-photo-#{id}"}>
+        <div class="relative w-full h-full">
+          <img alt="gallery" class="object-center w-full h-full" src={photo_url(link)} />
+          <div phx-click={hide_modal("open-photo-#{id}")}>
+            <.svg
+              icon={:x}
+              class="absolute z-10 fill-primary top-2 right-2"
+              height="20"
+              width="20"
+            />
+          </div>
+        </div>
+      </.modal>
+    <% end %>
+  </div>
+  <!-- This section should show if in edit mode -->
+  <div id="edit-existing-photos" class="grid hidden grid-cols-2 md:grid-cols-5 gap-0">
+    <%= for %{id: id, link: link} <- @photos do %>
+      <div class="relative">
+        <div phx-click="remove-photo" phx-value-photo={id} phx-target={@myself}>
+          <.svg icon={:x} class="absolute z-10 fill-primary top-2 right-2" height="20" width="20" />
+        </div>
+        <img
+          id={"edit-photo-#{id}"}
+          alt="gallery"
+          class="object-cover w-full h-48"
+          src={photo_url(link)}
+        />
+      </div>
+    <% end %>
+  </div>
+</section>

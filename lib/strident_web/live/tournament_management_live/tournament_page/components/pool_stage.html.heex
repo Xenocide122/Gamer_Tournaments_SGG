@@ -1,0 +1,262 @@
+<div id={"pool-stage-#{@stage_id}"}>
+  <%= if @can_manage_tournament and @stage_status == :scheduled do %>
+    <p class="mb-3 text-grey-light">
+      Once registration closes, you will be able to
+      swap participants between groups using the dropdowns.
+    </p>
+  <% end %>
+  <%= if @can_manage_tournament and @stage_status == :requires_tiebreaking do %>
+    <h3 class="uppercase">
+      Resolve ties
+    </h3>
+    <p class="mb-6 mr-6 text-grey-light">
+      This stage has tied participants. Please manually order participant places.
+    </p>
+  <% end %>
+
+  <%= for {group, %{matches: matches, participant_results: participant_results, has_first_round_bye_matches: has_first_round_bye_matches}} <- @groups do %>
+    <div
+      id={"pool-stage-#{@stage_id}-group-#{group}"}
+      class="px-8 py-6 mb-4 overflow-hidden rounded bg-blackish"
+    >
+      <div class="flex items-center mb-4">
+        <h4 class="text-center uppercase md:text-left">
+          Group <%= group %>
+        </h4>
+        <%= if @can_manage_tournament and @tournament_status == :scheduled and has_first_round_bye_matches do %>
+          <div class="ml-10 text-primary">
+            <svg
+              class="w-10 h-10"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d={StridentWeb.Common.SvgUtils.path(:exclamation)}
+              />
+            </svg>
+          </div>
+          <div class="text-sm text-primary">
+            Group has an empty participant. Any groups with empty participants will have a bye round.
+          </div>
+        <% end %>
+      </div>
+
+      <table id={"pool-stage-#{@stage_id}-participant-results-table-#{group}"} class="w-full mb-4">
+        <thead>
+          <tr>
+            <%= if @stage_status in [:finished, :requires_tiebreaking] do %>
+              <th class="w-24 text-sm font-light text-center uppercase text-grey-light">
+                Placing
+              </th>
+            <% end %>
+            <th class="w-auto"></th>
+            <th class="w-16 text-sm font-light text-center uppercase text-grey-light">
+              Played
+            </th>
+            <th class="w-16 text-sm font-light text-center uppercase text-grey-light">
+              Won
+            </th>
+            <th class="w-16 text-sm font-light text-center uppercase text-grey-light">
+              Lost
+            </th>
+            <th class="w-16 text-sm font-light text-center uppercase text-grey-light">
+              Tied
+            </th>
+          </tr>
+        </thead>
+
+        <tbody class="divide-y divide-grey-medium">
+          <%= for {participant_id, %{sp_id: sp_id, placing: placing, played: played, won: won, lost: lost, tied: tied, first_round_match_id: first_round_match_id, first_round_mp_id: first_round_mp_id, advance: advance}} <- Enum.sort_by(participant_results, &elem(&1, 1).placing) do %>
+            <tr>
+              <%= if @stage_status in [:finished, :requires_tiebreaking] do %>
+                <td
+                  id={
+                    "pool-stage-#{@stage_id}-participant-results-table-#{group}-#{participant_id}-placing"
+                  }
+                  class="text-center"
+                >
+                  <%= if @can_manage_tournament and @stage_status == :requires_tiebreaking do %>
+                    <.form
+                      :let={f}
+                      for={to_form(%{}, as: :stage_participant)}
+                      id={"manually-resolve-tied-sp-rank-#{sp_id}-form"}
+                      phx-change="resolve-tied-stage-participant"
+                    >
+                      <%= hidden_input(f, :stage_participant_id,
+                        name: "stage-participant-id",
+                        value: sp_id,
+                        id: "manually-resolve-tied-sp-rank-#{sp_id}-sp-id"
+                      ) %>
+                      <.form_select
+                        form={f}
+                        field={:new_rank}
+                        id={"manually-resolve-tied-sp-rank-#{sp_id}-select"}
+                        values={
+                          0..(Enum.count(participant_results) - 1)//1
+                          |> Enum.map(&{Strident.Prizes.format_prize_rank(&1), &1})
+                          |> then(&[nil | &1])
+                        }
+                        selected={if is_nil(placing), do: placing, else: placing - 1}
+                      />
+                    </.form>
+                  <% else %>
+                    <%= placing %>
+                  <% end %>
+                </td>
+              <% end %>
+              <td>
+                <div class={"relative flex py-2 #{advance_border_class(advance)}"}>
+                  <img
+                    src={@participant_details |> Map.get(participant_id) |> Map.get(:logo_url)}
+                    alt=""
+                    class="w-8 h-8 ml-2 mr-3 bg-gray-900 rounded-full"
+                  />
+                  <%= if @can_manage_tournament and (@stage_round == 0 and @tournament_status in [:scheduled, :registrations_closed] or @stage_round > 0 and @tournament_status == :in_progress) do %>
+                    <.form
+                      :let={f}
+                      for={to_form(%{}, as: :switch_match_participant)}
+                      id={
+                        "match-participant-#{participant_id}-switcher-#{first_round_mp_id || "null"}-group-#{group}-form"
+                      }
+                      phx-change="switch-match-participant"
+                    >
+                      <%= hidden_input(f, :stage_id,
+                        name: "stage-id",
+                        value: @stage_id,
+                        id:
+                          "match-participant-switcher-#{first_round_mp_id || "null"}-group-#{group}-stage-id"
+                      ) %>
+                      <%= hidden_input(f, :match_id,
+                        name: "match-id",
+                        value: first_round_match_id,
+                        id:
+                          "match-participant-switcher-#{first_round_mp_id || "null"}-group-#{group}-match-id"
+                      ) %>
+                      <%= hidden_input(f, :mp_id,
+                        name: "mp-id",
+                        value: first_round_mp_id,
+                        id:
+                          "match-participant-switcher-#{first_round_mp_id || "null"}-group-#{group}-mp-id"
+                      ) %>
+                      <.form_select
+                        form={f}
+                        field={:new_tp_id}
+                        id={
+                          "match-participant-switcher-#{first_round_mp_id || "null"}-group-#{group}"
+                        }
+                        values={@participant_options}
+                        selected={if first_round_mp_id, do: participant_id, else: nil}
+                        class="py-1 min-w-[240px]"
+                      />
+                    </.form>
+                  <% else %>
+                    <%= @participant_details |> Map.get(participant_id) |> Map.get(:name) %>
+                  <% end %>
+                </div>
+              </td>
+              <td
+                id={
+                  "pool-stage-#{@stage_id}-participant-results-table-#{group}-#{participant_id}-played"
+                }
+                class="text-center"
+              >
+                <%= played %>
+              </td>
+              <td
+                id={
+                  "pool-stage-#{@stage_id}-participant-results-table-#{group}-#{participant_id}-won"
+                }
+                class="text-center"
+              >
+                <%= won %>
+              </td>
+              <td
+                id={
+                  "pool-stage-#{@stage_id}-participant-results-table-#{group}-#{participant_id}-lost"
+                }
+                class="text-center"
+              >
+                <%= lost %>
+              </td>
+              <td
+                id={
+                  "pool-stage-#{@stage_id}-participant-results-table-#{group}-#{participant_id}-tied"
+                }
+                class="text-center"
+              >
+                <%= tied %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+
+      <div class="flex justify-end">
+        <%= case @child_stage_type do %>
+          <% :single_elimination -> %>
+            <div class="flex items-center">
+              <div class="w-2 h-2 mr-2 shadow bg-primary shadow-primary"></div>
+              <p class="text-xs text-grey-light">Advances to knockout round</p>
+            </div>
+          <% :double_elimination -> %>
+            <div class="flex items-center">
+              <div class="w-2 h-2 mr-2 shadow bg-primary shadow-primary"></div>
+              <p class="text-xs text-grey-light">Advances to upper knockout round</p>
+
+              <div class="w-2 h-2 mx-2 shadow bg-grilla-pink shadow-grilla-pink"></div>
+              <p class="text-xs text-grey-light">Advances to lower knockout round</p>
+            </div>
+          <% _ -> %>
+            <div></div>
+        <% end %>
+      </div>
+
+      <div id={"pool-stage-#{@stage_id}-match-details-#{group}"} x-data="poolGroup">
+        <div class="flex justify-between">
+          <div class="flex items-center cursor-pointer text-primary" x-bind="trigger">
+            <svg
+              class="w-5 h-5 mr-2 border rounded-full border-primary"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fill-rule="evenodd"
+                d={StridentWeb.Common.SvgUtils.path(:chevron_down)}
+                clip-rule="evenodd"
+              />
+            </svg>
+            <p>Matches</p>
+          </div>
+        </div>
+        <.live_component
+          id={"pool-stage-matches-#{@stage_id}-group-#{group}"}
+          module={PoolStageMatches}
+          matches={matches}
+          group={group}
+          stage_id={@stage_id}
+          stage_type={@stage_type}
+          stage_status={@stage_status}
+          participant_details={@participant_details}
+          can_manage_tournament={@can_manage_tournament}
+          tournament_id={@tournament_id}
+          timezone={@timezone}
+          locale={@locale}
+        />
+      </div>
+    </div>
+  <% end %>
+  <%= if @stage_status == :requires_tiebreaking and @can_manage_tournament do %>
+    <button
+      id={"manually-finish-stage-#{@stage_id}-button"}
+      class="px-24 mt-8 mb-8 text-2xl font-bold uppercase btn btn--primary font-display"
+      phx-click="manually-finish-stage-clicked"
+      phx-value-stage-id={@stage_id}
+    >
+      Resolve ties and finalize results
+    </button>
+  <% end %>
+</div>

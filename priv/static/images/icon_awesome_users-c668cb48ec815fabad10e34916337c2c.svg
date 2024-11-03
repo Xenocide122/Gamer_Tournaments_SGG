@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="121" height="91" viewBox="0 0 121 91">
+  <defs>
+    <filter id="Icon_awesome-users" x="0" y="0" width="121" height="91" filterUnits="userSpaceOnUse">
+      <feOffset input="SourceAlpha"/>
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feFlood flood-color="#03d5fb"/>
+      <feComposite operator="in" in2="blur"/>
+    </filter>
+    <filter id="Icon_awesome-users-2" x="0" y="0" width="121" height="91" filterUnits="userSpaceOnUse">
+      <feOffset input="SourceAlpha"/>
+      <feGaussianBlur stdDeviation="4" result="blur-2"/>
+      <feFlood flood-color="#03d5fb" result="color"/>
+      <feComposite operator="out" in="SourceGraphic" in2="blur-2"/>
+      <feComposite operator="in" in="color"/>
+      <feComposite operator="in" in2="SourceGraphic"/>
+    </filter>
+  </defs>
+  <g data-type="innerShadowGroup">
+    <g transform="matrix(1, 0, 0, 1, 0, 0)" filter="url(#Icon_awesome-users)">
+      <path id="Icon_awesome-users-3" data-name="Icon awesome-users" d="M15,32.25a10,10,0,1,0-10-10A10.009,10.009,0,0,0,15,32.25Zm70,0a10,10,0,1,0-10-10A10.009,10.009,0,0,0,85,32.25Zm5,5H80a9.971,9.971,0,0,0-7.047,2.906A22.855,22.855,0,0,1,84.688,57.25H95a5,5,0,0,0,5-5v-5A10.009,10.009,0,0,0,90,37.25Zm-40,0a17.5,17.5,0,1,0-17.5-17.5A17.491,17.491,0,0,0,50,37.25Zm12,5H60.7a24.161,24.161,0,0,1-21.406,0H38a18,18,0,0,0-18,18v4.5a7.5,7.5,0,0,0,7.5,7.5h45a7.5,7.5,0,0,0,7.5-7.5v-4.5A18,18,0,0,0,62,42.25ZM27.047,40.156A9.971,9.971,0,0,0,20,37.25H10a10.009,10.009,0,0,0-10,10v5a5,5,0,0,0,5,5H15.3A22.913,22.913,0,0,1,27.047,40.156Z" transform="translate(10.5 8.25)" fill="none" stroke="#03d5fb" stroke-width="3"/>
+    </g>
+    <g transform="matrix(1, 0, 0, 1, 0, 0)" filter="url(#Icon_awesome-users-2)">
+      <path id="Icon_awesome-users-4" data-name="Icon awesome-users" d="M15,32.25a10,10,0,1,0-10-10A10.009,10.009,0,0,0,15,32.25Zm70,0a10,10,0,1,0-10-10A10.009,10.009,0,0,0,85,32.25Zm5,5H80a9.971,9.971,0,0,0-7.047,2.906A22.855,22.855,0,0,1,84.688,57.25H95a5,5,0,0,0,5-5v-5A10.009,10.009,0,0,0,90,37.25Zm-40,0a17.5,17.5,0,1,0-17.5-17.5A17.491,17.491,0,0,0,50,37.25Zm12,5H60.7a24.161,24.161,0,0,1-21.406,0H38a18,18,0,0,0-18,18v4.5a7.5,7.5,0,0,0,7.5,7.5h45a7.5,7.5,0,0,0,7.5-7.5v-4.5A18,18,0,0,0,62,42.25ZM27.047,40.156A9.971,9.971,0,0,0,20,37.25H10a10.009,10.009,0,0,0-10,10v5a5,5,0,0,0,5,5H15.3A22.913,22.913,0,0,1,27.047,40.156Z" transform="translate(10.5 8.25)" fill="#fff"/>
+    </g>
+    <path id="Icon_awesome-users-5" data-name="Icon awesome-users" d="M15,32.25a10,10,0,1,0-10-10A10.009,10.009,0,0,0,15,32.25Zm70,0a10,10,0,1,0-10-10A10.009,10.009,0,0,0,85,32.25Zm5,5H80a9.971,9.971,0,0,0-7.047,2.906A22.855,22.855,0,0,1,84.688,57.25H95a5,5,0,0,0,5-5v-5A10.009,10.009,0,0,0,90,37.25Zm-40,0a17.5,17.5,0,1,0-17.5-17.5A17.491,17.491,0,0,0,50,37.25Zm12,5H60.7a24.161,24.161,0,0,1-21.406,0H38a18,18,0,0,0-18,18v4.5a7.5,7.5,0,0,0,7.5,7.5h45a7.5,7.5,0,0,0,7.5-7.5v-4.5A18,18,0,0,0,62,42.25ZM27.047,40.156A9.971,9.971,0,0,0,20,37.25H10a10.009,10.009,0,0,0-10,10v5a5,5,0,0,0,5,5H15.3A22.913,22.913,0,0,1,27.047,40.156Z" transform="translate(10.5 8.25)" fill="none" stroke="#03d5fb" stroke-width="3"/>
+  </g>
+</svg>

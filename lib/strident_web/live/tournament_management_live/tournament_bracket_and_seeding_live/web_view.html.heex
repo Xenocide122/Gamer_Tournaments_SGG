@@ -1,0 +1,13 @@
+<div id="bracket-and-seeding-web-view-for-mobile">
+  <%= live_render(
+    @socket,
+    StridentWeb.TournamentStage.Index,
+    id: "bracket-and-seeding-live",
+    session: %{
+      "current_user_id" => Map.get(@current_user || %{}, :id),
+      "slug" => @tournament.slug,
+      "timezone" => @timezone,
+      "locale" => @locale
+    }
+  ) %>
+</div>

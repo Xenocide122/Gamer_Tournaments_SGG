@@ -1,0 +1,31 @@
+<div
+  id="confirmation-overlay"
+  class="fixed top-0 left-0 z-50 flex items-center justify-center w-screen h-screen font-sans bg-blackish/90"
+>
+  <.card colored={true}>
+    <div class="max-w-64">
+      <h4><%= @message %></h4>
+      <.focus_wrap id="confirmation-message-focus-wrap">
+        <div class="flex justify-center mt-10 gap-x-6">
+          <button
+            id="confirmation-overlay-confirm-button"
+            class="btn btn--primary"
+            phx-click={@confirm_event}
+            {@confirm_value_attributes}
+            {@target_attribute}
+          >
+            <%= @confirm_prompt %>
+          </button>
+          <button
+            id="confirmation-overlay-cancel-button"
+            class="btn btn--secondary"
+            phx-click="close-confirmation"
+            {@target_attribute}
+          >
+            <%= @cancel_prompt %>
+          </button>
+        </div>
+      </.focus_wrap>
+    </div>
+  </.card>
+</div>

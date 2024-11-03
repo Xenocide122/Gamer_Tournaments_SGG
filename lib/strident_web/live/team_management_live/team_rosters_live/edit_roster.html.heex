@@ -1,0 +1,184 @@
+<div class="border-b-[1px] border-grey-medium last:border-b-0">
+  <div class="flex items-center pt-0.5 pb-1.5 space-x-3">
+    <details class="w-full" open={@roster.id == @open_roster_id}>
+      <summary
+        class="flex justify-between px-4 cursor-pointer"
+        phx-click="open-roster"
+        phx-value-roster={@roster.id}
+      >
+        <div class="mr-4">
+          <p>
+            <%= @roster.name %>
+          </p>
+
+          <p class="text-xs text-muted">
+            <%= @roster.game.title %>
+          </p>
+        </div>
+
+        <div class="flex items-center justify-between">
+          <div class="flex items-center flex-none -space-x-3">
+            <%= for member <- sort_captain_last(@roster.members) do %>
+              <div class="relative">
+                <img
+                  src={Accounts.avatar_url(member.team_member.user)}
+                  alt={Accounts.user_display_name(member.team_member.user)}
+                  class="w-8 h-8 border-2 border-black rounded-full"
+                />
+
+                <%= if member.type == :captain do %>
+                  <div class="w-4 h-4 tournament-player-card__captain">
+                    <svg viewBox="0 0 24 24" width="9" height="9" fill="currentColor">
+                      <path d={StridentWeb.Common.SvgUtils.path(:captain)}></path>
+                    </svg>
+                  </div>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+
+          <svg viewBox="0 0 18 18" width="30" height="30" class="chevron-move-down fill-primary">
+            <path d={StridentWeb.Common.SvgUtils.path(:chevron_right)}></path>
+          </svg>
+        </div>
+      </summary>
+
+      <div class="px-4 py-4 mt-4 shadow-xl bg-blackish">
+        <%= if @can_edit do %>
+          <div class="border-b-[1px] border-grey-medium">
+            <p class="text-sm">
+              Add to Roster
+            </p>
+
+            <div class="max-w-xs mb-8">
+              <.form
+                :let={f}
+                for={to_form(%{}, as: :player_roster_add)}
+                phx-change="add-roster-member"
+                phx-target={@myself}
+              >
+                <%= hidden_input(f, :roster, value: @roster.id) %>
+                <%= select(
+                  f,
+                  :member,
+                  @team.team_members
+                  |> Enum.reject(
+                    &(&1.id in Enum.map(@roster.members, fn %{team_member: %{id: id}} -> id end))
+                  )
+                  |> Enum.map(&{&1.user.display_name, &1.id}),
+                  prompt: "Choose player to add to roster",
+                  class: "form-input"
+                ) %>
+              </.form>
+            </div>
+          </div>
+        <% end %>
+
+        <div class="py-2">
+          <%= for member <- @roster.members do %>
+            <.form
+              :let={f}
+              for={to_form(%{}, as: :roster_player)}
+              phx-change="roster-edit"
+              phx-target={@myself}
+              phx-value-player={member.id}
+              class="border-b-[1px] border-grey-medium py-1.5 last:border-b-0"
+            >
+              <%= hidden_input(f, :id, value: member.id) %>
+              <div class="flex items-center">
+                <img
+                  src={Accounts.avatar_url(member.team_member.user)}
+                  alt={Accounts.user_display_name(member.team_member.user)}
+                  class="flex-none mr-3 rounded-full w-9 h-9"
+                />
+
+                <p class="flex-grow min-w-0 mr-3 overflow-hidden text-ellipsis">
+                  <%= Accounts.user_display_name(member.team_member.user) %>
+                </p>
+
+                <div class="flex items-center grilla-radio">
+                  <%= label() do %>
+                    <%= radio_button(f, :is_starter, true, checked: member.is_starter) %>
+                    <span class={
+                      "ml-2 text-sm #{if(member.is_starter, do: "text-primary", else: "text-grey-light")}"
+                    }>
+                      Starter
+                    </span>
+                  <% end %>
+                </div>
+
+                <div class="flex items-center grilla-radio">
+                  <%= label() do %>
+                    <%= radio_button(f, :is_starter, false, checked: not member.is_starter) %>
+                    <span class={
+                      "ml-2 text-sm #{if(not member.is_starter, do: "text-primary", else: "text-grey-light")}"
+                    }>
+                      Sub
+                    </span>
+                  <% end %>
+                </div>
+
+                <div class="flex items-center ml-2">
+                  <span class="mr-2 text-sm text-grey-light">Captain</span>
+                  <%= label(class: "switch") do %>
+                    <%= checkbox(f, :type,
+                      checked_value: "captain",
+                      unchecked_value: "player",
+                      value: member.type
+                    ) %>
+                    <span class="slider round"></span>
+                  <% end %>
+                </div>
+
+                <%= if member.confirmed_delete do %>
+                  <div class="flex items-center ml-4">
+                    <%= label(class: "mb-0") do %>
+                      <%= hidden_input(f, :delete) %>
+                      <div class="flex justify-between">
+                        <a
+                          href="#"
+                          phx-click="cancel-remove"
+                          phx-value-remove={member.id}
+                          phx-target={@myself}
+                          class="mr-2"
+                        >
+                          &times
+                        </a>
+
+                        <a
+                          href="#"
+                          phx-click="remove-variant"
+                          phx-value-remove={member.id}
+                          phx-target={@myself}
+                        >
+                          <button class="text-xs text-black border rounded cursor-pointer bg-secondary border-secondary">
+                            Remove
+                          </button>
+                        </a>
+                      </div>
+                    <% end %>
+                  </div>
+                <% else %>
+                  <%= label(class: "mb-0 flex flex-row") do %>
+                    <%= checkbox(f, :confirm_delete,
+                      class: "invisible",
+                      value: member.confirmed_delete
+                    ) %>
+                    <svg
+                      width="20"
+                      height="20"
+                      viewbox="0 0 22 22"
+                      class="cursor-pointer fill-secondary"
+                    >
+                      <path d={StridentWeb.Common.SvgUtils.path(:remove)}></path>
+                    </svg>
+                  <% end %>
+                <% end %>
+              </div>
+            </.form>
+          <% end %>
+        </div>
+      </div>
+    </details>
+  </div>
+</div>

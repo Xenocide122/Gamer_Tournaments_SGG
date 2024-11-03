@@ -1,0 +1,453 @@
+<div id={"battle-royale-stage-#{@stage_id}"} class="relative">
+  <%= if !!@current_user && !!@current_user.is_staff && @stage_status == :in_progress && not (Application.get_env(:strident, :env) == :prod and is_nil(System.get_env("IS_STAGING"))) do %>
+    <button
+      id={"fill-in-all-mp-stats-#{@stage_id}-button"}
+      class="btn btn--primary"
+      phx-click="fill-in-all-mp-stats"
+      phx-target={@myself}
+    >
+      QA Hack: fill in all MP stats
+    </button>
+  <% end %>
+  <%= if @can_manage_tournament and @stage_status == :in_progress do %>
+    <div class="mb-10">
+      <p class="w-1/2 mb-3">
+        Once you are ready, you can create a new round using the button below. Totals for the scores are kept on the first tab of the table below.
+      </p>
+      <button
+        id={"battle-royale-stage-#{@stage_id}-create-next-round-button"}
+        class="btn btn--primary"
+        phx-click="create-next-round"
+        phx-target={@myself}
+      >
+        Create Next Round
+      </button>
+      <button
+        id={"battle-royale-stage-#{@stage_id}-delete-last-round-button"}
+        class="btn btn--secondary"
+        phx-click="delete-last-round-clicked"
+        phx-target={@myself}
+      >
+        Delete Last Round
+      </button>
+    </div>
+  <% end %>
+  <%= if @can_manage_tournament and @all_mps_have_stats and @stage_status == :in_progress do %>
+    <div class="mb-10">
+      <p class="w-1/2 mb-3">
+        <%= if @stage_has_child do %>
+          <%= if @selecting_to_advance do %>
+            Use the checkboxes in the tables below to select which teams will move on to the next stage of the tournament.
+          <% else %>
+            Ready to progress to the next stage of the tournament? Click the button below and you can select the teams that will be moving on.
+          <% end %>
+          Ready to wrap things up? Click the button below! You'll have a chance to finalize everyone's placings before officially completing the tournament.
+        <% else %>
+        <% end %>
+      </p>
+      <button
+        :if={not @stage_has_child}
+        id={"battle-royale-stage-#{@stage_id}-complete-stage-button"}
+        class="btn btn--primary"
+        phx-click="complete-stage-clicked"
+        phx-target={@myself}
+      >
+        Complete Tournament
+      </button>
+      <button
+        :if={@stage_has_child and not @selecting_to_advance}
+        id={"battle-royale-stage-#{@stage_id}-select-to-advance-button"}
+        class="btn btn--primary"
+        phx-click="start-selecting-to-advance"
+        phx-target={@myself}
+      >
+        Move to Stage 2
+      </button>
+      <button
+        :if={@stage_has_child and @selecting_to_advance}
+        id={"battle-royale-stage-#{@stage_id}-move-to-next-stage-button"}
+        class="btn btn--primary"
+        phx-click="move-to-next-stage-clicked"
+        phx-target={@myself}
+      >
+        Save teams and start Stage 2
+      </button>
+    </div>
+  <% end %>
+  <%= if @can_manage_tournament and @stage_status == :scheduled do %>
+    <p class="mb-3 text-grey-light">
+      Once registration closes, you will be able to
+      swap participants between groups using the dropdowns.
+    </p>
+  <% end %>
+  <%= if @can_manage_tournament and @stage_status == :requires_tiebreaking do %>
+    <h3 class="uppercase">
+      Resolve ties
+    </h3>
+    <p class="mb-6 mr-6 text-grey-light">
+      This stage has tied participants. Please manually order participant places.
+    </p>
+  <% end %>
+
+  <%= for {group, %{matches: matches, participant_results: participant_results, first_round_match_id: first_round_match_id}} <- @groups do %>
+    <% displayed_round = Map.get(@displayed_round_by_group, group) %>
+    <% displayed_match = Enum.find(matches, &(&1.round == displayed_round)) %>
+    <div class="flex w-full border-grey-light border-b-1 gap-x-6 font-display">
+      <h4
+        id={"tournament-totals-#{@stage_id}-group-#{group}-button"}
+        class={"#{if is_nil(displayed_round), do: "text-primary underline", else: ""} cursor-pointer"}
+        phx-click="click-displayed-round"
+        phx-value-group={group}
+        phx-value-round={nil}
+        phx-target={@myself}
+      >
+        Tournament Totals
+      </h4>
+      <%= for match <- Enum.sort_by(matches, & &1.round) do %>
+        <h4
+          id={"displayed-round-#{match.round}-#{@stage_id}-group-#{group}-button"}
+          class={"#{if displayed_round == match.round, do: "text-primary underline", else: ""} cursor-pointer"}
+          phx-click="click-displayed-round"
+          phx-value-group={group}
+          phx-value-round={match.round}
+          phx-target={@myself}
+        >
+          Round <%= match.round + 1 %>
+        </h4>
+      <% end %>
+    </div>
+    <div
+      id={"battle-royale-stage-#{@stage_id}-group-#{group}"}
+      class="px-8 py-6 mb-4 overflow-hidden rounded bg-blackish"
+    >
+      <div class="flex items-center mb-4">
+        <h4 class="text-center uppercase md:text-left">
+          Group <%= group %>
+        </h4>
+      </div>
+
+      <table
+        id={"battle-royale-stage-#{@stage_id}-participant-results-table-#{group}"}
+        class="w-full mb-4"
+      >
+        <thead>
+          <tr>
+            <%= if @stage_status in [:finished, :requires_tiebreaking] do %>
+              <th class="w-24 text-sm font-light text-center uppercase text-grey-light">
+                Placing
+              </th>
+            <% end %>
+            <th class="w-auto"></th>
+            <%= for stat_label <- @stat_labels do %>
+              <th
+                phx-click="sort-by-stat"
+                phx-target={@myself}
+                phx-value-stat-label={stat_label}
+                class={"w-16 text-sm font-light text-center uppercase cursor-pointer whitespace-nowrap #{if stat_label == @sort_by_stat_label, do: "text-primary", else: "text-grey-light"}"}
+              >
+                <%= stat_label %>
+                <%= if stat_label == @sort_by_stat_label do %>
+                  <%= if @sort_by_stat_direction == :asc do %>
+                    ↑
+                  <% else %>
+                    ↓
+                  <% end %>
+                <% end %>
+              </th>
+            <% end %>
+          </tr>
+        </thead>
+
+        <tbody class="divide-y divide-grey-medium">
+          <%= for {participant_id, %{sp_id: sp_id, placing: placing, first_round_match_id: first_round_match_id, first_round_mp_id: first_round_mp_id, total_stats: total_stats} = participant_result } <- Enum.sort_by(participant_results, fn {_group, results} -> if @sort_by_stat_label, do: Map.get(results.total_stats, @sort_by_stat_label), else: results.placing end, @sort_by_stat_direction) do %>
+            <tr>
+              <%= if @stage_status in [:finished, :requires_tiebreaking] do %>
+                <td
+                  id={
+                    "battle-royale-stage-#{@stage_id}-participant-results-table-#{group}-#{participant_id}-placing"
+                  }
+                  class="text-center"
+                >
+                  <%= if @can_manage_tournament and @stage_status == :requires_tiebreaking do %>
+                    <.form
+                      :let={f}
+                      for={@form_stage_participant}
+                      id={"manually-resolve-tied-sp-rank-#{sp_id}-form"}
+                      phx-change="resolve-tied-stage-participant"
+                    >
+                      <%= hidden_input(f, :stage_participant_id,
+                        name: "stage-participant-id",
+                        value: sp_id,
+                        id: "manually-resolve-tied-sp-rank-#{sp_id}-sp-id"
+                      ) %>
+                      <.form_select
+                        form={f}
+                        field={:new_rank}
+                        id={"manually-resolve-tied-sp-rank-#{sp_id}-select"}
+                        values={
+                          0..(Enum.count(participant_results) - 1)//1
+                          |> Enum.map(&{Strident.Prizes.format_prize_rank(&1), &1})
+                          |> then(&[nil | &1])
+                        }
+                        selected={if is_nil(placing), do: placing, else: placing - 1}
+                      />
+                    </.form>
+                  <% else %>
+                    <%= placing %>
+                  <% end %>
+                </td>
+              <% end %>
+              <td>
+                <div class="relative flex py-2">
+                  <%= if @can_manage_tournament and @selecting_to_advance do %>
+                    <.form
+                      :let={f}
+                      for={@form_select_to_advance}
+                      id={"select-to-advance-#{participant_id}-form"}
+                      phx-change="select-to-advance-changed"
+                      phx-target={@myself}
+                    >
+                      <%= hidden_input(f, :tp_id, value: participant_id) %>
+                      <%= checkbox(f, :selected_to_advance,
+                        class:
+                          "h-4 w-4 text-primary focus:ring-indigo-500 border-gray-300 rounded",
+                        id: "battle-royale-stage-#{@stage_id}-select-to-advance-#{participant_id}"
+                      ) %>
+                    </.form>
+                  <% end %>
+                  <img
+                    src={@participant_details |> Map.get(participant_id) |> Map.get(:logo_url)}
+                    alt=""
+                    class="w-8 h-8 ml-2 mr-3 bg-gray-900 rounded-full"
+                  />
+                  <%= if @can_manage_tournament && (@stage_round == 0 and @tournament_status in [:scheduled, :registrations_open, :registrations_closed] or @stage_round > 0 and @tournament_status == :in_progress)  do %>
+                    <div class="flex gap-x-4">
+                      <%= @participant_details |> Map.get(participant_id) |> Map.get(:name) %>
+                      <button
+                        :if={@selected_participant_id_for_switching != participant_id}
+                        id={"switch-participant-with-another-#{participant_id}"}
+                        class="btn btn--primary"
+                        phx-click="click-participant-for-switching"
+                        phx-target={@myself}
+                        phx-value-selected-participant-id-for-switching={participant_id}
+                      >
+                        switch...
+                      </button>
+                    </div>
+                    <.form
+                      :let={f}
+                      :if={@selected_participant_id_for_switching == participant_id}
+                      for={@form_switch_match_participant}
+                      id={
+                        "match-participant-#{participant_id}-switcher-#{first_round_mp_id || "null"}-group-#{group}-form"
+                      }
+                      phx-change="switch-match-participant"
+                    >
+                      <%= hidden_input(f, :stage_id,
+                        name: "stage-id",
+                        value: @stage_id,
+                        id:
+                          "match-participant-#{participant_id}-switcher-#{first_round_mp_id || "null"}-group-#{group}-stage-id"
+                      ) %>
+                      <%= hidden_input(f, :match_id,
+                        name: "match-id",
+                        value: first_round_match_id,
+                        id:
+                          "match-participant-#{participant_id}-switcher-#{first_round_mp_id || "null"}-group-#{group}-match-id"
+                      ) %>
+                      <%= hidden_input(f, :mp_id,
+                        name: "mp-id",
+                        value: first_round_mp_id,
+                        id:
+                          "match-participant-#{participant_id}-switcher-#{first_round_mp_id || "null"}-group-#{group}-mp-id"
+                      ) %>
+                      <.form_select
+                        form={f}
+                        field={:new_tp_id}
+                        id={
+                          "match-participant-#{participant_id}-switcher-#{first_round_mp_id || "null"}-group-#{group}"
+                        }
+                        values={@participant_options}
+                        selected={if first_round_mp_id, do: participant_id, else: nil}
+                        class="py-1 min-w-[240px]"
+                      />
+                    </.form>
+                  <% else %>
+                    <%= @participant_details |> Map.get(participant_id) |> Map.get(:name) %>
+                  <% end %>
+                </div>
+              </td>
+
+              <% mp =
+                if is_nil(displayed_match),
+                  do: nil,
+                  else:
+                    Enum.find(
+                      displayed_match.participants,
+                      &(&1.tournament_participant_id == participant_id)
+                    ) %>
+              <%= if is_nil(displayed_round) or is_nil(mp) do %>
+                <%= for stat_label <- @stat_labels do %>
+                  <td>
+                    <div class="text-center">
+                      <%= Map.get(total_stats, stat_label) %>
+                    </div>
+                  </td>
+                <% end %>
+              <% else %>
+                <% stats_changesets_by_round =
+                  Map.get(participant_result, :stats_changesets_by_round) %>
+                <% stats_changeset = Map.get(stats_changesets_by_round, displayed_round) %>
+                <div class="relative">
+                  <%= for {stat_label, index} <- Enum.with_index(@stat_labels) do %>
+                    <%= if @stage_status == :in_progress and @can_manage_tournament do %>
+                      <td
+                        id={"battle-royale-stat-input-stage-#{@stage_id}-#{group}-#{participant_id}-stat-#{index}"}
+                        class="text-center"
+                      >
+                        <.form
+                          :let={f}
+                          id={"match-participant-stat-input-#{mp.id}-form-#{stat_label}"}
+                          for={stats_changesets_by_round[displayed_round]}
+                          phx-change="update-mp-stats"
+                          phx-target={@myself}
+                        >
+                          <%= hidden_input(f, :tp_id, value: participant_id) %>
+                          <%= hidden_input(f, :round, value: displayed_round) %>
+                          <%= hidden_input(f, :group, value: group) %>
+                          <%= hidden_input(f, :stat_label, value: stat_label) %>
+                          <.form_text_input
+                            form={f}
+                            field={:stats}
+                            value={
+                              Map.get(
+                                Ecto.Changeset.get_field(stats_changeset, :stats, @default_stats),
+                                stat_label
+                              )
+                            }
+                            phx_debounce="700"
+                            id={"battle-royale-stat-input-#{participant_id}-stat-#{index}"}
+                            name={"match_participant[stats][#{index}]"}
+                            class="w-12 px-1 font-normal text-center"
+                          />
+                        </.form>
+                      </td>
+                    <% else %>
+                      <td
+                        id={"battle-royale-stat-stage-#{@stage_id}-#{group}-#{participant_id}-stat-#{index}"}
+                        class="text-center"
+                      >
+                        <%= Map.get(
+                          Ecto.Changeset.get_field(stats_changeset, :stats, @default_stats),
+                          stat_label
+                        ) %>
+                      </td>
+                    <% end %>
+                  <% end %>
+                </div>
+              <% end %>
+            </tr>
+          <% end %>
+          <tr :if={
+            @can_manage_tournament and
+              ((@stage_round == 0 and
+                  @tournament_status in [:scheduled, :registrations_open, :registrations_closed]) or
+                 (@stage_round > 0 and @tournament_status == :in_progress))
+          }>
+            <td>
+              <div class="relative flex py-2">
+                <.form
+                  :let={f}
+                  for={@form_switch_match_participant}
+                  id={"empty-match-participant-switcher-null-group-#{group}-form"}
+                  phx-change="switch-match-participant"
+                >
+                  <%= hidden_input(f, :stage_id,
+                    name: "stage-id",
+                    value: @stage_id,
+                    id: "empty-match-participant-switcher-null-group-#{group}-form-stage-id"
+                  ) %>
+                  <%= hidden_input(f, :match_id,
+                    name: "match-id",
+                    value: first_round_match_id,
+                    id: "empty-match-participant-switcher-null-group-#{group}-form-match-id"
+                  ) %>
+                  <%= hidden_input(f, :mp_id,
+                    name: "mp-id",
+                    value: nil,
+                    id: "empty-match-participant-switcher-null-group-#{group}-form-mp-id"
+                  ) %>
+                  <.form_select
+                    form={f}
+                    field={:new_tp_id}
+                    id={"empty-match-participant-switcher-null-group-#{group}-#{Enum.count(participant_results)}"}
+                    values={@participant_options}
+                    selected={nil}
+                    class="py-1 min-w-[240px]"
+                  />
+                </.form>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="flex justify-end">
+        <%= case @child_stage_type do %>
+          <% :single_elimination -> %>
+            <div class="flex items-center">
+              <div class="w-2 h-2 mr-2 shadow bg-primary shadow-primary"></div>
+              <p class="text-xs text-grey-light">Advances to knockout round</p>
+            </div>
+          <% :double_elimination -> %>
+            <div class="flex items-center">
+              <div class="w-2 h-2 mr-2 shadow bg-primary shadow-primary"></div>
+              <p class="text-xs text-grey-light">Advances to upper knockout round</p>
+
+              <div class="w-2 h-2 mx-2 shadow bg-grilla-pink shadow-grilla-pink"></div>
+              <p class="text-xs text-grey-light">Advances to lower knockout round</p>
+            </div>
+          <% _ -> %>
+            <div></div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+  <%= if @stage_status == :requires_tiebreaking and @can_manage_tournament do %>
+    <button
+      id={"manually-finish-stage-#{@stage_id}-button"}
+      class="px-24 mt-8 mb-8 text-2xl font-bold uppercase btn btn--primary font-display"
+      phx-click="manually-finish-stage-clicked"
+      phx-value-stage-id={@stage_id}
+    >
+      Resolve ties and finalize results
+    </button>
+  <% end %>
+  <%= if Enum.any?(@unsaved_stats_changesets_by_mp_id) do %>
+    <div class="fixed flex items-center px-4 py-4 bg-blackish border-2 bottom-12 right-10 gap-x-10 border-primary">
+      <p>
+        You have unsaved changes.
+      </p>
+      <button class="btn btn--primary" phx-click="save-stats-changesets" phx-target={@myself}>
+        Save
+      </button>
+    </div>
+  <% end %>
+
+  <.flash flash={@flash} phx-target={@myself} class="absolute !top-0" />
+
+  <%= if @show_confirmation do %>
+    <.live_component
+      id="battle-royale-stage-#{@stage_id}-confirmation"
+      target={@myself}
+      module={StridentWeb.Components.Confirmation}
+      confirm_event={@confirmation_confirm_event}
+      confirm_values={@confirmation_confirm_values}
+      message={@confirmation_message}
+      confirm_prompt={@confirmation_confirm_prompt}
+      cancel_prompt={@confirmation_cancel_prompt}
+      timezone={@timezone}
+      locale={@locale}
+    />
+  <% end %>
+</div>

@@ -1,0 +1,233 @@
+<div class="pt-32">
+  <div class="flex">
+    <div class="container space-y-8 text-gray-light">
+      <.back_button phx-click={JS.navigate(~p"/tournament/#{@tournament.slug}/player-dashboard")}>
+        Back To Player Dashboard
+      </.back_button>
+
+      <div class="flex flex-col items-center md:flex-row">
+        <%= if @party.logo_url do %>
+          <img src={@party.logo_url} alt="Party Image" class="h-32 mr-8" />
+        <% else %>
+          <img
+            src={safe_static_url("/images/default-team.png")}
+            alt="Party Image"
+            class="h-32 mr-8"
+          />
+        <% end %>
+        <h3 class="leading-none tracking-normal font-display">
+          <%= @party.name %> Roster
+        </h3>
+      </div>
+
+      <div>
+        <div class="flex flex-col mt-8">
+          <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+            <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
+              <div class="overflow-hidden ring-1 ring-black ring-opacity-5">
+                <!-- Team Roster -->
+                <%= if @current_user_can_manage_ids do %>
+                  <.live_component
+                    id="party-members"
+                    module={StridentWeb.PartyManagementLive.Components.Roster}
+                    party={@party}
+                    roster={[]}
+                    current_user={@current_user}
+                    tournament={@tournament}
+                  />
+
+                  <.button
+                    :if={Enum.any?(@party.party_invitations, &(&1.status == :pending))}
+                    id={"send-all-pending-invitations-#{@party.id}"}
+                    button_type={:primary}
+                    class="mt-4 rounded"
+                    phx-click="send-all-pending-invitations"
+                  >
+                    Send All Pending invitations
+                  </.button>
+                <% else %>
+                  <section class="mb-8">
+                    <div class="flex flex-col flex-wrap flex-auto gap-8 md:flex-row">
+                      <%= for party_member <- @party.party_members do %>
+                        <.live_component
+                          id={"party-members-cards-#{party_member.id}"}
+                          module={
+                            StridentWeb.TournamentManagementLive.TournamentPage.Components.PartyMemberCard
+                          }
+                          item={party_member}
+                          show_real_status={true}
+                        />
+                      <% end %>
+
+                      <%= for invitation <- @party.party_invitations, invitation.status == :pending do %>
+                        <.live_component
+                          id={"party-invitation-#{@party.id}-#{invitation.id}"}
+                          module={
+                            StridentWeb.TournamentManagementLive.TournamentPage.Components.PartyMemberCard
+                          }
+                          item={invitation}
+                        />
+                      <% end %>
+                    </div>
+                  </section>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <%= if @current_user_can_manage_ids do %>
+        <section class="mb-8">
+          <h4 class="mb-8">Invite to Roster</h4>
+          <div>
+            <.live_component
+              id="search-users"
+              module={StridentWeb.Live.Components.SearchForm}
+              search_term={@users_search_term}
+              results={@users_search_results}
+              placeholder="Search for a user to invite..."
+              phx_debounce={300}
+              render_result_fn={&render_user_search_result/1}
+            />
+          </div>
+
+          <form phx-change="validate-email" phx-submit="send-invite">
+            <div class="flex flex-cols">
+              <div>
+                <p class="text-grey-light">Email:</p>
+                <input
+                  name="email"
+                  type="text"
+                  class="w-full form-input"
+                  phx-debounce="500"
+                  autocomplete="off"
+                />
+              </div>
+            </div>
+            <%= if @validation_msg && @validation_msg != "" do %>
+              <p class="text-sm text-secondary-dark"><%= @validation_msg %></p>
+            <% end %>
+
+            <button
+              class="mt-4 btn btn--primary disabled:opacity-50"
+              phx_disable_with="Sending invite..."
+              disabled={is_nil(@validation_msg) || (@validation_msg && @validation_msg != "")}
+            >
+              Send Invitation
+            </button>
+          </form>
+        </section>
+      <% end %>
+
+      <%= if @current_user_can_manage_ids do %>
+        <section>
+          <h4 class="mb-8">Upload New Team Logo/Image</h4>
+          <%= if @party.logo_url do %>
+            <p class="mb-4 text-grey-light">Current Team Logo</p>
+            <img src={@party.logo_url} alt="Party Image" class="mb-8 h-36" />
+          <% end %>
+          <div>
+            <form
+              id={"upload-new-party-logo-#{@party.id}"}
+              phx-submit="upload-new-logo"
+              phx-change="validate"
+            >
+              <label>Upload New Team Logo/Image</label>
+              <%= label(class: "#{if(Enum.count(@uploads.party_photo.entries) > 0, do: "hidden")}") do %>
+                <div phx-drop-target={@uploads.party_photo.ref}>
+                  <%= live_file_input(@uploads.party_photo, class: "hidden") %>
+                  <div class="flex justify-start">
+                    <div class="grid h-40 upload-box place-items-center w-96">
+                      <img class="w-20 mb-1 h-15" src="/images/file_group.png" />
+                      <p class="mb-1">
+                        Drag and Drop Your File
+                      </p>
+
+                      <div class="flex text-xs text-grey-light">
+                        <p class="mr-1">
+                          Or
+                        </p>
+                        <p class="mr-1 link clickable">
+                          Select File
+                        </p>
+                        <p>
+                          from your computer
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <p class="text-xs font-light tracking-wider text-grey-light">
+                    Recommended: 1024x1024px PNG with transparent background
+                  </p>
+                </div>
+              <% end %>
+
+              <%= for entry <- @uploads.party_photo.entries do %>
+                <div class="flex flex-col">
+                  <div class="relative">
+                    <div phx-click="remove-photo" phx-value-ref={entry.ref}>
+                      <.svg
+                        icon={:x}
+                        class="absolute z-10 fill-primary top-2 left-2"
+                        height="20"
+                        width="20"
+                      />
+                    </div>
+
+                    <.live_img_preview entry={entry} width={384} />
+                  </div>
+
+                  <div class="my-2 progress-bar w-96">
+                    <div
+                      class="progress-bar__fill"
+                      style={"transform: translateX(-#{100 - entry.progress}%)"}
+                    >
+                    </div>
+                  </div>
+                </div>
+
+                <%= for error <- upload_errors(@uploads.party_photo, entry) do %>
+                  <p class="alert alert-danger">
+                    <%= error_to_string(error) %>
+                  </p>
+                <% end %>
+
+                <%= submit("Upload New Logo",
+                  id: "update-new-party-logo-#{@party.id}",
+                  phx_disable_with: "Saving...",
+                  class: "btn btn--primary flex-1 px-16"
+                ) %>
+              <% end %>
+            </form>
+          </div>
+        </section>
+      <% end %>
+
+      <section :if={
+        @current_user_can_manage_ids and
+          @tournament.status in [:scheduled, :registrations_open, :registrations_closed]
+      }>
+        <h4 class="mb-4 uppercase">Drop Team From Tournament</h4>
+        <p class="mb-4 text-grey-light">
+          You can drop your team from the tournament if you need to using the button below. This will remove yourself and all players registered to the team from the tournament.
+        </p>
+
+        <.button
+          id={"drop-team-button-#{@party.id}"}
+          button_type={:primary_ghost}
+          class="uppercase rounded"
+          phx-click={show_modal("drop-team-from-tournament-modal-#{@party.id}")}
+        >
+          Drop From Tournament
+        </.button>
+
+        <.drop_team_from_tournament_modal
+          id={"drop-team-from-tournament-modal-#{@party.id}"}
+          party_name={@party.name}
+          participant_id={@my_participant.id}
+        />
+      </section>
+    </div>
+  </div>
+</div>

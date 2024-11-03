@@ -1,0 +1,36 @@
+<div>
+  <.form :let={f} for={@changeset} phx-change="validate" phx-submit="save" phx-target={@myself}>
+    <div class="form-group">
+      <.form_label
+        form={f}
+        field={:genre_name}
+        label="Genre Name"
+        class="mb-0 text-sm text-white"
+      />
+      <.form_text_input form={f} field={:genre_name} phx-debounce={1000} />
+      <.form_feedback form={f} field={:genre_name} />
+    </div>
+
+    <div class="form-group">
+      <.form_label
+        form={f}
+        field={:feature}
+        label="Feature Genre in Main Tournaments Page List"
+        class="mb-0 text-sm text-white"
+      />
+      <%= checkbox(f, :feature,
+        phx_debounce: 1000,
+        class: "h-4 w-4 text-primary focus:ring-indigo-500 border-gray-300 rounded"
+      ) %>
+      <.form_feedback form={f} field={:feature} />
+    </div>
+
+    <div class="flex justify-end space-x-4">
+      <.link navigate={@return_to} class="btn btn--primary-ghost">Cancel</.link>
+      <%= submit("Save",
+        phx_disable_with: "Sending...",
+        class: "btn btn--wide btn--primary"
+      ) %>
+    </div>
+  </.form>
+</div>

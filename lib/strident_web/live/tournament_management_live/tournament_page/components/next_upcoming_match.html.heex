@@ -1,0 +1,58 @@
+<div id="next-upcoming-match">
+  <%= if @match do %>
+    <div class="flex items-center">
+      <h3 class="mr-4 tournament-heading">
+        Upcoming Matchups
+      </h3>
+
+      <.link
+        navigate={
+          Routes.tournament_page_show_path(@socket, :bracket_and_seeding, @tournament.slug)
+        }
+        class="text-primary mb-6"
+        hidden={if(not is_nil(@current_user) && @current_user.is_staff, do: false, else: true)}
+      >
+        Edit Matches
+      </.link>
+    </div>
+
+    <div class="flex">
+      <.wide_card colored={true}>
+        <div class="mb-5 text-sm">
+          <strong>
+            <.localised_datetime
+              datetime={@match.starts_at}
+              timezone={@timezone}
+              locale={@locale}
+            />
+          </strong>
+        </div>
+
+        <div class="flex space-x-8">
+          <%= for {match_participant, index} <- Enum.with_index(@match.participants) do %>
+            <% participant =
+              Enum.find(@participants, &(&1.id == match_participant.tournament_participant_id)) %>
+            <%= if index > 0 do %>
+              <div class="text-2xl text-center">
+                vs
+              </div>
+            <% end %>
+
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <img
+                  alt="participant"
+                  class="h-6 w-6 rounded-full mr-2.5"
+                  src={Strident.TournamentParticipants.participant_logo_url(participant)}
+                />
+                <div>
+                  <%= TournamentParticipants.participant_name(participant) %>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </.wide_card>
+    </div>
+  <% end %>
+</div>

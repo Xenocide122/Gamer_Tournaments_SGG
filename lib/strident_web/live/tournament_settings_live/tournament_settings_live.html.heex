@@ -1,0 +1,114 @@
+<.container id={"tournament-settings-#{@tournament.id}"} class="relative">
+  <:side_menu>
+    <.live_component
+      id={"side-menu-#{@tournament.id}"}
+      module={StridentWeb.TournamentManagement.Components.SideMenu}
+      can_manage_tournament={@can_manage_tournament}
+      tournament={@tournament}
+      number_of_participants={
+        Enum.count(@tournament.participants, &(&1.status in Tournaments.on_track_statuses()))
+      }
+      live_action={@team_site}
+      current_user={@current_user}
+      timezone={@timezone}
+      locale={@locale}
+    />
+  </:side_menu>
+
+  <div class="px-4 md:px-32">
+    <h3 class="hidden text-6xl leading-none tracking-normal md:block font-display">
+      Tournament Settings
+    </h3>
+
+    <.focus_wrap id="tournament-settings-focus-wrap bg-blackish">
+      <.live_component
+        timezone={@timezone}
+        locale={@locale}
+        id={"tab-#{@tournament.id}"}
+        module={StridentWeb.TournamentSettingsLive.Components.Tab}
+        current_user={@current_user}
+        tournament={@tournament}
+        page={@page}
+      />
+
+      <div
+        :if={
+          has_unsaved_changes?(
+            @tournament_changeset,
+            @discord_sml_changeset,
+            @stream_sml_changesets,
+            @mgmt_changesets,
+            @stage_setting_changesets,
+            @tiebreaker_strategy_changesets
+          )
+        }
+        class="fixed z-50 items-center px-4 py-4 border rounded md:-translate-x-2/4 md:left-1/2 md:w-auto bottom-4 md:flex bg-grey-medium gap-y-2 md:gap-x-4 border-primary"
+      >
+        <p class="mb-2 whitespace-nowrap md:mb-0">
+          Careful! You have unsaved changes.
+        </p>
+        <div class="flex justify-between gap-x-4">
+          <.button id="reset-button" button_type={:secondary_ghost} phx_click="reset-form">
+            Reset
+          </.button>
+          <.button id="save-changes-button" button_type={:primary} phx_click="save-changes">
+            Save Changes
+          </.button>
+        </div>
+      </div>
+
+      <div class="pt-4">
+        <%= case @page do %>
+          <% :basic_settings -> %>
+            <.live_component
+              timezone={@timezone}
+              locale={@locale}
+              id="basic-settings"
+              module={StridentWeb.TournamentSettingsLive.Components.BasicSettings}
+              tournament={@tournament}
+              tournament_changeset={@tournament_changeset}
+              discord_sml_changeset={@discord_sml_changeset}
+              stream_sml_changesets={@stream_sml_changesets}
+              mgmt_changesets={@mgmt_changesets}
+              mgmt_search_results={@mgmt_search_results}
+            />
+          <% :match_settings -> %>
+            <.live_component
+              timezone={@timezone}
+              locale={@locale}
+              id="match-settings"
+              module={StridentWeb.TournamentSettingsLive.Components.MatchSettings}
+              stage_setting_changesets={@stage_setting_changesets}
+              tournament={@tournament}
+            />
+          <% :stage_settings -> %>
+            <.live_component
+              timezone={@timezone}
+              locale={@locale}
+              id="stage-settings"
+              module={StridentWeb.TournamentSettingsLive.Components.StageSettings}
+              tournament={@tournament}
+              stage_setting_changesets={@stage_setting_changesets}
+              tiebreaker_strategy_changesets={@tiebreaker_strategy_changesets}
+            />
+          <% :brackets_structure -> %>
+            <.live_component
+              id="brackets-structure"
+              module={StridentWeb.TournamentSettingsLive.Components.BracketsStructure}
+              brackets_structure_changeset={@brackets_structure_changeset}
+              stages_structure={@stages_structure}
+            />
+          <% :cancel_tournament -> %>
+            <.live_component
+              id="cancel-tournament"
+              module={StridentWeb.TournamentSettingsLive.Components.CancelTournament}
+              tournament={@tournament}
+              current_user={@current_user}
+              timezone={@timezone}
+              locale={@locale}
+            />
+        <% end %>
+      </div>
+    </.focus_wrap>
+  </div>
+</.container>

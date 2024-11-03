@@ -1,0 +1,107 @@
+<div class="pt-12 md:pt-44">
+  <div class="container">
+    <div class="max-w-lg mx-auto">
+      <div class="p-6 mb-20 card">
+        <h2 class="mb-4">
+          Create an account
+        </h2>
+
+        <p class="mb-6 text-sm text-muted">
+          Already have an account? <%= link("Log in",
+            to: Routes.live_path(@socket, StridentWeb.UserLogInLive),
+            class: "ml-2 font-medium text-primary"
+          ) %>
+        </p>
+
+        <%= StridentWeb.Oauth2View.render("menu.html", %{show_apple_login: @show_apple_login}) %>
+
+        <p class="my-6 text-center text-muted">OR</p>
+
+        <.form
+          :let={f}
+          class="space-y-6"
+          for={@changeset}
+          action=""
+          phx-submit="create"
+          phx-change="validate"
+          phx-trigger-action={@trigger_login}
+        >
+          <%= hidden_input(f, :timezone, value: @timezone) %>
+          <%= hidden_input(f, :locale, value: @locale) %>
+
+          <%= for password_credential <- inputs_for(f, :password_credential) do %>
+            <div class="form__group">
+              <.form_label form={password_credential} field={:email} class="block mb-1" />
+              <.form_email_input
+                form={password_credential}
+                field={:email}
+                phx-debounce="300"
+                class="form-input"
+              />
+              <.form_feedback
+                form={password_credential}
+                field={:email}
+                always_show={@show_all_errors}
+              />
+            </div>
+          <% end %>
+
+          <div class="form__group">
+            <.form_label form={f} field={:display_name} class="block mb-1" />
+            <.form_text_input
+              form={f}
+              field={:display_name}
+              phx-debounce="300"
+              placeholder={@suggested_name}
+              class={
+                if Ecto.Changeset.get_field(@changeset, :display_name),
+                  do: "form-input",
+                  else: "form-input no-feedback"
+              }
+            />
+            <%= if Ecto.Changeset.get_field(@changeset, :display_name) do %>
+              <.form_feedback form={f} field={:display_name} always_show={@show_all_errors} />
+            <% end %>
+          </div>
+
+          <%= for password_credential <- inputs_for(f, :password_credential) do %>
+            <div class="form__group">
+              <.form_label form={password_credential} field={:password} class="block mb-1" />
+              <.form_password_input
+                form={password_credential}
+                field={:password}
+                phx-debounce="300"
+                value={input_value(password_credential, :password)}
+                class="form-input"
+              />
+              <.form_feedback
+                form={password_credential}
+                field={:password}
+                always_show={@show_all_errors}
+              />
+            </div>
+          <% end %>
+
+          <div class="flex items-center justify-left">
+            <h-captcha id="signupCaptcha" phx-hook="Captcha"></h-captcha>
+          </div>
+
+          <%= if @captcha_error do %>
+            <div class="form-feedback--error invalid-feedback">
+              <p>Please complete the captcha to verify your humanity</p>
+            </div>
+          <% end %>
+
+          <%= if @changeset.action && @changeset.action != :validate do %>
+            <div class="form-feedback--error invalid-feedback">
+              <p>Please fix any errors</p>
+            </div>
+          <% end %>
+          <div>
+            <%= submit("Create account", class: "btn btn--block btn--primary btn--wide") %>
+          </div>
+        </.form>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,31 @@
+{
+  "scripts": {
+    "deploy": "NODE_ENV=production ./node_modules/.bin/postcss css/app.css -o ../priv/static/assets/app.css"
+  },
+  "devDependencies": {
+    "@tailwindcss/forms": "^0.4.0",
+    "@tailwindcss/line-clamp": "^0.4.0",
+    "autoprefixer": "^10.4.1",
+    "mjml": "^4.12.0",
+    "postcss": "^8.4.18",
+    "postcss-cli": "^8.3.1",
+    "postcss-import": "^14.1.0",
+    "tailwindcss": "^3.2.1",
+    "tailwindcss-animate": "^1.0.5"
+  },
+  "dependencies": {
+    "@alpinejs/focus": "^3.10.2",
+    "@antv/x6": "^1.34.1",
+    "@glidejs/glide": "^3.5.2",
+    "@thoughtbot/tailwindcss-aria-attributes": "^0.2.0",
+    "alpinejs": "^3.10.2",
+    "croppie": "^2.6.5",
+    "dropzone": "^6.0.0-beta.2",
+    "flatpickr": "^4.6.11",
+    "luxon": "^3.1.1",
+    "react": "^18.1.0",
+    "sortablejs": "^1.15.0",
+    "styled-components": "^5.3.5",
+    "topbar": "^1.0.1"
+  }
+}

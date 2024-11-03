@@ -1,0 +1,33 @@
+<div class="md:mb-8">
+  <.wide_card
+    :if={!!@profile_url}
+    class="h-full flex items-center justify-between bg-transparent md:bg-blackish p-2 md:p-4"
+  >
+    <.link
+      navigate={@profile_url}
+      class="flex items-center justify-between gap-x-2 mr-2 hover:underline"
+    >
+      <img src={@logo_url} alt="" class="rounded-full w-8 h-8 mr-8 md:h-14 md:w-14 md:mr-4" />
+
+      <div class="break-all line-clamp-3">
+        <%= @display_name %>
+      </div>
+    </.link>
+
+    <div>
+      <%= show_buttons(assigns) %>
+    </div>
+  </.wide_card>
+  <.wide_card
+    :if={!@profile_url}
+    class="h-full flex items-center justify-between bg-transparent md:bg-blackish p-2 md:p-4"
+  >
+    <div class="flex items-center justify-between gap-x-2 mr-2">
+      <img src={@logo_url} alt="" class="rounded-full w-8 h-8 mr-8 md:h-14 md:w-14 md:mr-4" />
+
+      <div class="break-all line-clamp-3">
+        <%= @display_name %>
+      </div>
+    </div>
+  </.wide_card>
+</div>

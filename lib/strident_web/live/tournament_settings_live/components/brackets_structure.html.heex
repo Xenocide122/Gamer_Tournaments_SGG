@@ -1,0 +1,34 @@
+<div id={@id}>
+  <p class="w-full p-4 text-center">
+    You can change the overall bracket structure here.
+  </p>
+  <.form
+    :let={f}
+    id={@id <> "-form"}
+    for={@brackets_structure_changeset}
+    phx-change="change-brackets-structure"
+    class="w-full pb-20"
+  >
+    <.live_component id="stages-structure-component" module={StagesStructureComponent} />
+    <.live_component
+      :if={@show_two_stage}
+      id={@id <> "-stages-page"}
+      module={BracketsStructureComponent}
+      f={f}
+      stages={
+        @brackets_structure_changeset.changes
+        |> Map.put_new(:types, @brackets_structure_changeset.data.types)
+      }
+      stages_structure={@stages_structure}
+    />
+  </.form>
+  <div class="w-full flex justify-center">
+    <div
+      :if={@show_submit_button}
+      class="text-xl cursor-pointer text-primary hover:underline"
+      phx-click="regen-with-new-brackets-structure"
+    >
+      ⚠ Click here to regenerate your tournament using this brackets structure. All match data will be lost!
+    </div>
+  </div>
+</div>

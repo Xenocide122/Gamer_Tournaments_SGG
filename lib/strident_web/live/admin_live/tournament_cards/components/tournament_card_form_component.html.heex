@@ -1,0 +1,130 @@
+<div>
+  <.form :let={f} for={@changeset} phx-change="validate" phx-submit="save" phx-target={@myself}>
+    <div class="form-group">
+      <.form_label
+        form={f}
+        field={:header}
+        label="Tournament Card Header"
+        class="mb-0 text-sm text-white"
+      />
+      <.form_text_input form={f} field={:header} phx-debounce={1000} />
+      <.form_feedback form={f} field={:header} />
+    </div>
+
+    <div class="form-group">
+      <.form_label
+        form={f}
+        field={:body}
+        label="Tournament Card Body"
+        class="mb-0 text-sm text-white"
+      />
+      <.form_textarea form={f} field={:body} phx-debounce={1000} />
+      <.form_feedback form={f} field={:body} />
+    </div>
+
+    <div class="form-group">
+      <.form_label
+        form={f}
+        field={:button_text}
+        label="Button Text"
+        class="mb-0 text-sm text-white"
+      />
+      <.form_text_input form={f} field={:button_text} phx-debounce={1000} />
+      <.form_feedback form={f} field={:button_text} />
+    </div>
+
+    <div class="form-group">
+      <.form_label form={f} field={:button_url} label="Link Url" class="mb-0 text-sm text-white" />
+      <.form_text_input form={f} field={:button_url} phx-debounce={1000} />
+      <.form_feedback form={f} field={:button_url} />
+    </div>
+
+    <div class="form-group">
+      <.form_label
+        form={f}
+        field={:sort_index}
+        label="Tournament Card Sort Index (lower numbers appear first)"
+        class="mb-0 text-sm text-white"
+      />
+      <.form_text_input form={f} field={:sort_index} phx-debounce={1000} />
+      <.form_feedback form={f} field={:sort_index} />
+    </div>
+
+    <div class="form-group">
+      <label>Upload Tournament Card Background Image</label>
+      <%= if not is_nil(@card) and @card.background_image_url do %>
+        <p class="mb-4 text-grey-light">Current Background Image</p>
+        <img src={@card.background_image_url} alt="Card background image" class="mb-8 h-36" />
+      <% end %>
+
+      <%= label(class: "#{if(Enum.count(@uploads.background_image.entries) > 0, do: "hidden")}") do %>
+        <div phx-drop-target={@uploads.background_image.ref}>
+          <%= live_file_input(@uploads.background_image, class: "hidden") %>
+          <div class="flex justify-start">
+            <div class="grid h-40 upload-box place-items-center w-96">
+              <img class="w-20 mb-1 h-15" src="/images/file_group.png" />
+              <p class="mb-1">
+                Drag and Drop Your File
+              </p>
+
+              <div class="flex text-xs text-grey-light">
+                <p class="mr-1">
+                  Or
+                </p>
+                <p class="mr-1 link clickable">
+                  Select File
+                </p>
+                <p>
+                  from your computer
+                </p>
+              </div>
+            </div>
+          </div>
+          <p class="text-xs font-light tracking-wider text-grey-light">
+            Recommended: 16:9 PNG
+          </p>
+        </div>
+      <% end %>
+      <.form_feedback form={f} field={:background_image_url} />
+
+      <%= for entry <- @uploads.background_image.entries do %>
+        <div class="flex flex-col">
+          <div class="relative">
+            <div phx-click="remove-photo" phx-value-ref={entry.ref}>
+              <.svg
+                icon={:x}
+                class="absolute z-10 fill-primary top-2 left-2"
+                height="20"
+                width="20"
+              />
+            </div>
+
+            <.live_img_preview entry={entry} width={384} />
+          </div>
+
+          <div class="my-2 progress-bar w-96">
+            <div
+              class="progress-bar__fill"
+              style={"transform: translateX(-#{100 - entry.progress}%)"}
+            >
+            </div>
+          </div>
+        </div>
+
+        <%= for error <- upload_errors(@uploads.background_image, entry) do %>
+          <p class="alert alert-danger">
+            <%= error_to_string(error) %>
+          </p>
+        <% end %>
+      <% end %>
+    </div>
+
+    <div class="flex justify-end space-x-4">
+      <.link navigate={@return_to} class="btn btn--primary-ghost">Cancel</.link>
+      <%= submit("Save",
+        phx_disable_with: "Sending...",
+        class: "btn btn--wide btn--primary"
+      ) %>
+    </div>
+  </.form>
+</div>

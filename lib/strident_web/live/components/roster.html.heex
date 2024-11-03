@@ -1,0 +1,18 @@
+<div>
+  <%= for player <- @players do %>
+    <.link navigate={profile_path(player.user)} class="block">
+      <.slim_card class="flex flex-col items-center">
+        <img
+          src={Strident.Accounts.avatar_url(player.user)}
+          alt="Participant"
+          class="w-24 rounded-full mb-4"
+        />
+        <p class={
+          "font-display text-ellipsis text-xl #{if @name_vertical_padding, do: "md:h-12"}"
+        }>
+          <%= player.user.display_name %>
+        </p>
+      </.slim_card>
+    </.link>
+  <% end %>
+</div>

@@ -1,0 +1,313 @@
+<div class="relative pb-10 overflow-hidden">
+  <div class="container absolute z-50 flex items-center mt-24 text-outline">
+    <div
+      class={
+        "link text-center #{if(@show != :statistic, do: "visible", else: "invisible")} mb-2 mb:mb-0"
+      }
+      phx-click="open-statistic"
+    >
+      <div class="flex items-center">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-5 h-5"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            fill-rule="evenodd"
+            d={StridentWeb.Common.SvgUtils.path(:chevron_left)}
+            clip-rule="evenodd"
+          />
+        </svg>
+        Back to profile
+      </div>
+    </div>
+  </div>
+  <div class="flex flex-col w-full md:flex-row">
+    <%= if @can_edit do %>
+      <div class="z-50 mt-20 ml-8 md:mt-128">
+        <.live_component
+          id="side-menu"
+          module={StridentWeb.TeamLive.SideMenu}
+          team={@team}
+          current_menu_item={@team_site}
+          timezone={@timezone}
+          locale={@locale}
+        />
+      </div>
+    <% end %>
+
+    <div
+      class="profile-background"
+      x-data="navbarMargin"
+      x-bind:style="{marginTop: `${height}px`}"
+      @window.resize.debounce="resize();"
+    >
+      <img src={Strident.Teams.get_team_banner(@team)} class="w-full" />
+    </div>
+    <div class="diagonal-border"></div>
+
+    <div class="relative flex-grow pb-40 md:mt-72 mt-36 md:pt-8">
+      <div class="mb-12 md:mb-auto">
+        <div class="container">
+          <div class="flex flex-col items-start mb-10 md:flex-row">
+            <div class="flex items-end justify-between w-full md:w-fit">
+              <img
+                src={Teams.get_team_image(@team)}
+                alt={@team.name}
+                class="w-40 h-40 mr-8 bg-blackish border-4 border-black rounded-full"
+              />
+              <%= unless @can_edit do %>
+                <div class="mb-2 md:hidden">
+                  <.live_component
+                    id="follow-mobile"
+                    module={StridentWeb.Components.Follow}
+                    following_user={@following_team}
+                    timezone={@timezone}
+                    locale={@locale}
+                  />
+                </div>
+              <% end %>
+            </div>
+            <div class="w-full md:mt-20">
+              <h1>
+                <%= @team.name %>
+              </h1>
+              <div class="flex flex-col items-start w-full md:justify-between md:flex-row">
+                <div>
+                  <div class="flex items-center space-x-6">
+                    <%= if @can_edit do %>
+                      <.live_component
+                        id="profile-picture-form"
+                        module={StridentWeb.Components.UploadImageForm}
+                        upload_for={@team}
+                        modalized={true}
+                        timezone={@timezone}
+                        locale={@locale}
+                      >
+                        <p class="link clickable">
+                          Upload new logo
+                        </p>
+                      </.live_component>
+
+                      <.live_component
+                        id="profile-banner-form"
+                        module={StridentWeb.Components.UploadImageForm}
+                        upload_for={@team}
+                        modalized={true}
+                        timezone={@timezone}
+                        locale={@locale}
+                        banner={true}
+                      >
+                        <p class="link clickable">
+                          Upload new banner
+                        </p>
+                      </.live_component>
+                    <% else %>
+                      <div class="hidden md:block">
+                        <.live_component
+                          id="follow-desktop"
+                          module={StridentWeb.Components.Follow}
+                          following_user={@following_team}
+                          timezone={@timezone}
+                          locale={@locale}
+                        />
+                      </div>
+                    <% end %>
+                    <div
+                      class={"link hidden #{if(@show == :statistic, do: "md:block")}"}
+                      phx-click="open-followers"
+                    >
+                      <span class="font-bold">
+                        <%= length(@followers) %>
+                      </span>
+                      Followers
+                    </div>
+                  </div>
+                </div>
+
+                <.live_component
+                  id="social-links"
+                  module={StridentWeb.Components.SocialLinks}
+                  social_media_links={@team.social_media_links}
+                  timezone={@timezone}
+                  locale={@locale}
+                />
+              </div>
+            </div>
+          </div>
+          <div class={
+            "flex justify-start space-x-6 text-primary md:mb-10 md:justify-start #{if(@show == :statistic, do: "md:hidden")}"
+          }>
+            <div
+              class={"link #{if(@show == :followers, do: "text-white")}"}
+              phx-click={if @show == :followers, do: "open-statistic", else: "open-followers"}
+            >
+              <span class="font-bold">
+                <%= length(@followers) %>
+              </span>
+              Followers
+            </div>
+          </div>
+
+          <div class={if(@show == :statistic, do: "hidden", else: "md:hidden")}>
+            <hr class="mt-4 mb-4 border-grey-medium" />
+          </div>
+        </div>
+      </div>
+
+      <div class="container">
+        <div class="flex flex-col md:flex-row">
+          <%= case @show do %>
+            <% :following -> %>
+              <.live_component
+                id="user-following"
+                module={StridentWeb.Components.Profile.Grid}
+                profiles={@following}
+                current_user={@current_user}
+                timezone={@timezone}
+                locale={@locale}
+              />
+            <% :followers -> %>
+              <.live_component
+                id="user-followers"
+                module={StridentWeb.Components.Profile.Grid}
+                profiles={@followers}
+                current_user={@current_user}
+                timezone={@timezone}
+                locale={@locale}
+              />
+            <% :statistic -> %>
+              <div x-data="profileScroll" class="w-full">
+                <div class="hidden py-1 mb-4 space-x-4 border-b border-grey-dark profile-menu md:flex">
+                  <h5
+                    x-bind:class="position === 0 ? 'text-primary' : 'link text-white'"
+                    class="relative uppercase"
+                    x-bind="menuItem"
+                    value="0"
+                  >
+                    Profile
+                  </h5>
+                  <h5
+                    x-bind:class="position === 1 ? 'text-primary' : 'link text-white'"
+                    class="relative uppercase"
+                    x-bind="menuItem"
+                    value="1"
+                  >
+                    Tournaments
+                  </h5>
+                </div>
+                <div class="md:hidden">
+                  <select class="mb-4 form-input" x-bind:value="position">
+                    <option x-bind="menuItem" value="0">Profile</option>
+                    <option x-bind="menuItem" value="1">Tournaments</option>
+                  </select>
+                </div>
+                <div x-bind="pane" position="0">
+                  <div class="my-4">
+                    <%= StridentWeb.Components.UnderlinedHeader.header("Team Roster") %>
+
+                    <%= unless Enum.empty?(@rosters) do %>
+                      <div class="grid grid-cols-1 gap-2 md:grid-cols-2">
+                        <.form :let={f} for={to_form(%{}, as: :roster)} phx-change="select-roster">
+                          <.form_select
+                            form={f}
+                            field={:roster}
+                            values={@rosters}
+                            selected={@roster}
+                            prompt="All"
+                            class="mt-1 mb-3"
+                          />
+                        </.form>
+                      </div>
+                    <% end %>
+
+                    <.live_component
+                      id="team-roster"
+                      module={StridentWeb.Components.RosterThin}
+                      team_or_party_members={@team.team_members}
+                      team_rosters={@team.team_rosters}
+                      roster={@roster}
+                      timezone={@timezone}
+                      locale={@locale}
+                      position={:grid}
+                    />
+                  </div>
+
+                  <div class="my-4">
+                    <%= StridentWeb.Components.UnderlinedHeader.header(
+                      "Recent Tournament Results"
+                    ) %>
+
+                    <.live_component
+                      id="recent-results"
+                      module={StridentWeb.Components.RecentTournamentResults}
+                      recent_results={@recent_results}
+                      timezone={@timezone}
+                      locale={@locale}
+                    />
+                  </div>
+
+                  <div class="my-4">
+                    <%= StridentWeb.Components.UnderlinedHeader.header("Upcoming Tournaments") %>
+
+                    <%= if Enum.empty?(@tournaments) do %>
+                      <p class="text-grey-light">
+                        Follow <%= @team.name %> to be notified when they play in their next tournament.
+                      </p>
+                    <% else %>
+                      <.live_component
+                        id="upcoming-tournaments"
+                        module={StridentWeb.PlayerProfileLive.TournamentsComponent}
+                        current_user={@current_user}
+                        tournaments={upcoming_tournaments(@tournaments)}
+                        timezone={@timezone}
+                        locale={@locale}
+                      />
+                      <div class="flex justify-center mt-6">
+                        <button
+                          class="text-primary border-primary border rounded inner-glow w-full md:w-[300px] py-2 uppercase"
+                          x-bind="menuItem"
+                          value="1"
+                        >
+                          View All
+                        </button>
+                      </div>
+                    <% end %>
+                  </div>
+
+                  <%= unless Strident.StringUtils.is_empty?(@team.description) do %>
+                    <%= StridentWeb.Components.UnderlinedHeader.header("Team Bio") %>
+
+                    <p class="mb-8">
+                      <%= @team.description %>
+                    </p>
+                  <% end %>
+
+                  <%= if @team.team_performance_history_image_url do %>
+                    <%= StridentWeb.Components.UnderlinedHeader.header("Preformace History") %>
+
+                    <img
+                      src={@team.team_performance_history_image_url}
+                      alt="Team's performance history image"
+                      class="w-full"
+                    />
+                  <% end %>
+                </div>
+                <div x-bind="pane" position="1" class="relative">
+                  <.live_component
+                    id="team-tournaments"
+                    module={StridentWeb.PlayerProfileLive.TournamentsComponent}
+                    current_user={@current_user}
+                    tournaments={@tournaments}
+                    timezone={@timezone}
+                    locale={@locale}
+                  />
+                </div>
+              </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

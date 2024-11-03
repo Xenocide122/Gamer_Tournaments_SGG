@@ -1,0 +1,85 @@
+<main class="min-h-screen">
+  <.flash flash={@flash} />
+
+  <%= live_render(
+    @socket,
+    StridentWeb.NavbarLive,
+    id: "navbar-live",
+    session: %{
+      "current_user_id" => Map.get(@current_user || %{}, :id),
+      "timezone" => @timezone,
+      "locale" => @locale,
+      "can_stake" => @can_stake,
+      "can_play" => @can_play,
+      "can_wager" => @can_wager,
+      "is_using_vpn" => @is_using_vpn,
+      "show_vpn_banner" => @show_vpn_banner,
+      "check_timezone" => @check_timezone
+    }
+  ) %>
+
+  <%= @inner_content %>
+
+  <div :if={!!@current_user} class="sticky w-full bottom-10">
+    <%= live_render(
+      @socket,
+      StridentWeb.NotificationLive.NotificationFlash,
+      id: "notification-flash-sticky",
+      session: %{"current_user_id" => Map.get(@current_user || %{}, :id)}
+    ) %>
+  </div>
+
+  <div
+    :if={not is_nil(assigns[:impersonating_staff_id])}
+    class="sticky max-w-lg bottom-10 left-10"
+  >
+    <.live_component
+      timezone={@timezone}
+      locale={@locale}
+      id="impersonation"
+      module={StridentWeb.Components.Impersonation}
+      current_user={@current_user}
+      impersonating_staff_id={@impersonating_staff_id}
+    />
+  </div>
+
+  <.live_component
+    timezone={@timezone}
+    locale={@locale}
+    id="cheatcodes"
+    module={StridentWeb.Components.Cheatcodes}
+    current_user={@current_user}
+  />
+
+  <.live_component
+    :if={@check_timezone}
+    user_return_to={@user_return_to}
+    timezone={@timezone}
+    id="timezone_modal"
+    module={StridentWeb.Live.Components.TimezoneModalComponent}
+    current_user={@current_user}
+  />
+
+  <.live_component
+    id="feature-popups"
+    module={StridentWeb.Live.Components.NewFeaturePopups}
+    current_user={@current_user}
+    timezone={@timezone}
+    locale={@locale}
+  />
+
+  <.live_component id="footer" module={StridentWeb.Components.Footer} />
+
+  <%= if @current_user do %>
+    <%= live_render(
+      @socket,
+      StridentWeb.Components.Vpn.Banner,
+      id: "vpn-banner",
+      session: %{
+        "is_using_vpn" => @is_using_vpn,
+        "show_vpn_banner" => @show_vpn_banner,
+        "current_user_id" => Map.get(@current_user || %{}, :id)
+      }
+    ) %>
+  <% end %>
+</main>

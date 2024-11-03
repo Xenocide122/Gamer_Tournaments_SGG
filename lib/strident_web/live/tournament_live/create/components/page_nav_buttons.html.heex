@@ -1,0 +1,32 @@
+<div class={"flex flex-col #{@button_alignment} mt-10 xl:flex-row gap-x-6 gap-y-6"}>
+  <button
+    id="back-button"
+    type="button"
+    class={"font-bold px-2 #{@button_xPadding} py-3 text-base !no-underline uppercase border-white border-2 rounded-lg btn--primary font-display md:text-3xl text-center align-center"}
+    phx-click="back"
+    phx-hook="ScrollToTop"
+  >
+    Back
+  </button>
+
+  <%= unless @current_page in [:tournament_type] do %>
+    <button
+      type="button"
+      id={"#{@next_event}-button"}
+      class="btn--primary disabled:opacity-50 font-bold px-2 md:px-8 py-3 text-base !no-underline uppercase border-white border-2 rounded-lg font-display md:text-3xl text-center align-center"
+      phx-click={@next_event}
+      disabled={@next_disabled}
+      phx-hook="ScrollToTop"
+    >
+      <%= @next_label %>
+    </button>
+  <% end %>
+
+  <div
+    id="reset-form-button-mobile"
+    class="relative mt-6 text-center cursor-pointer text-primary hover:text-primary-dark xl:hidden"
+    phx-click="reset-form-clicked"
+  >
+    Reset Form
+  </div>
+</div>

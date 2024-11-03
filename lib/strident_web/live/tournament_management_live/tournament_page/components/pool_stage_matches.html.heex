@@ -1,0 +1,198 @@
+<div x-bind="matchDetails">
+  <div class="flex justify-center my-8 font-display gap-x-10">
+    <%= for round <- @matches |> Enum.map(& &1.round) |> Enum.sort() |> Enum.uniq() do %>
+      <h4
+        x-on:click={"round = #{round}"}
+        x-bind:class={"{ 'text-primary border-b-2 border-primary': round === #{round} }"}
+        class="pb-4 cursor-pointer"
+      >
+        Round <%= round + 1 %>
+      </h4>
+    <% end %>
+  </div>
+
+  <%= for {round, matches} <- Enum.group_by(@matches, & &1.round) do %>
+    <%= for match <- matches do %>
+      <%= case match.participants do %>
+        <% [mp_0, mp_1] -> %>
+          <% [participant_0, participant_1] =
+            [mp_0, mp_1] |> Enum.map(&Map.get(@participant_details, &1.tournament_participant_id)) %>
+
+          <div
+            class="flex items-start mb-4"
+            id={"pool-stage-#{@stage_id}-match-details-match-#{match.id}"}
+            x-show={"(round == #{round})"}
+          >
+            <div class="flex items-center justify-end flex-1">
+              <%= if @can_manage_tournament and @stage_status in [:in_progress] and is_nil(mp_0.rank) and is_nil(mp_1.rank) do %>
+                <div class="flex mr-6 space-x-4">
+                  <.live_component
+                    timezone={@timezone}
+                    locale={@locale}
+                    id={"mark-match-tie-#{match.id}"}
+                    module={StridentWeb.TournamentPageLive.Components.MarkMatchTieButton}
+                    match={match}
+                  />
+
+                  <.live_component
+                    id={"mark-match-participant-winner-#{mp_0.id}"}
+                    module={StridentWeb.TournamentPageLive.Components.MarkMatchWinnerButton}
+                    match_participant={mp_0}
+                    participant_name={participant_0.name}
+                    scores_and_names={[
+                      %{name: participant_0.name, score: mp_0.score},
+                      %{name: participant_1.name, score: mp_1.score}
+                    ]}
+                    tournament_id={@tournament_id}
+                    timezone={@timezone}
+                    locale={@locale}
+                  />
+                </div>
+              <% end %>
+
+              <div class="flex items-center">
+                <div class={if mp_0.rank == 0, do: "text-primary", else: "" <> "w-36 truncate"}>
+                  <%= participant_0.name %>
+                </div>
+
+                <img
+                  src={participant_0.logo_url}
+                  alt={participant_0.name}
+                  class="w-12 h-12 ml-3 bg-gray-900 rounded-full"
+                />
+              </div>
+            </div>
+
+            <div class="flex flex-col items-center px-6">
+              <div class="flex items-center mb-2">
+                <%= if @can_manage_tournament and @stage_status in [:in_progress] do %>
+                  <.live_component
+                    id={"match-participant-score-input-#{mp_0.id}"}
+                    module={StridentWeb.TournamentPageLive.Components.MatchParticipantScoreInput}
+                    match_participant={mp_0}
+                    timezone={@timezone}
+                    locale={@locale}
+                  />
+                <% else %>
+                  <%= mp_0.score || 0 %>
+                <% end %>
+
+                <span class="mx-3">-</span>
+
+                <%= if @can_manage_tournament and @stage_status in [:in_progress] do %>
+                  <.live_component
+                    id={"match-participant-score-input-#{mp_1.id}"}
+                    module={StridentWeb.TournamentPageLive.Components.MatchParticipantScoreInput}
+                    match_participant={mp_1}
+                    timezone={@timezone}
+                    locale={@locale}
+                  />
+                <% else %>
+                  <%= mp_1.score || 0 %>
+                <% end %>
+              </div>
+
+              <.localised_datetime
+                datetime={match.starts_at}
+                timezone={@timezone}
+                locale={@locale}
+                class="text-sm text-grey-light"
+              />
+            </div>
+
+            <div class="flex items-center justify-between flex-1">
+              <div class="flex items-center">
+                <img
+                  src={participant_1.logo_url}
+                  alt={participant_1.name}
+                  class="w-12 h-12 mr-3 bg-gray-900 rounded-full"
+                />
+
+                <div class={if mp_1.rank == 0, do: "text-primary", else: "" <> "w-36 truncate"}>
+                  <%= participant_1.name %>
+                </div>
+              </div>
+              <%= if @can_manage_tournament and @stage_status in [:in_progress] and is_nil(mp_0.rank) and is_nil(mp_1.rank) do %>
+                <div class="ml-6">
+                  <.live_component
+                    id={"mark-match-participant-winner-#{mp_1.id}"}
+                    module={StridentWeb.TournamentPageLive.Components.MarkMatchWinnerButton}
+                    match_participant={mp_1}
+                    participant_name={participant_1.name}
+                    scores_and_names={[
+                      %{name: participant_0.name, score: mp_0.score},
+                      %{name: participant_1.name, score: mp_1.score}
+                    ]}
+                    tournament_id={@tournament_id}
+                    timezone={@timezone}
+                    locale={@locale}
+                  />
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% [mp] -> %>
+          <% participant = Map.get(@participant_details, mp.tournament_participant_id) %>
+
+          <div
+            class="flex items-start mb-4"
+            id={"pool-stage-#{@stage_id}-match-details-match-#{match.id}"}
+            x-show={"(round == #{round})"}
+          >
+            <div class="flex items-center justify-end flex-1">
+              <div class="mr-6">
+                <%= if @can_manage_tournament and @stage_status in [:in_progress] and is_nil(mp.rank) do %>
+                  <.live_component
+                    id={"mark-match-participant-winner-#{mp.id}"}
+                    module={StridentWeb.TournamentPageLive.Components.MarkMatchWinnerButton}
+                    match_participant={mp}
+                    participant_name={participant.name}
+                    scores_and_names={[%{name: participant.name, score: mp.score}]}
+                    tournament_id={@tournament_id}
+                    timezone={@timezone}
+                    locale={@locale}
+                  />
+                <% end %>
+              </div>
+
+              <div class={if mp.rank == 0, do: "text-primary", else: ""}>
+                <%= participant.name %>
+              </div>
+
+              <img
+                src={participant.logo_url}
+                alt={participant.name}
+                class="w-12 h-12 ml-3 bg-gray-900 rounded-full"
+              />
+            </div>
+
+            <div class="flex flex-col items-center px-6">
+              <div class="flex items-center mb-2">
+                <%= if @can_manage_tournament and @stage_status in [:in_progress] do %>
+                  <.live_component
+                    id={"match-participant-score-input-#{mp.id}"}
+                    module={StridentWeb.TournamentPageLive.Components.MatchParticipantScoreInput}
+                    match_participant={mp}
+                    timezone={@timezone}
+                    locale={@locale}
+                  />
+                <% else %>
+                  <%= mp.score || 0 %>
+                <% end %>
+
+                <p class="ml-3 text-grey-light">← Bye match</p>
+              </div>
+
+              <div class="text-sm text-grey-light">
+                No start time
+              </div>
+            </div>
+
+            <div class="flex-1"></div>
+          </div>
+        <% [] -> %>
+          <div x-show={"(round == #{round})"}></div>
+      <% end %>
+    <% end %>
+  <% end %>
+</div>

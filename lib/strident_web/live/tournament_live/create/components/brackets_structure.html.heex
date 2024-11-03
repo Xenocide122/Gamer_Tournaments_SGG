@@ -1,0 +1,39 @@
+<div>
+  <.card colored id="create-tournament-stages" class="card--glowing-two-tone p-0.5">
+    <div class="px-10 3xl:px-14">
+      <h3 class="uppercase text-white text-center w-full py-2 mb-4">
+        <%= humanize(@stages_structure) %> Tournament
+      </h3>
+      <div class="text-center text-grey-light font-light mb-8 max-w-2xl mx-auto">
+        Looking for that truly 'champion' experience? Set up a group stage before your bracket so only the most elite participants advance to the winner takes all stage.
+      </div>
+      <div class="grid grid-cols-2 gap-10">
+        <%= for {stage_type, index} <- Enum.with_index(@stages.types) do %>
+          <div class="grow">
+            <h4 class="text-white py-4">
+              Stage <%= index + 1 %>
+            </h4>
+            <fieldset id={input_name(@f, :stages) <> "[types][#{index}]"}>
+              <%= for {allowed_type, label} <- allowed_stage_types(@stages.types, index) do %>
+                <div class="w-full mb-4">
+                  <div class="grilla-radio flex items-center">
+                    <%= label(class: "font-light tracking-wider mb-0") do %>
+                      <%= radio_button(@f, :type, allowed_type,
+                        checked: allowed_type == stage_type,
+                        name: input_name(@f, :stages) <> "[types][#{index}]"
+                      ) %>
+                      <%= label %>
+                    <% end %>
+                  </div>
+                  <div class="ml-8 text-grey-light font-light">
+                    <%= description(allowed_type, index) %>
+                  </div>
+                </div>
+              <% end %>
+            </fieldset>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </.card>
+</div>

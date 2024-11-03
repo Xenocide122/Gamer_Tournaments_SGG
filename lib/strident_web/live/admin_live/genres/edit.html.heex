@@ -1,0 +1,28 @@
+<div class="py-16 mt-16 text-center md:text-left">
+  <div class="container space-y-8 ">
+    <div class="lg:px-5">
+      <div class="flex justify-between items-center mb-2">
+        <div>
+          <h3 class="text-6xl leading-none tracking-normal font-display">Edit Genre</h3>
+        </div>
+        <div>
+          <.link
+            navigate={Routes.games_index_path(@socket, :index)}
+            class="btn btn--primary-ghost"
+          >
+            Back
+          </.link>
+        </div>
+      </div>
+      <div class="border-b border-gray-200 pb-5 sm:pb-0 mb-4"></div>
+      <section class="mt-8">
+        <.live_component
+          module={StridentWeb.Components.GenreFormComponent}
+          id={@genre.id || :new}
+          genre={@genre}
+          return_to="/admin/games"
+        />
+      </section>
+    </div>
+  </div>
+</div>

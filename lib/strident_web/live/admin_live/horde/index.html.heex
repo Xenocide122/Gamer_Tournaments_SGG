@@ -1,0 +1,75 @@
+<div class="py-16 mt-16 text-center md:text-left">
+  <div class="container space-y-4 ">
+    <div class="lg:px-3">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-6xl leading-none tracking-normal font-display">Horde</h3>
+        </div>
+      </div>
+      <div class="pb-5 mb-4 border-b border-gray-200 sm:pb-0">
+        <div class="mt-3 sm:mt-4">
+          <div>
+            <Menus.tabs selected={:horde} />
+          </div>
+        </div>
+      </div>
+      <section :if={false} id="horde-regions" class="mt-8">
+        <div class="flex flex-wrap gap-x-2 gap-y-4">
+          <div :for={{region_code, %{selected: selected}} <- @regions}>
+            <div
+              class={[
+                "border-1 hover:bg-primary rounded px-2 text-xl cursor-pointer",
+                if(selected,
+                  do: "border-primary bg-grey-light",
+                  else: "border-secondary bg-grey-medium"
+                )
+              ]}
+              phx-click="click-region-code"
+              phx-value-region-code={region_code}
+            >
+              <%= region_code %>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="singleton-controle" class="mt-8">
+        <.table rows={[
+          Strident.Twitch.TwitchOauth2StateCache,
+          Strident.Twitch.TwitchOauth2CodeVerifierCache
+        ]}>
+          <:col :let={module_name} label="name">
+            <%= module_name %>
+          </:col>
+
+          <:col :let={module_name} label="PID">
+            <%= inspect(Strident.HordeStarter.whereis(module_name)) %>
+          </:col>
+
+          <:col :let={_module_name} label="Start">
+            <div phx-click="start-singleton" class="cursor-pointer hover:underline">
+              start singleton
+            </div>
+          </:col>
+        </.table>
+      </section>
+
+      <section id="horde-table" class="mt-8">
+        <.table rows={@horde}>
+          <:col :let={horde} label="Region">
+            <%= horde.region_code %>
+          </:col>
+
+          <:col :let={horde} label="Module">
+            <%= horde.module_list |> Enum.map(&to_string/1) |> Enum.join(", ") %>
+          </:col>
+        </.table>
+      </section>
+      <section id="image-tag" class="mt-8">
+        <div>
+          Image tag: <%= Application.get_env(:strident, :image_tag) %>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,15 @@
+<%= link to: Routes.auth_path(StridentWeb.Endpoint, :request, "discord"), class: "my-2 w-full", rel: "nofollow" do %>
+  <div class="flex items-center justify-center text-white btn btn--primary btn--wide bg-brands-discord border-brands-discord">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      class="mr-2"
+    >
+      <path d={StridentWeb.Common.SvgUtils.path(:discord)}></path>
+    </svg>
+    Log in with Discord
+  </div>
+<% end %>

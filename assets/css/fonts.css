@@ -1,0 +1,38 @@
+@font-face {
+  font-family: 'Rajdhani';
+  font-weight: 300;
+  src: url('/fonts/Rajdhani-Light.ttf') format('opentype');
+}
+@font-face {
+  font-family: 'Rajdhani';
+  font-weight: 400;
+  src: url('/fonts/Rajdhani-Regular.ttf') format('opentype');
+}
+
+@font-face {
+  font-family: 'Rajdhani';
+  font-weight: 500;
+  src: url('/fonts/Rajdhani-Medium.ttf') format('opentype');
+}
+
+
+@font-face {
+  font-family: 'Rajdhani';
+  font-weight: 700;
+  src: url('/fonts/Rajdhani-Bold.ttf') format('opentype');
+}
+
+@font-face {
+  font-family: 'Rajdhani';
+  font-weight: 600;
+  src: url('/fonts/Rajdhani-SemiBold.ttf') format('opentype');
+}
+
+@font-face {
+  font-family: 'PTSans';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: auto; /* or block, swap, fallback, optional */
+  src: local('PTSans'), url('/fonts/PTSans-Regular.ttf') format('ttf'); /* will be preloaded */
+  unicode-range: U+000-5FF; /* Latin glyphs */
+}

@@ -1,0 +1,31 @@
+<div class="pt-28">
+  <div class="container py-20">
+    <div class="mb-10 text-center">
+      <h1 class="md:text-7xl md:leading-none">
+        Patch Notes
+      </h1>
+      <p>Follow along with updates and improvements made to Stride.</p>
+      <.link href="https://twitter.com/grilla" type="a" target="_blank">
+        Follow us on Twitter
+      </.link>
+    </div>
+
+    <%= for changelog <- @changelogs do %>
+      <.wide_card colored={true} class="mb-6">
+        <div class="p-4">
+          <h2><%= changelog.title %></h2>
+          <p class="mb-4 text-grey-light">
+            <%= Strident.Helpers.DateTimeFormatter.format_date(
+              changelog.published_at,
+              "America/New_York",
+              "en"
+            ) %>
+          </p>
+          <div class="markdown">
+            <%= Strident.MarkdownTransformations.to_html(changelog.body) %>
+          </div>
+        </div>
+      </.wide_card>
+    <% end %>
+  </div>
+</div>

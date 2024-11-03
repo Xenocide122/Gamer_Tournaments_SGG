@@ -1,0 +1,486 @@
+<div>
+  <.flash flash={@flash} phx-target={@myself} />
+
+  <.socket_suspense show_inner_block={@is_connected}>
+    <div class="flex flex-col items-stretch xl:flex-row">
+      <div class="flex-1">
+        <.form
+          :let={f}
+          for={@tournament_changeset}
+          id="tournament-info-form"
+          phx-change="update-tournament"
+        >
+          <div class="mb-6">
+            <.form_label form={f} field={:title} label="Name" class="mb-0 text-white" />
+            <.form_text_input form={f} field={:title} phx-debounce={100} disabled={@cancelled} />
+            <.form_feedback form={f} field={:title} />
+          </div>
+
+          <div class="mb-6">
+            <.form_label form={f} field={:vanity_url} label="Vanity URL" class="mb-0 text-white" />
+            <%= if vanity_url = Changeset.get_field(@tournament_changeset, :vanity_url) do %>
+              <%= Routes.tournament_show_vanity_url_path(@socket, :show, vanity_url) %>
+            <% end %>
+
+            <.form_text_input
+              form={f}
+              field={:vanity_url}
+              phx-debounce={100}
+              placeholder="my-awesome-fgc-tournament"
+              disabled={@cancelled}
+            />
+            <.form_feedback form={f} field={:vanity_url} />
+          </div>
+
+          <%= if @tournament.status in [:scheduled, :registrations_open, :registrations_closed] do %>
+            <div class="mb-6">
+              <.form_label
+                form={f}
+                field={:players_per_participant}
+                label="How many players in each roster?"
+                class="mb-0 text-white"
+              />
+              <.form_text_input
+                form={f}
+                field={:players_per_participant}
+                phx-debounce={100}
+                disabled={@cancelled}
+              />
+              <.form_feedback form={f} field={:players_per_participant} />
+            </div>
+
+            <div class="mb-6">
+              <.form_label form={f} field={:starts_at} label="Start Date" class="mb-0 text-white" />
+              <.form_datetime_local_input
+                form={f}
+                field={:starts_at}
+                timezone={@timezone}
+                phx-debounce={200}
+                disabled={@cancelled}
+              />
+              <.form_feedback form={f} field={:starts_at} />
+            </div>
+          <% end %>
+
+          <%= if @tournament.status == :scheduled do %>
+            <div class="mb-6">
+              <.form_label
+                form={f}
+                field={:registrations_open_at}
+                label="Registration Opens"
+                class="mb-0 text-white"
+              />
+              <.form_datetime_local_input
+                form={f}
+                field={:registrations_open_at}
+                timezone={@timezone}
+                phx-debounce={200}
+                disabled={@cancelled}
+              />
+              <.form_feedback form={f} field={:registrations_open_at} />
+            </div>
+          <% end %>
+
+          <%= if @tournament.status in [:scheduled, :registrations_open] do %>
+            <div class="mb-6">
+              <.form_label
+                form={f}
+                field={:registrations_close_at}
+                label="Registration Closes"
+                class="mb-0 text-white"
+              />
+              <.form_datetime_local_input
+                form={f}
+                field={:registrations_close_at}
+                timezone={@timezone}
+                phx-debounce={200}
+                disabled={@cancelled}
+              />
+              <.form_feedback form={f} field={:registrations_close_at} />
+            </div>
+          <% end %>
+
+          <div class="mb-6">
+            <.form_label
+              form={f}
+              field={:is_public}
+              label="Make tournament publicly visible on Stride?"
+              class="mb-0 text-white"
+            />
+            <div class="flex flex-row mb-4">
+              <%= for {public, label} <- [{true, "Show"}, {false, "Hide"}] do %>
+                <div class="flex items-center grilla-radio">
+                  <%= label(class: "font-light tracking-wider mb-0 #{if @cancelled, do: "opacity-70"}") do %>
+                    <%= radio_button(f, :is_public, public, phx_debounce: 50, disabled: @cancelled) %>
+                    <%= label %>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+            <.form_feedback form={f} field={:is_public} />
+          </div>
+
+          <div class="mb-6">
+            <.form_label form={f} field={:website} label="Website" class="mb-0 text-white" />
+            <.form_text_input form={f} field={:website} phx-debounce={100} disabled={@cancelled} />
+            <.form_feedback form={f} field={:website} />
+          </div>
+
+          <div class="mb-6">
+            <.form_label
+              form={f}
+              field={:contact_email}
+              label="Contact Email"
+              class="mb-0 text-white"
+            />
+            <.form_text_input
+              form={f}
+              field={:contact_email}
+              phx-debounce={100}
+              disabled={@cancelled}
+            />
+            <.form_feedback form={f} field={:contact_email} />
+
+            <div class="flex justify-end">
+              <div
+                :for={{email_show, label} <- [{:show, "Show"}, {:hide, "Hide"}]}
+                class={
+                "flex items-center ml-4 grilla-radio #{if @cancelled, do: "opacity-70"}"
+              }
+              >
+                <%= label() do %>
+                  <%= radio_button(f, :show_contact_email, email_show == :show,
+                    checked:
+                      (@tournament_changeset.data.show_contact_email && email_show == :show) ||
+                        (not @tournament_changeset.data.show_contact_email && email_show == :hide),
+                    phx_debounce: 50,
+                    disabled: @cancelled
+                  ) %>
+                  <span class="ml-2">
+                    <%= label %>
+                  </span>
+                <% end %>
+              </div>
+            </div>
+          </div>
+          <div class="mb-6 ">
+            <.form_label
+              form={f}
+              field={:required_participant_count}
+              label="Number of Participants"
+              class="mb-0 font-light tracking-wider"
+              disabled={@cancelled}
+            />
+
+            <.form_text_input form={f} field={:required_participant_count} phx_debounce={50} />
+            <.form_feedback form={f} field={:required_participant_count} />
+          </div>
+
+          <div class="mb-6">
+            <.form_label form={f} field={:game_id} label="Game" class="mb-0" />
+            <.form_select
+              form={f}
+              field={:game_id}
+              values={@games}
+              selected={@tournament_changeset.data.game_id}
+              phx_debounce={50}
+              class="opacity-70"
+              disabled
+            />
+            <.form_feedback form={f} field={:game_id} />
+          </div>
+
+          <div class="mb-6">
+            <.form_label form={f} field={:platform} class="mb-0 text-white" />
+            <.form_select
+              form={f}
+              field={:platform}
+              values={@platforms}
+              prompt="Choose a Platform"
+              selected={@tournament_changeset.data.platform}
+              phx_debounce={50}
+              disabled={@cancelled}
+              class="disabled:opacity-70"
+            />
+            <.form_feedback form={f} field={:platform} />
+          </div>
+          <.form_label form={f} field={:location} label="Location" class="mb-0 text-white" />
+          <div class="flex">
+            <%= for {location_type, label} <- [{:online, "Online"}, {:offline, "Offline"}] do %>
+              <div class={"flex items-center grilla-radio #{if @cancelled, do: "opacity-70"}"}>
+                <%= label do %>
+                  <%= radio_button(f, :location, location_type,
+                    checked: @tournament_changeset.data.location == location_type,
+                    phx_debounce: 50,
+                    disabled: @cancelled
+                  ) %>
+                  <span class="ml-2">
+                    <%= label %>
+                  </span>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+          <.form_feedback form={f} field={:location} />
+
+          <%= if @tournament_changeset.data.location == :offline do %>
+            <input
+              type="text"
+              id="places-autocomplete"
+              placeholder="Enter a place"
+              class="mb-4 form-input"
+              autocomplete="off"
+              phx-debounce={50}
+              phx-update="ignore"
+              value={@tournament_changeset.data.full_address}
+              disabled={@cancelled}
+            />
+
+            <%= hidden_input(f, :lat) %>
+            <%= hidden_input(f, :lng) %>
+            <%= hidden_input(f, :full_address) %>
+
+            <div
+              id="map"
+              phx-hook="Map"
+              phx-update="ignore"
+              class="w-full h-64"
+              data-lat={@tournament.lat}
+              data-lng={@tournament.lng}
+            >
+            </div>
+          <% end %>
+
+          <div class="mb-6">
+            <.form_label
+              form={f}
+              label="Summary (280 character limit)"
+              field={:summary}
+              class="mb-0 text-white"
+            />
+            <.form_textarea
+              form={f}
+              field={:summary}
+              rows="6"
+              phx-debounce={100}
+              disabled={@cancelled}
+              class="disabled:opacity-70"
+            />
+            <.form_feedback form={f} field={:summary} />
+          </div>
+
+          <div class="mb-6">
+            <.form_label
+              form={f}
+              label="Rules (Markdown supported)"
+              field={:rules}
+              class="mb-0 text-white"
+            />
+            <.form_textarea
+              form={f}
+              field={:rules}
+              rows="6"
+              phx-debounce={100}
+              disabled={@cancelled}
+              class="disabled:opacity-70"
+            />
+            <.form_feedback form={f} field={:rules} />
+          </div>
+        </.form>
+      </div>
+
+      <div class="hidden mx-16 md:block gradient-separator"></div>
+
+      <div class="flex-1">
+        <div class="mb-6">
+          <label class="mb-0 text-white">
+            Thumbnail Image
+          </label>
+          <img class="w-full" src={@tournament.thumbnail_image_url} />
+          <%= if @cancelled do %>
+            <p class="cursor-default text-primary opacity-70">
+              Update New Thumbnail Image (279 x 128 pixels)
+            </p>
+          <% else %>
+            <.live_component
+              timezone={@timezone}
+              locale={@locale}
+              id="tournament-cover-image-form"
+              module={StridentWeb.Components.UploadImageForm}
+              upload_for={%{tournament_id: @tournament.id, thumb: true}}
+              modalized={true}
+            >
+              <p class="link clickable">
+                Update New Thumbnail Image (279 x 128 pixels)
+              </p>
+            </.live_component>
+          <% end %>
+        </div>
+
+        <.form
+          :let={f}
+          for={@discord_sml_changeset}
+          id="tournament-discord-invitation-form"
+          phx-change="update-discord-invitation"
+        >
+          <div class="mb-6">
+            <.form_label
+              form={f}
+              field={:user_input}
+              label="Discord Invite Link"
+              class="mb-0 text-white"
+            />
+            <.form_text_input
+              form={f}
+              field={:user_input}
+              phx-debounce={100}
+              disabled={@cancelled}
+            />
+            <.form_feedback form={f} field={:user_input} />
+          </div>
+        </.form>
+
+        <div class="mb-6">
+          <label class="mb-0 text-white">Stream Links</label>
+          <%= for {stream_sml_changeset, index} <- Enum.with_index(@stream_sml_changesets) do %>
+            <.form
+              :let={f}
+              :if={stream_sml_changeset.action != :delete}
+              for={stream_sml_changeset}
+              id={"tournament-stream-links-form-#{index}"}
+              phx-change="update-stream-link"
+              phx-submit="push-enter"
+              class="mb-2"
+            >
+              <%= hidden_input(f, :index, value: index) %>
+              <div class="flex items-center">
+                <.form_text_input
+                  form={f}
+                  field={:user_input}
+                  phx-debounce={10}
+                  disabled={@cancelled}
+                />
+
+                <div
+                  id={"remove-stream-link-button-#{index}"}
+                  phx-click={unless @cancelled, do: "remove-stream-link"}
+                  phx-value-index={index}
+                  class={if @cancelled, do: "opacity-70"}
+                >
+                  <.svg icon={:x} width="20" height="20" class="fill-grey-light" />
+                </div>
+              </div>
+              <.form_feedback form={f} field={:user_input} />
+            </.form>
+          <% end %>
+
+          <div class="flex justify-end px-4">
+            <div
+              id="add-sml-changeset-button"
+              class={[
+                "flex items-center mt-1 text-primary",
+                if(@cancelled, do: "opacity-70 cursor-default", else: "cursor-pointer")
+              ]}
+              phx-click={unless @cancelled, do: "add-stream-link"}
+            >
+              <span class="mr-1">
+                Add another
+              </span>
+
+              <.svg icon={:add_fill} width="20" height="20" class="fill-primary" />
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-6">
+          <label class="mb-0 text-white">Tournament Admins</label>
+          <%= for {mgmt_changeset, index} <- Enum.with_index(@mgmt_changesets) do %>
+            <div
+              :if={mgmt_changeset.action != :delete}
+              id={
+                if mgmt_changeset.action == :insert,
+                  do: "new-admin-#{mgmt_changeset.changes.user_id}",
+                  else: "existing-admin-#{mgmt_changeset.data.id}"
+              }
+              class="flex items-center my-1 gap-x-4"
+            >
+              <.image
+                id={"tournament-management-personnel-search-result-user-avatar-#{mgmt_changeset.data.id}"}
+                image_url={mgmt_changeset.data.user.avatar_url}
+                alt="logo"
+                class="rounded-full"
+                width={50}
+                height={50}
+              />
+              <div>
+                <%= mgmt_changeset.data.user.display_name %>
+              </div>
+              <div
+                id={"remove-mgmt-#{mgmt_changeset.data.id}"}
+                phx-click={unless @cancelled, do: "remove-mgmt"}
+                phx-value-index={index}
+                class={
+                  if @cancelled,
+                    do: "opacity-50",
+                    else: "cursor-pointer opacity-70 hover:opacity-100"
+                }
+                title="Remove admin"
+              >
+                <.svg icon={:x} width="20" height="20" class="fill-grey-light" />
+              </div>
+              <div class="text-secondary">
+                <%= Strident.ChangesetUtils.error_codes_string(mgmt_changeset) %>
+              </div>
+            </div>
+          <% end %>
+
+          <.form
+            :let={f}
+            for={@form}
+            id="tournament-management-personnel-search-form"
+            phx-change="search-users-for-mgmt"
+          >
+            <div class="mt-6">
+              <.form_label
+                form={f}
+                field={:user_input}
+                label="Add another tournament admin"
+                class="mb-0 text-grey-light"
+              />
+              <.form_text_input
+                placeholder="Search for Stride users by their 'display name'"
+                form={f}
+                field={:user_input}
+                phx-debounce={1000}
+                disabled={@cancelled}
+              />
+              <.form_feedback form={f} field={:user_input} />
+              <div id="tournament-management-personnel-search-results">
+                <div
+                  :for={user <- @mgmt_search_results}
+                  class="flex items-center p-2 mx-2 cursor-pointer gap-x-4 bg-grey-medium border-1 border-primary opacity-70 hover:opacity-100"
+                  title={"Add new tournament admin #{user.display_name}"}
+                  id={"tournament-management-personnel-search-result-" <> user.id}
+                  phx-click="add-mgmt"
+                  phx-value-user-id={user.id}
+                >
+                  <.image
+                    id={"tournament-management-personnel-search-result-user-avatar-#{user.id}"}
+                    image_url={user.avatar_url}
+                    alt="logo"
+                    class="rounded-full"
+                    width={40}
+                    height={40}
+                  />
+                  <div>
+                    <%= user.display_name %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </.form>
+        </div>
+      </div>
+    </div>
+  </.socket_suspense>
+</div>

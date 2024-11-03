@@ -1,0 +1,35 @@
+@layer components {
+  .profile-cover {
+    @apply h-[420px] bg-cover bg-center flex items-end mb-12;
+    background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0, #000000),
+      linear-gradient(to bottom, rgba(25, 24, 32, 0.7) 0, rgba(25, 24, 32, 0.7)),
+      var(--cover-image-url);
+  }
+  .profile-background {
+    @apply min-h-[480px] max-h-[720px] w-full bg-grey-medium absolute overflow-hidden;
+  }
+  .diagonal-border {
+    @apply h-[500px] bg-blackish border-primary border-t-4 w-full mt-[180px]  md:mt-[375px] absolute;
+    transform: skewY(-3deg);
+  }
+
+  .profile-menu > h5:not(.link)::after {
+    @apply w-full h-0.5 bg-primary absolute bottom-0 left-0 -mb-1 rounded-full translate-y-1/2;
+    content: ' ';
+    box-shadow: 0px -2px 6px var(--color-primary);
+  }
+
+  @media (min-width: 768px) {
+    .socials-grid {
+      direction: rtl;
+    }
+  }
+
+  .scroll.scroll-left {
+    @apply -translate-x-[100vw];
+  }
+
+  .scroll.scroll-right {
+    @apply translate-x-[100vw];
+  }
+}

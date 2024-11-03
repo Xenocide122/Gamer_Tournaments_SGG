@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="41" height="31" viewBox="0 0 41 31">
+  <defs>
+    <filter id="Icon_awesome-money-bill-alt" x="0" y="0" width="41" height="31" filterUnits="userSpaceOnUse">
+      <feOffset input="SourceAlpha"/>
+      <feGaussianBlur stdDeviation="2.5" result="blur"/>
+      <feFlood flood-color="#03d5fb"/>
+      <feComposite operator="in" in2="blur"/>
+    </filter>
+    <filter id="Icon_awesome-money-bill-alt-2" x="0" y="0" width="41" height="31" filterUnits="userSpaceOnUse">
+      <feOffset input="SourceAlpha"/>
+      <feGaussianBlur stdDeviation="2" result="blur-2"/>
+      <feFlood flood-color="#03d5fb" result="color"/>
+      <feComposite operator="out" in="SourceGraphic" in2="blur-2"/>
+      <feComposite operator="in" in="color"/>
+      <feComposite operator="in" in2="SourceGraphic"/>
+    </filter>
+  </defs>
+  <g data-type="innerShadowGroup">
+    <g transform="matrix(1, 0, 0, 1, 0, 0)" filter="url(#Icon_awesome-money-bill-alt)">
+      <path id="Icon_awesome-money-bill-alt-3" data-name="Icon awesome-money-bill-alt" d="M13.75,13.25h-.625V9.812a.312.312,0,0,0-.313-.312h-.53a.936.936,0,0,0-.52.157l-.6.4a.312.312,0,0,0-.087.433l.347.52a.312.312,0,0,0,.433.087l.018-.012V13.25H11.25a.312.312,0,0,0-.312.312v.625a.312.312,0,0,0,.313.312h2.5a.312.312,0,0,0,.313-.312v-.625A.312.312,0,0,0,13.75,13.25Zm10-8.75H1.25A1.25,1.25,0,0,0,0,5.75v12.5A1.25,1.25,0,0,0,1.25,19.5h22.5A1.25,1.25,0,0,0,25,18.25V5.75A1.25,1.25,0,0,0,23.75,4.5ZM1.875,17.625v-2.5a2.5,2.5,0,0,1,2.5,2.5Zm0-8.75v-2.5h2.5A2.5,2.5,0,0,1,1.875,8.875Zm10.625,7.5c-2.071,0-3.75-1.959-3.75-4.375s1.679-4.375,3.75-4.375S16.25,9.584,16.25,12,14.57,16.375,12.5,16.375Zm10.625,1.25h-2.5a2.5,2.5,0,0,1,2.5-2.5Zm0-8.75a2.5,2.5,0,0,1-2.5-2.5h2.5Z" transform="translate(8 3.5)" fill="none" stroke="#03d5fb" stroke-width="1"/>
+    </g>
+    <g transform="matrix(1, 0, 0, 1, 0, 0)" filter="url(#Icon_awesome-money-bill-alt-2)">
+      <path id="Icon_awesome-money-bill-alt-4" data-name="Icon awesome-money-bill-alt" d="M13.75,13.25h-.625V9.812a.312.312,0,0,0-.313-.312h-.53a.936.936,0,0,0-.52.157l-.6.4a.312.312,0,0,0-.087.433l.347.52a.312.312,0,0,0,.433.087l.018-.012V13.25H11.25a.312.312,0,0,0-.312.312v.625a.312.312,0,0,0,.313.312h2.5a.312.312,0,0,0,.313-.312v-.625A.312.312,0,0,0,13.75,13.25Zm10-8.75H1.25A1.25,1.25,0,0,0,0,5.75v12.5A1.25,1.25,0,0,0,1.25,19.5h22.5A1.25,1.25,0,0,0,25,18.25V5.75A1.25,1.25,0,0,0,23.75,4.5ZM1.875,17.625v-2.5a2.5,2.5,0,0,1,2.5,2.5Zm0-8.75v-2.5h2.5A2.5,2.5,0,0,1,1.875,8.875Zm10.625,7.5c-2.071,0-3.75-1.959-3.75-4.375s1.679-4.375,3.75-4.375S16.25,9.584,16.25,12,14.57,16.375,12.5,16.375Zm10.625,1.25h-2.5a2.5,2.5,0,0,1,2.5-2.5Zm0-8.75a2.5,2.5,0,0,1-2.5-2.5h2.5Z" transform="translate(8 3.5)" fill="#fff"/>
+    </g>
+    <path id="Icon_awesome-money-bill-alt-5" data-name="Icon awesome-money-bill-alt" d="M13.75,13.25h-.625V9.812a.312.312,0,0,0-.313-.312h-.53a.936.936,0,0,0-.52.157l-.6.4a.312.312,0,0,0-.087.433l.347.52a.312.312,0,0,0,.433.087l.018-.012V13.25H11.25a.312.312,0,0,0-.312.312v.625a.312.312,0,0,0,.313.312h2.5a.312.312,0,0,0,.313-.312v-.625A.312.312,0,0,0,13.75,13.25Zm10-8.75H1.25A1.25,1.25,0,0,0,0,5.75v12.5A1.25,1.25,0,0,0,1.25,19.5h22.5A1.25,1.25,0,0,0,25,18.25V5.75A1.25,1.25,0,0,0,23.75,4.5ZM1.875,17.625v-2.5a2.5,2.5,0,0,1,2.5,2.5Zm0-8.75v-2.5h2.5A2.5,2.5,0,0,1,1.875,8.875Zm10.625,7.5c-2.071,0-3.75-1.959-3.75-4.375s1.679-4.375,3.75-4.375S16.25,9.584,16.25,12,14.57,16.375,12.5,16.375Zm10.625,1.25h-2.5a2.5,2.5,0,0,1,2.5-2.5Zm0-8.75a2.5,2.5,0,0,1-2.5-2.5h2.5Z" transform="translate(8 3.5)" fill="none" stroke="#03d5fb" stroke-width="1"/>
+  </g>
+</svg>

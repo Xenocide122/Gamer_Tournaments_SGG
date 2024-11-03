@@ -1,0 +1,246 @@
+<div class="overflow-x-hidden">
+  <section class="mt-16 md:mt-24 lg:mt-24 md:h-auto lg:bg-[length:100%] xl:h-max bg-center bg-top bg-[length:200%] bg-no-repeat flex items-start ">
+    <div class="container uppercase px-5 max-w-full  bg-gradient-to-b from-transparent from-10% via-[#000d1f00] via-36% via-[#000d1f4d] to-[#000d1f] to-90%">
+      <div class="relative bg-gradient-to-b from-transparent ">
+        <div class="flex justify-center">
+          <img class="" src={safe_static_url("/images/strident-hero.png")} />
+        </div>
+        <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-transparent from-95% via-transparent to-blackish">
+        </div>
+      </div>
+      <h1 class="relative mb-5 text-4xl text-center uppercase font-display md:text-7xl mt-[-10%] lg:mt-[-14%] md:mb-10">
+        The <span class="text-primary font-bold">Premium</span> Tournament Solution
+      </h1>
+
+      <div class="flex flex-col md:flex-row justify-center gap-x-4 md:gap-x-16 text-center font-display text-3xl md:text-4xl mb-16 drop-shadow-[0_0_20px_var(--color-primary)]">
+        <span>Giveaways & Rewards</span>
+        <span>Free entry</span>
+        <span>Minecraft Events</span>
+      </div>
+
+      <div class="relative flex items-center justify-center space-x-6 md:space-x-10 mb-14">
+        <.link
+          navigate={Routes.tournament_index_path(@socket, :index)}
+          class="font-bold px-2 md:px-4 py-3 text-base !no-underline uppercase border-white border-2 rounded-lg btn--primary font-display md:text-3xl text-center align-center"
+        >
+          Explore Tournaments
+        </.link>
+        <.link
+          navigate={
+            if !!@current_user, do: ~p"/user/#{@current_user.slug}", else: ~p"/users/log_in"
+          }
+          class="font-bold px-2 md:px-4 py-3 text-base !no-underline uppercase border-white border-2 rounded-lg btn--primary-dark font-display md:text-3xl text-center align-center"
+        >
+          Create your profile
+        </.link>
+      </div>
+    </div>
+  </section>
+
+  <section :if={Enum.any?(@featured_tournaments)} class="relative pb-14 md:py-16">
+    <div class="md:container">
+      <div class="font-display font-bold uppercase text-2xl md:text-4xl mb-4 md:mb-12 px-4 md:px-0 md:text-center">
+        Featured Events
+      </div>
+
+      <div class="flex flex-col-reverse md:flex-row w-96 md:w-full m-auto gap-x-4">
+        <div class="flex justify-center gap-x-2 mt-6 md:mt-0 md:block md:w-5/12">
+          <div
+            :for={tournament <- @featured_tournaments}
+            phx-click="select-featured-tournament"
+            phx-value-featured-tournament-id={tournament.id}
+            class={[
+              "h-1/5 overflow-hidden",
+              "rounded-xl border border-4",
+              if(
+                !!@selected_featured_tournament &&
+                  tournament.id == @selected_featured_tournament.id,
+                do: "border-primary",
+                else: "border-transparent"
+              )
+            ]}
+          >
+            <div class={[
+              "block md:hidden",
+              "rounded-full w-6 h-6 border border-2 border-grey-light h-full",
+              if(
+                !!@selected_featured_tournament &&
+                  tournament.id == @selected_featured_tournament.id,
+                do: "bg-primary",
+                else: "slider-nav-default"
+              )
+            ]}>
+            </div>
+            <div
+              class={[
+                "hidden md:block",
+                "text-left h-full px-4 overflow-hidden bg-blackish bg-center bg-cover cursor-pointer",
+                if(
+                  !!@selected_featured_tournament &&
+                    tournament.id == @selected_featured_tournament.id,
+                  do: "rounded-none",
+                  else: "rounded-lg"
+                )
+              ]}
+              style={"background-image: linear-gradient(90deg, black, transparent 100%), url(#{imgproxy_url(tournament.cover_image_url || tournament.game.default_game_banner_url, width: 2048, height: 1024, resize: :fit, enlarge: false)})"}
+              phx-click="select-featured-tournament"
+              phx-value-featured-tournament-id={tournament.id}
+            >
+              <div class="container flex flex-col items-start justify-center h-full md:items-center md:space-x-4 md:flex-row md:justify-start">
+                <div class="flex-none text-2xl uppercase"><%= tournament.title %></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="grow">
+          <.link navigate={~p"/t/#{@selected_featured_tournament.slug}"} class="w-full">
+            <div
+              class="relative w-full h-80 md:h-128 overflow-hidden bg-center bg-cover bg-no-repeat bg-grey-medium border border-primary border-2 rounded-md"
+              style={"background-image: linear-gradient(0deg, black, transparent 100%), url(#{imgproxy_url(@selected_featured_tournament.cover_image_url || @selected_featured_tournament.game.default_game_banner_url, width: 2048, height: 1024, resize: :fit, enlarge: false)})"}
+            >
+              <div class="absolute md:block bottom-0 left-0 md:bottom-12 md:left-12 w-full px-3">
+                <div class="font-display uppercase transition-property-[transform] duration-300 origin-top-left mb-4">
+                  <span class={[
+                    "text-4xl",
+                    if(@selected_featured_tournament.thumbnail_image_url,
+                      do: "line-clamp-1",
+                      else: "line-clamp-2"
+                    )
+                  ]}>
+                    <%= @selected_featured_tournament.title %>
+                  </span>
+                </div>
+                <div class="flex md:space-x-1.5 w-full transition-property-[opacity] duration-200 opacity-100 md:text-xl text-light gap-x-2 italic uppercase">
+                  <div class="hidden md:block truncate">
+                    <%= @selected_featured_tournament.game.title %>
+                  </div>
+                  <div class="hidden md:block">
+                    &bull;
+                  </div>
+                  <div class="flex-shrink truncate">
+                    <.localised_datetime
+                      datetime={@selected_featured_tournament.starts_at}
+                      timezone={@timezone}
+                      locale={@locale}
+                    />
+                  </div>
+                  <div :if={@selected_featured_tournament.is_scrim}>&bull;</div>
+                  <div :if={@selected_featured_tournament.is_scrim}>
+                    [Scrim]
+                  </div>
+                  <div>&bull;</div>
+                  <div :if={Money.positive?(@selected_featured_tournament_total_prize_pool)}>
+                    <%= @selected_featured_tournament_total_prize_pool %> Prize Pool
+                  </div>
+                  <div :if={Money.zero?(@selected_featured_tournament_total_prize_pool)}>
+                    No Prize Pool
+                  </div>
+                </div>
+              </div>
+            </div>
+          </.link>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section :if={Enum.any?(@incipient_tournaments)}>
+    <div class="md:container">
+      <div class="flex items-center justify-between text-center mb-4 md:mb-6 md:text-left px-5 md:px-0">
+        <div class="font-display font-bold uppercase text-2xl md:text-4xl">Starting Soon</div>
+        <.link navigate={Routes.tournament_index_path(@socket, :index)} class="text-primary">
+          Browse all tournaments
+        </.link>
+      </div>
+      <div class="hidden md:grid sm:grid-cols-2 lg:grid-cols-4 md:gap-x-10">
+        <.live_component
+          :for={tournament <- @incipient_tournaments}
+          id={"tournament-hover-#{tournament.id}"}
+          module={StridentWeb.Components.Tournaments.HoverTournamentCard}
+          tournament={tournament}
+          timezone={@timezone}
+          locale={@locale}
+          allow_hover_default={true}
+        />
+      </div>
+      <div class="block md:hidden h-[332px] w-96 m-auto">
+        <.live_component
+          :for={
+            tournament <-
+              Enum.filter(@incipient_tournaments, &(&1.id == @selected_incipient_tournament_id))
+          }
+          id={"tournament-sm-hover-#{tournament.id}"}
+          module={StridentWeb.Components.Tournaments.HoverTournamentCard}
+          tournament={tournament}
+          timezone={@timezone}
+          locale={@locale}
+          allow_hover_default={true}
+        />
+      </div>
+      <div class="flex justify-center gap-x-2 mt-4 md:mt-0 md:block md:w-5/12 md:space-y-4">
+        <div
+          :for={tournament <- @incipient_tournaments}
+          phx-click="select-incipient-tournament"
+          phx-value-incipient-tournament-id={tournament.id}
+          class="block md:hidden"
+        >
+          <div class={[
+            "rounded-full w-6 h-6 border border-2 border-grey-light",
+            if(
+              !!@selected_incipient_tournament_id &&
+                tournament.id == @selected_incipient_tournament_id,
+              do: "bg-primary",
+              else: "bg-greyish"
+            )
+          ]}>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-14 md:py-8">
+    <div class="md:container relative">
+      <div class="flex items-center justify-between mb-4 md:mb-12 md:flex-row px-4 md:px-0">
+        <div class="font-display font-bold uppercase text-2xl md:text-4xl">Popular Games</div>
+        <.link navigate={Routes.tournament_index_path(@socket, :index)} class="hidden md:block">
+          Browse all games >
+        </.link>
+      </div>
+
+      <div class="relative grid grid-cols-2 mb-12 md:grid-cols-5 gap-x-6 gap-y-8 lg:gap-14 xl:gap-16 px-4 md:px-0">
+        <%= for game <- @popular_games do %>
+          <.link
+            navigate={Routes.tournament_index_path(@socket, :index, %{games: game.slug})}
+            class="rounded-[20px] overflow-hidden transition-transform hover:scale-110"
+          >
+            <img src={game.cover_image_url} alt={game.title} class="w-full h-auto" />
+          </.link>
+        <% end %>
+      </div>
+
+      <div class="text-center md:hidden">
+        <.link navigate={Routes.tournament_index_path(@socket, :index)}>
+          Browse all games >
+        </.link>
+      </div>
+    </div>
+  </section>
+
+  <section class="px-4">
+    <div class="font-display text-2xl md:text-4xl mb-4 md:mb-16 text-center font-bold uppercase">
+      <div class="hidden md:block underline decoration-primary underline-offset-32">
+        <%= "Stride's Minecraft Offerings" %>
+      </div>
+      <div class="block md:hidden">
+        <%= "Minecraft Offerings" %>
+      </div>
+    </div>
+    <.live_component
+      id="minecraft-offerings"
+      module={StridentWeb.HomeLive.MinecraftOfferings}
+      timezone={@timezone}
+      locale={@locale}
+    />
+  </section>
+</div>

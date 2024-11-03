@@ -1,0 +1,155 @@
+<div id="create-tournament" class="container flex items-center px-0 py-2 mx-auto mb-10 max-w-7xl">
+  <.form
+    :let={f}
+    id="create-tournament-form"
+    for={@changeset}
+    phx-change="change"
+    phx-submit="do-nothing"
+    class="w-full pb-20 mt-20 xl:flex xl:mt-32 gap-x-24"
+  >
+    <%= unless @current_page in [:landing, :custom_tournament, :tournament_type] do %>
+      <.live_component
+        id="create-tournament-page-progress-component"
+        module={PageProgress}
+        changeset={@changeset}
+        current_page={@current_page}
+        pages={@pages}
+        timezone={@timezone}
+        locale={@locale}
+      />
+    <% end %>
+
+    <div class="w-full">
+      <%= case @current_page do %>
+        <% :landing -> %>
+          <.live_component
+            id="create-tournament-landing-component"
+            module={Landing}
+            saved_forms={@saved_forms}
+            timezone={@timezone}
+            locale={@locale}
+          />
+        <% :tournament_type -> %>
+          <.live_component
+            id="create-tournament-tournament-type-component"
+            module={TournamentTypePage}
+            f={f}
+            stages_structure={@stages_structure}
+          />
+        <% :stages -> %>
+          <.live_component
+            id="create-tournament-stages-component"
+            module={BracketsStructurePage}
+            f={f}
+            stages={Changeset.get_field(@changeset, :stages)}
+            stages_structure={@stages_structure}
+            timezone={@timezone}
+            locale={@locale}
+          />
+        <% :tournament_info -> %>
+          <.live_component
+            id="create-tournament-tournament-info-component"
+            module={TournamentInfoPage}
+            f={f}
+            tournament_type={Changeset.get_field(@changeset, :tournament_type)}
+            stages_structure={@stages_structure}
+            tournament_info={Changeset.get_field(@changeset, :tournament_info)}
+            stages={Changeset.get_field(@changeset, :stages)}
+            games={@games}
+            platforms={@platforms}
+            prize_strategies={@prize_strategies}
+            locations={@locations}
+            timezone={@timezone}
+            locale={@locale}
+            can_stake={@can_stake}
+            can_play={@can_play}
+            current_user={@current_user}
+            ip_location={@ip_location}
+          />
+        <% :invites -> %>
+          <.live_component
+            id="create-tournament-invites-component"
+            module={Invites}
+            f={f}
+            stages_structure={@stages_structure}
+            invites={Changeset.get_field(@changeset, :invites)}
+            timezone={@timezone}
+            locale={@locale}
+          />
+        <% :confirmation -> %>
+          <.live_component
+            id="create-tournament-confirmation-component"
+            module={Confirmation}
+            f={f}
+            tournament_type={Changeset.get_field(@changeset, :tournament_type)}
+            stages_structure={@stages_structure}
+            stages={Changeset.get_field(@changeset, :stages)}
+            tournament_info={Changeset.get_field(@changeset, :tournament_info)}
+            invites={Changeset.get_field(@changeset, :invites)}
+            confirmation={Changeset.get_field(@changeset, :confirmation)}
+            games={@games}
+            platforms={@platforms}
+            locations={@locations}
+            invited_users={@invited_users}
+            timezone={@timezone}
+            locale={@locale}
+          />
+        <% :payment -> %>
+          <.live_component
+            id="create-tournament-payment-component"
+            module={Payment}
+            f={f}
+            tournament_info={Changeset.get_field(@changeset, :tournament_info)}
+            timezone={@timezone}
+            locale={@locale}
+          />
+        <% :custom_tournament -> %>
+          <.live_component
+            id="custom-tournament"
+            module={CustomTournament}
+            timezone={@timezone}
+            locale={@locale}
+          />
+      <% end %>
+
+      <%= unless @current_page in [:landing, :custom_tournament] do %>
+        <.live_component
+          id="create-tournament-page-nav-buttons"
+          module={PageNavButtons}
+          current_user={@current_user}
+          changeset={@changeset}
+          current_page={@current_page}
+          timezone={@timezone}
+          locale={@locale}
+        />
+      <% end %>
+    </div>
+  </.form>
+  <%= if @show_confirmation do %>
+    <.live_component
+      id="create-tournament-confirmation"
+      module={StridentWeb.Components.Confirmation}
+      confirm_event={@confirmation_confirm_event}
+      message={@confirmation_message}
+      confirm_prompt={@confirmation_confirm_prompt}
+      cancel_prompt={@confirmation_cancel_prompt}
+      timezone={@timezone}
+      locale={@locale}
+    />
+  <% end %>
+  <div
+    id="spinner"
+    class="hidden"
+    js-trigger-close-spinner
+    js-action-close-spinner={JS.hide(to: "#spinner")}
+    js-trigger-show-spinner
+    js-action-show-spinner={JS.show(to: "#spinner")}
+  >
+    <.live_component
+      id="rego-spinner"
+      current_user={@current_user}
+      module={StridentWeb.Components.FullPageSpinner}
+      message=""
+    />
+  </div>
+</div>

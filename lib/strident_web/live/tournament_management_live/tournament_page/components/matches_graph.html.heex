@@ -1,0 +1,167 @@
+<div>
+  <%= if @enable_seeding do %>
+    <div
+      id="toggle-show-seeding-button"
+      phx-click="toggle-show-seeding"
+      phx-target={@myself}
+      class="cursor-pointer text-primary py-4 px-2 hover:underline"
+    >
+      <%= if @show_seeding do %>
+        Show Matches Graph
+      <% else %>
+        Show Seeding
+      <% end %>
+    </div>
+  <% end %>
+  <%= if @show_seeding do %>
+    <.live_component
+      id={"bracket-seeding--#{@stage_id}"}
+      module={StridentWeb.BracketLive.BracketSeedingLive}
+      current_user={@current_user}
+      can_manage_tournament={@can_manage_tournament}
+      tournament_id={@tournament_id}
+      stage_id={@stage_id}
+      tournament_slug={@tournament_slug}
+      tournament_status={@tournament_status}
+      all_participant_details={@all_participant_details}
+      timezone={@timezone}
+      locale={@locale}
+      debug_mode={@debug_mode}
+    />
+  <% else %>
+    <div id={"matches-graph-container-#{@stage_id}"} class="matches-graph-container">
+      <div id={"matches-graph-panel-#{@stage_id}"} class="matches-graph-panel">
+        <.flash
+          id={"matches-graph-flash-#{@stage_id}"}
+          flash={@flash}
+          myself={@myself}
+          lifespan_info={2000}
+          lifespan_error={5000}
+          class="fixed !top-20"
+        />
+
+        <div
+          phx-hook="MatchesGraph"
+          id={"matches-graph-#{@stage_id}"}
+          class="matches-graph"
+          phx-update="ignore"
+          phx-target={@myself}
+          data-can-manage-tournament={if @can_manage_tournament, do: "true", else: nil}
+          data-myself={@myself}
+          data-debug-mode={if @debug_mode, do: "true", else: nil}
+        >
+        </div>
+
+        <div
+          id={"matches-graph-#{@stage_id}-toolbar"}
+          class="absolute top-[1px] right-[1px] flex bg-blackish"
+        >
+          <div
+            class="p-2 border cursor-pointer text-grey-light border-grey-light"
+            title="Zoom to fit"
+            phx-click="zoom-to-fit"
+            phx-target={@myself}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-6 h-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d={StridentWeb.Common.SvgUtils.path(:refresh)}
+              />
+            </svg>
+          </div>
+          <div
+            class="p-2 border cursor-pointer text-grey-light border-grey-light"
+            title="Zoom in"
+            phx-click="zoom-in"
+            phx-target={@myself}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d={StridentWeb.Common.SvgUtils.path(:zoom_in)}
+              >
+              </path>
+            </svg>
+          </div>
+          <div
+            class="p-2 border cursor-pointer text-grey-light border-grey-light"
+            title="Zoom out"
+            phx-click="zoom-out"
+            phx-target={@myself}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d={StridentWeb.Common.SvgUtils.path(:zoom_out)}
+              >
+              </path>
+            </svg>
+          </div>
+        </div>
+
+        <%= if @show_confirmation do %>
+          <.live_component
+            id="matches-graph-confirmation"
+            module={StridentWeb.Components.Confirmation}
+            target={@myself}
+            confirm_event={@confirmation_confirm_event}
+            confirm_values={@confirmation_confirm_values}
+            message={@confirmation_message}
+            timezone={@timezone}
+            locale={@locale}
+          />
+        <% end %>
+
+        <%= if @can_manage_tournament and @tournament_status in [:scheduled, :registrations_open, :registrations_closed] and @has_first_round_bye_matches do %>
+          <div class="absolute flex items-center top-5 left-5 bg-blackish/0">
+            <div class="text-primary">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="w-10 h-10"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d={StridentWeb.Common.SvgUtils.path(:exclamation)}
+                />
+              </svg>
+            </div>
+            <div class="text-sm text-primary">
+              You have empty bracket matches. Any participants without an opponent will receive a bye for the round.
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>

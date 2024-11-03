@@ -1,0 +1,40 @@
+<div class="relative w-full h-full">
+  <.link navigate={@tournament_link_to} class="w-full h-full">
+    <div
+      class="absolute top-0 bottom-0 left-0 right-0 w-full h-full overflow-hidden transition bg-blackish bg-center bg-cover"
+      style={
+  "background-image: url(#{imgproxy_url(@tournament.cover_image_url || @tournament.game.default_game_banner_url, width: 2048, height: 1024, resize: :fit, enlarge: false)})"
+  }
+      x-bind="cardBackground"
+    >
+    </div>
+    <div
+      class="absolute bottom-[0px] md:bottom-[20px] md:bottom-0 left-0 right-0 h-[132px] md:h-16 p-1 z-[4] w-full"
+      x-bind="cardText"
+    >
+      <div class="container flex flex-col items-start justify-center h-full md:items-center md:space-x-4 md:flex-row md:justify-start p-2">
+        <h1 class="flex w-full text-4xl uppercase justify-center md:justify-start">
+          <%= @tournament.title %>
+        </h1>
+        <div class="flex w-full justify-center flex-col md:flex-row md:justify-start items-center flex-wrap md:h-full md:space-x-4">
+          <div class="flex-shrink truncate">
+            <%= @tournament.game.title %>
+          </div>
+          <div class="flex-shrink text-clip hidden md:block">
+            &bull;
+          </div>
+          <div class="flex-shrink truncate">
+            <.localised_datetime
+              datetime={@tournament.starts_at}
+              timezone={@timezone}
+              locale={@locale}
+            />
+          </div>
+          <div class="flex-shrink text-clip hidden md:block">
+            &bull;
+          </div>
+        </div>
+      </div>
+    </div>
+  </.link>
+</div>

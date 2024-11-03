@@ -1,0 +1,199 @@
+<div id={"tournament-bracket-and-seeding-#{@tournament.id}"} class="px-8">
+  <div class="min-h-[10vh]"></div>
+  <section class="mt-8 mb-8">
+    <div class="flex flex-col">
+      <div class="">
+        <div class="flex flex-col justify-start gap-2">
+          <h1>
+            Brackets and Seeding
+          </h1>
+        </div>
+      </div>
+    </div>
+    <div
+      :if={
+        not Tournaments.can_start?(@tournament) and
+          @tournament.status in [:registrations_closed]
+      }
+      class="flex flex-col"
+    >
+      <.card class="border border-secondary text-lg">
+        You are unable to start the tournament, you may not have enough participants or you might not have covered your prize pool
+      </.card>
+    </div>
+  </section>
+
+  <div :if={@can_manage_tournament} id="admin-controls" class="">
+    <section class="">
+      <div class="flex flex-col lg:flex-row justify-between">
+        <div class="mb-8 md:mb-4">
+          <div class="flex flex-col justify-start">
+            <h2 class="uppercase">
+              <%= @tournament.title %>
+            </h2>
+          </div>
+        </div>
+        <div class="">
+          <div class="flex flex-col md:flex-row justify-items-center gap-2">
+            <.button
+              :if={@tournament.status == :scheduled}
+              id={"open-registrations-button-#{@tournament.id}"}
+              button_type={:primary}
+              phx-click="open-registrations-clicked"
+            >
+              Open Registrations
+            </.button>
+            <.button
+              :if={@tournament.status == :registrations_open}
+              id={"close-registrations-button-#{@tournament.id}"}
+              button_type={:primary}
+              phx-click="close-registrations-clicked"
+              disabled={
+                Enum.count(
+                  @tournament.participants,
+                  &(&1.status in [:confirmed, :chip_in_to_entry_fee])
+                ) < 3
+              }
+            >
+              Close Registrations
+            </.button>
+            <.button
+              :if={@tournament.status == :registrations_closed}
+              id={"start-tournament-button-#{@tournament.id}"}
+              button_type={:primary}
+              disabled={not Tournaments.can_start?(@tournament)}
+              phx-click="start-tournament-clicked"
+            >
+              Start Tournament
+            </.button>
+            <div
+              :if={@show_restart_tournament_button and @tournament.status not in [:finished]}
+              class=""
+            >
+              <div class="flex">
+                <.live_component
+                  module={StridentWeb.Components.ClickableTooltip}
+                  id="matches-regeneration-explanation-tooltip"
+                  text={"""
+                  What does the Regenerate Matches button do?
+
+                  1. Deletes all your matches
+                  2. Creates brand new matches.
+                  3. Does NOT include dropped participants.
+                  4. Uses the Seeding ladder to determine first-round match pairings
+                  5. Attempts to mimic deleted first-round pairings
+                  """}
+                  class="mt-3"
+                  modal_class="right-0"
+                />
+                <.button
+                  :if={@show_restart_tournament_button and @tournament.status not in [:finished]}
+                  id={"restart-tournament-button-#{@tournament.id}"}
+                  button_type={:primary}
+                  phx-click="restart-tournament-clicked"
+                >
+                  Regenerate Matches
+                </.button>
+              </div>
+            </div>
+
+            <.button
+              :if={@tournament.status == :under_review and @can_manage_tournament}
+              id="finish-tournament-button"
+              button_type={:primary}
+              phx-click="finish-tournament-clicked"
+            >
+              Distribute prizes
+            </.button>
+
+            <.button
+              :if={
+                @tournament.status in [:hide_cancel_button_temporarily] and
+                  @can_manage_tournament
+              }
+              id="cancel-tournament-button"
+              button_type={:secondary}
+              phx-click="cancel-tournament-clicked"
+            >
+              Cancel tournament
+            </.button>
+            <%= if not is_nil(@stage) do %>
+              <.button
+                :if={
+                  @stage.status == :requires_tiebreaking and
+                    @stage.type in [:single_elimination, :double_elimination]
+                }
+                id={"manually-finish-stage-#{@stage.id}-button"}
+                phx-click="manually-finish-stage-clicked"
+                button_type={:primary}
+                phx-value-stage-id={@stage.id}
+              >
+                Resolve ties and finalize results
+              </.button>
+            <% end %>
+          </div>
+        </div>
+      </div>
+      <div class="flex flex-col mb-4">
+        <span :if={@tournament.status == :scheduled}>
+          Your tournament is not open for registration yet. Now is a good time to review the details/settings and make sure everything is correct.
+        </span>
+        <span :if={
+          @tournament.status == :registrations_open and @tournament.type == :casting_call
+        }>
+          Registrations are open! Participants can register for your tournament. When you want to close registrations, click the button below. Button is disabled until at least 3 participants are confirmed.
+        </span>
+        <span :if={@tournament.status == :registrations_open and @tournament.type == :invite_only}>
+          Registrations are open. You can invite/drop participants and they can accept/refuse your invitations. When you want to close registrations, click the button below. Button is disabled until at least 3 participants are confirmed.
+        </span>
+        <span :if={@tournament.status == :registrations_closed}>
+          Registrations are closed. This is your chance to review first-round pairings and make any final tweaks. When you want to start the tournament, click the button below.
+        </span>
+        <%= if not is_nil(@stage) do %>
+          <span :if={
+            @stage.status == :requires_tiebreaking and
+              @stage.type in [:single_elimination, :double_elimination]
+          }>
+            This stage has tied participants. Please manually order participant places.
+          </span>
+        <% end %>
+      </div>
+
+      <div class="">
+        <.live_component
+          :for={stage <- @tournament.stages}
+          :if={
+            @can_manage_tournament and stage.status in [:finished, :requires_tiebreaking] and
+              Enum.empty?(stage.child_edges)
+          }
+          id="stage-participant-placings-component"
+          module={StridentWeb.Components.StageParticipantPlacings}
+          current_user={@current_user}
+          tournament={@tournament}
+          stage={stage}
+          can_manage_tournament={@can_manage_tournament}
+        />
+      </div>
+
+      <div :if={@tournament.id == "ba82a82a-59a9-45c4-8bf5-1eea2e939efe"}>
+        <img class="mb-4" src="https://strident-games.s3.amazonaws.com/pool-1.png" />
+        <img class="mb-4" src="https://strident-games.s3.amazonaws.com/bracket-1.png" />
+        <img class="mb-4" src="https://strident-games.s3.amazonaws.com/bracket-2.png" />
+      </div>
+    </section>
+  </div>
+  <div :if={@tournament.id != "ba82a82a-59a9-45c4-8bf5-1eea2e939efe"}>
+    <%= live_render(
+      @socket,
+      StridentWeb.TournamentStage.Index,
+      id: "bracket-seeding-live",
+      session: %{
+        "current_user_id" => Map.get(@current_user || %{}, :id),
+        "slug" => @tournament.slug,
+        "timezone" => @timezone,
+        "locale" => @locale,
+        "debug_mode" => @debug_mode
+      }
+    ) %>
+  </div>
+</div>

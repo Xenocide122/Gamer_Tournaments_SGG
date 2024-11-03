@@ -1,0 +1,52 @@
+<div class={
+  if @position == :vertical, do: "flex flex-col", else: "grid grid-cols-1 md:grid-cols-2 gap-2"
+}>
+  <%= for player <- @players do %>
+    <%= if @position == :vertical do %>
+      <.link navigate={profile_path(player.user)} class="block">
+        <div class="card--slim card--colored mb-1">
+          <div class="bg-blackish card__inner p-4">
+            <div class="flex justify-left items-center space-x-2">
+              <div class="inline-block relative shrink-0 w-fit">
+                <img
+                  src={Strident.Accounts.avatar_url(player.user)}
+                  alt="Participant"
+                  class="w-16 h-16 rounded-full"
+                />
+
+                <%= if player.type == :captain do %>
+                  <div class="tournament-player-card__captain">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      width="18"
+                      height="18"
+                      fill="currentColor"
+                    >
+                      <path d={StridentWeb.Common.SvgUtils.path(:captain)}></path>
+                    </svg>
+                  </div>
+                <% end %>
+              </div>
+              <div class="w-fit min-w-0 text-left">
+                <p class="tournament-player-card__name text-primary">
+                  <%= player.user.display_name %>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </.link>
+    <% else %>
+      <div class="flex h-min items-center bg-grey-medium justify-between">
+        <img class="h-20 w-20 flex-none" src={player.user.avatar_url} />
+        <div class="flex-grow flex flex-col items-start p-3">
+          <.link navigate={profile_path(player.user)} class="block">
+            <h4 class="hover:underline"><%= player.user.display_name %></h4>
+          </.link>
+        </div>
+        <div class="shadow--right bg-primary h-20 w-0.5 flex-none"></div>
+      </div>
+    <% end %>
+  <% end %>
+</div>

@@ -1,0 +1,162 @@
+<div class="w-full">
+  <.flash flash={@flash} myself={@myself} />
+  <.form
+    :let={f}
+    for={@changeset}
+    id="social-media-form"
+    phx-target={@myself}
+    phx-submit="update-user-details"
+    phx-change="validate-social-media"
+  >
+    <div>I&apos;m a...</div>
+    <div class="flex items-center my-3">
+      <%= checkbox(f, :is_pro,
+        class: "h-4 w-4 text-primary focus:ring-indigo-500 border-gray-300 rounded"
+      ) %>
+      <.form_label form={f} field={:is_pro} label="Player" class="pl-2 mb-0 mr-6 select-none" />
+      <%= checkbox(f, :is_tournament_organizer,
+        class: "h-4 w-4 text-primary focus:ring-indigo-500 border-gray-300 rounded"
+      ) %>
+      <.form_label
+        form={f}
+        field={:is_tournament_organizer}
+        label="Tournament Organizer"
+        class="pl-2 mb-0 mr-6 select-none"
+      />
+
+      <%= checkbox(f, :is_caster,
+        class: "h-4 w-4 text-primary focus:ring-indigo-500 border-gray-300 rounded"
+      ) %>
+
+      <.form_label form={f} field={:is_caster} label="Caster" class="pl-2 mb-0 mr-6 select-none" />
+      <%= checkbox(f, :is_graphic_designer,
+        class: "h-4 w-4 text-primary focus:ring-indigo-500 border-gray-300 rounded"
+      ) %>
+      <.form_label
+        form={f}
+        field={:is_graphic_designer}
+        label="Graphic Designer"
+        class="pl-2 mb-0 mr-6 select-none"
+      />
+      <%= checkbox(f, :is_producer,
+        class: "h-4 w-4 text-primary focus:ring-indigo-500 border-gray-300 rounded"
+      ) %>
+      <.form_label
+        form={f}
+        field={:is_producer}
+        label="Producer"
+        class="pl-2 mb-0 mr-6 select-none"
+      />
+    </div>
+
+    <div class="my-5 divider--horizontal"></div>
+
+    <div class="grid md:grid-cols-2 gap-x-16">
+      <div class="form-group">
+        <.form_label form={f} field={:real_name} label="Name" />
+        <.form_text_input form={f} field={:real_name} />
+        <.form_feedback form={f} field={:real_name} />
+      </div>
+
+      <div class="form-group">
+        <.form_label form={f} field={:featured_team_id} />
+
+        <.form_select
+          form={f}
+          field={:featured_team_id}
+          values={my_teams(@current_user)}
+          selected={
+            (@current_user.team_user_feature && @current_user.team_user_feature.team_id) || ""
+          }
+          prompt="None"
+        />
+
+        <.form_feedback form={f} field={:featured_team_id} />
+      </div>
+
+      <div class="form-group">
+        <.form_label form={f} field={:location} />
+        <.form_text_input form={f} field={:location} />
+        <.form_feedback form={f} field={:location} />
+      </div>
+
+      <div class="form-group">
+        <.form_label form={f} field={:birthday} />
+        <.form_datetime_local_input
+          form={f}
+          field={:birthday}
+          timezone={@timezone}
+          notime
+          returndate
+        />
+        <.form_feedback form={f} field={:birthday} />
+      </div>
+
+      <div class="form-group">
+        <.form_label form={f} field={:social_media} label="Social Media" />
+        <%= if Enum.all?(inputs_for(f, :social_media_link_user), &Enum.all?(inputs_for(&1, :social_media_link), fn %{source: source} -> Changeset.get_field(source, :delete) end)) do %>
+          <span class="italic text-muted">
+            No social media accounts
+          </span>
+        <% end %>
+
+        <%= for i <- inputs_for(f, :social_media_link_user) do %>
+          <%= for x <- inputs_for(i, :social_media_link) do %>
+            <div class={
+              if Changeset.get_field(x.source, :delete),
+                do: "hidden",
+                else: "mb-2"
+            }>
+              <div class="flex items-center">
+                <.form_text_input
+                  form={x}
+                  field={:user_input}
+                  class="form-input"
+                  placeholder="e.g. twitter.com/Stride"
+                  phx-debounce="300"
+                />
+                <div class="hidden">
+                  <%= checkbox(x, :delete) %>
+                </div>
+                <div
+                  class="text-primary"
+                  phx-click="remove-social-media"
+                  phx-value-index={i.index}
+                  phx-target={@myself}
+                >
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                    <path d={StridentWeb.Common.SvgUtils.path(:x)} />
+                  </svg>
+                </div>
+              </div>
+              <%= if Map.has_key?(x.source.changes, :user_input) do %>
+                <span class="form-feedback--error invalid-feedback">
+                  <%= elem(Keyword.get(x.source.errors, :handle, {""}), 0) %>
+                </span>
+              <% end %>
+            </div>
+          <% end %>
+        <% end %>
+
+        <div class="flex justify-end">
+          <div
+            class="flex items-center text-primary"
+            phx-click="add-new-social-media"
+            phx-target={@myself}
+            style="cursor: pointer;"
+          >
+            <span class="mr-1">
+              Add another
+            </span>
+
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+              <path d={StridentWeb.Common.SvgUtils.path(:add_fill)} />
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%= submit("Save", class: "btn btn--primary uppercase text-center", id: "update") %>
+  </.form>
+</div>

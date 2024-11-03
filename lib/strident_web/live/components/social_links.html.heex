@@ -1,0 +1,13 @@
+<div class="flex gap-x-4">
+  <%= for social <- @social_media_links do %>
+    <%= link to: Strident.SocialMedia.url(social.brand, social.handle), class: "link", target: "_blank" do %>
+      <div class="">
+        <img
+          src={"https://strident-games.s3.amazonaws.com/brand-logo-#{social.brand}.svg"}
+          alt={social.brand}
+          class="w-12 h-12"
+        />
+      </div>
+    <% end %>
+  <% end %>
+</div>

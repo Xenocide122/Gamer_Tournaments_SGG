@@ -1,0 +1,143 @@
+<div>
+  <div class="block w-full">
+    <.flash id="stage-flash" flash={@flash} lifespan_info={4000} lifespan_error={5000} />
+
+    <div class="flex justify-start">
+      <.form
+        :let={f}
+        id="select-stage"
+        for={@form}
+        phx-change="change-stage"
+        phx-submit="do-nothing"
+        class={if(Enum.count(@tournament.stages) == 1, do: "", else: "min-w-[25%] py-8")}
+      >
+        <%= if Enum.count(@tournament.stages) == 1 do %>
+          <%= hidden_input(f, :stage, value: Enum.at(@tournament.stages, 0).type) %>
+        <% else %>
+          <.form_select
+            form={f}
+            field={:stage}
+            values={get_stages_from_links(@tournament.stages)}
+            selected={@selected_stage_type}
+            phx_debounce="300"
+          />
+        <% end %>
+      </.form>
+    </div>
+
+    <%= for stage <- Enum.sort_by(@tournament.stages, & &1.round), @selected_stage_type == stage.type or is_nil(@selected_stage_type) do %>
+      <.live_component
+        :if={Tournaments.can_manage_tournament?(@current_user, @tournament)}
+        id={"matches-with-discrepancy-reports-for-stage-#{stage.id}"}
+        module={StridentWeb.TournamentStage.Components.MatchDiscrepancyReports}
+        matches={stage.matches}
+        current_user={@current_user}
+        timezone={@timezone}
+        locale={@locale}
+      />
+
+      <div class="mt-8 mb-6">
+        <h3 class="capitalize text-primary">
+          <%= humanize(stage.type) %> Stage
+        </h3>
+      </div>
+
+      <div
+        :if={
+          Tournaments.can_manage_tournament?(@current_user, @tournament) and
+            stage.status == :scheduled and
+            Map.get(@extra_stage_details, stage.id).previous_stage_status == :finished
+        }
+        class="flex items-center mb-6"
+      >
+        <h4 class="mr-6 text-primary">
+          When you&apos;re ready to start the next stage, click "Start stage".
+        </h4>
+        <button
+          id={"manually-start-stage-#{stage.id}-button"}
+          class="btn btn--primary"
+          phx-click="manually-start-stage-clicked"
+          phx-value-stage-id={stage.id}
+        >
+          Start stage
+        </button>
+      </div>
+
+      <%= if stage.type in [:single_elimination, :double_elimination] do %>
+        <%= live_render(
+          @socket,
+          StridentWeb.BracketLive,
+          id: "bracket-live-#{stage.id}",
+          session: %{
+            "debug_mode" => @debug_mode,
+            "current_user_id" => Map.get(@current_user || %{}, :id),
+            "tournament_slug" => @tournament.slug,
+            "stage_id" => stage.id,
+            "timezone" => @timezone,
+            "locale" => @locale,
+            "check_timezone" => @check_timezone
+          }
+        ) %>
+      <% end %>
+
+      <.live_component
+        :if={Enum.any?(stage.matches) and stage.type == :round_robin}
+        id={"pool--#{@tournament.id}--#{stage.id}"}
+        module={StridentWeb.TournamentPageLive.Components.PoolStage}
+        current_user={@current_user}
+        stage={stage}
+        tournament_status={@tournament.status}
+        required_participant_count={@tournament.required_participant_count}
+        participants={@tournament.participants}
+        timezone={@timezone}
+        locale={@locale}
+        tournament={@tournament}
+      />
+
+      <.live_component
+        :if={Enum.any?(stage.matches) and stage.type == :swiss}
+        id={"pool--#{@tournament.id}--#{stage.id}"}
+        module={StridentWeb.TournamentPageLive.Components.PoolStage}
+        current_user={@current_user}
+        stage={stage}
+        tournament_status={@tournament.status}
+        required_participant_count={@tournament.required_participant_count}
+        participants={@tournament.participants}
+        timezone={@timezone}
+        locale={@locale}
+        tournament={@tournament}
+      />
+
+      <div :if={Enum.empty?(stage.matches)} id={"no-matches-in-stage-#{stage.id}"}>
+        Matches will be regenerated when a new tournament participant registers.
+      </div>
+
+      <.live_component
+        :if={stage.type == :battle_royale}
+        id={"battle-royale--#{@tournament.id}--#{stage.id}"}
+        module={StridentWeb.TournamentPageLive.Components.BattleRoyaleStage}
+        current_user={@current_user}
+        stage={stage}
+        tournament_status={@tournament.status}
+        required_participant_count={@tournament.required_participant_count}
+        participants={@tournament.participants}
+        timezone={@timezone}
+        locale={@locale}
+        tournament={@tournament}
+      />
+    <% end %>
+  </div>
+
+  <.live_component
+    :if={@show_confirmation}
+    id="tournament-stage-confirmation"
+    module={StridentWeb.Components.Confirmation}
+    confirm_event={@confirmation_confirm_event}
+    confirm_values={@confirmation_confirm_values}
+    message={@confirmation_message}
+    confirm_prompt={@confirmation_confirm_prompt}
+    cancel_prompt={@confirmation_cancel_prompt}
+    timezone={@timezone}
+    locale={@locale}
+  />
+</div>

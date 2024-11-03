@@ -1,0 +1,62 @@
+<div id="match-settings-page">
+  <.flash flash={@flash} phx-target={@myself} />
+  <.socket_suspense show_inner_block={@is_connected}>
+    <div
+      :for={stage <- Enum.sort_by(@tournament.stages, & &1.round)}
+      class="flex flex-col items-stretch xl:flex-row"
+    >
+      <div :if={!!stage.round && stage.round > 0} class="hidden mx-16 md:block gradient-separator">
+      </div>
+
+      <div class="flex-1">
+        <h4 class="mb-8 font-display text-grey-light">
+          <%= capitalize_each_word(stage.type) %> Match Settings
+        </h4>
+        <.form
+          :let={f}
+          :for={
+            {%{data: %{name: name, value: {value, _type}}} = changeset, index} <-
+              @stage_setting_changesets
+              |> Map.get(stage.id)
+              |> Enum.with_index()
+              |> Enum.filter(fn {changeset, _index} ->
+                changeset.data.name in StageSetting.match_settings_names()
+              end)
+              |> Enum.sort_by(fn {changeset, _index} -> sort_order(changeset.data.name) end)
+          }
+          for={changeset}
+          id={"stage-#{stage.id}-setting-#{index}"}
+          phx-change="change-stage-setting"
+          class="mb-4"
+        >
+          <%= hidden_input(f, :index, value: index) %>
+          <%= hidden_input(f, :stage_id, value: stage.id) %>
+          <%= label_string(name) %>
+
+          <div class={["flex mb-4", if(@cancelled, do: "opacity-70")]}>
+            <div class="flex items-center grilla-radio">
+              <%= label() do %>
+                <%= radio_button(f, :setting, true, checked: value, disabled: @cancelled) %>
+                <span class="ml-2">
+                  Enabled
+                </span>
+              <% end %>
+            </div>
+
+            <div class="flex items-center grilla-radio">
+              <%= label() do %>
+                <%= radio_button(f, :setting, false,
+                  checked: not value,
+                  disabled: @cancelled
+                ) %>
+                <span class="mb-0 ml-2">
+                  Disabled
+                </span>
+              <% end %>
+            </div>
+          </div>
+        </.form>
+      </div>
+    </div>
+  </.socket_suspense>
+</div>

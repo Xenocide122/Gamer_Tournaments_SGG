@@ -1,0 +1,84 @@
+<div class="flex-grow">
+  <%= case @position do %>
+    <% :vertical -> %>
+      <div class="{@class}">
+        <div class="block md:hidden">
+          <%= for {rank, money} <- @prize_pool do %>
+            <div class="card grid grid-cols-2 gap-6 p-6 mb-1">
+              <div class="text-sm">
+                <div class="font-bold">
+                  RANK
+                </div>
+                <p>
+                  <%= rank %>
+                </p>
+              </div>
+
+              <div class="text-sm">
+                <div class="font-bold">
+                  PRIZE MONEY
+                </div>
+                <p>
+                  <%= money %>
+                </p>
+              </div>
+            </div>
+          <% end %>
+        </div>
+
+        <table class="hidden md:table min-w-full rounded overflow-hidden divide-y-2 divide-black">
+          <thead class="card text-sm font-bold">
+            <tr>
+              <th scope="col" class="text-left px-2 py-2">
+                RANK
+              </th>
+              <th scope="col" class="text-left px-2 py-2">
+                PRIZE MONEY
+              </th>
+            </tr>
+          </thead>
+
+          <tbody class="divide-y-2 divide-black">
+            <%= for {rank, money} <- @prize_pool do %>
+              <tr class="card text-sm">
+                <td class="px-2 py-2 whitespace-nowrap">
+                  <%= Prizes.format_prize_rank(rank) %>
+                </td>
+                <td class="px-2 py-2 whitespace-nowrap">
+                  <%= money %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% :horizontal -> %>
+      <div class="tournament-prizes flex items-start {@class}">
+        <%= for {rank, money} <- @prize_pool do %>
+          <div class="min-w-max" x-bind="prize" rank={rank}>
+            <span>
+              <%= Strident.Prizes.format_prize_rank(rank) %>
+            </span>
+            -
+            <span>
+              <%= money %>
+            </span>
+          </div>
+        <% end %>
+      </div>
+    <% :vertical_min -> %>
+      <div class="flex flex-col items-start {@class} space-y-1">
+        <%= for {rank, money} <- @prize_pool do %>
+          <div class="min-w-max" rank={rank}>
+            <span>
+              <%= Strident.Prizes.format_prize_rank(rank) %>
+            </span>
+            -
+            <span>
+              <%= money %>
+            </span>
+          </div>
+        <% end %>
+      </div>
+  <% end %>
+</div>

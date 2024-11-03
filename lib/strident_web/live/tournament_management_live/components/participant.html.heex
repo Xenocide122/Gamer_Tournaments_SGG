@@ -1,0 +1,58 @@
+<div class="relative bg-transparent md:w-60 md:tournament-player-card">
+  <.link
+    id={"show-participant-link-#{@participant_id}"}
+    navigate={@view_link}
+    class="flex flex-row justify-between md:justify-center md:grid"
+  >
+    <!-- Participant header -->
+    <div class="flex flex-row md:row-span-1">
+      <div class="flex items-center">
+        <div class="p-2">
+          <.image
+            id={"participant-card-logo-#{@participant_id}"}
+            image_url={@participant_avatar}
+            alt="participant"
+            class="object-scale-down rounded-full"
+            width={40}
+            height={40}
+          />
+        </div>
+
+        <div class="flex flex-col justify-start">
+          <p class="text-lg text-left font-display text-ellipsis">
+            <%= @participant_name %>
+          </p>
+
+          <p :if={!!@label_text && @label_class} class={@label_class}><%= @label_text %></p>
+        </div>
+      </div>
+    </div>
+
+    <.display_participant_body
+      tournament_allow_staking={@tournament.allow_staking}
+      tournament_status={@tournament.status}
+      participant_status={@participant_status}
+      participant_id={@participant_id}
+      progress_bar={@progress_bar}
+    />
+
+    <%= if @view_link && @participant_status in [:chip_in_to_entry_fee, :contribution_to_entry_fee, :confirmed] do %>
+      <div class="justify-center hidden md:flex ">
+        <.button
+          id={"view-participant-button-#{@participant_id}"}
+          button_type={:primary_ghost}
+          class="h-10 !py-0 !pb-4 mt-4 text-3xl uppercase border rounded cursor-pointer w-44 font-display inner-glow"
+        >
+          View
+        </.button>
+      </div>
+    <% end %>
+  </.link>
+  <!-- Show bottom line if stake is nil -->
+  <div class="flex justify-center md:pt-4">
+    <hr
+      class="absolute bottom-0 border-t-2 shadow-lg border-grilla-pink shadow-grilla-pink"
+      width="95%"
+    />
+  </div>
+</div>

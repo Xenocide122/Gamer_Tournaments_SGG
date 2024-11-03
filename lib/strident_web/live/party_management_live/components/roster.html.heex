@@ -1,0 +1,30 @@
+<div>
+  <.table
+    id={"party-roster-#{@party.id}"}
+    rows={
+      @party.party_members ++
+        (@party.party_invitations
+         |> Enum.filter(&(&1.status in [:pending, :dropped, :rejected]))
+         |> Enum.sort_by(&(&1.status != :pending)))
+    }
+    row_id={fn item -> row_id(item) end}
+  >
+    <:col :let={player} label="Username">
+      <.username player={player} />
+    </:col>
+    <:col :let={player} label="Email">
+      <.email player={player} />
+    </:col>
+    <:col :let={player} label="Invite Status">
+      <.invitation_status player={player} />
+    </:col>
+    <:col :let={player} label="Manage Player">
+      <.manage_player
+        state={:enabled}
+        player={player}
+        tournament={@tournament}
+        current_user={@current_user}
+      />
+    </:col>
+  </.table>
+</div>

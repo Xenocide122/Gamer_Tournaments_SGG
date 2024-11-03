@@ -1,0 +1,118 @@
+<div class="py-16 mt-16 text-center md:text-left">
+  <div class="container space-y-4 ">
+    <div class="lg:px-3">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-6xl leading-none tracking-normal font-display">Games</h3>
+        </div>
+        <div>
+          <.button
+            id="challenges-kill-switch-button"
+            button_type={:primary}
+            phx-click="disable-all-challenges"
+          >
+            Challenges Kill Switch
+          </.button>
+          <.link navigate={Routes.games_create_path(@socket, :create)} class="btn btn--primary">
+            Add Game
+          </.link>
+        </div>
+      </div>
+      <div class="pb-5 mb-4 border-b border-gray-200 sm:pb-0">
+        <div class="mt-3 sm:mt-4">
+          <div>
+            <Menus.tabs selected={:games} />
+          </div>
+        </div>
+      </div>
+      <section id="games-search" class="my-8">
+        <form phx-change="filter-search">
+          <input
+            name="search_term"
+            type="text"
+            class="form-input"
+            placeholder="Filter games"
+            value={@search_term}
+          />
+        </form>
+      </section>
+      <section id="games-table" class="mt-8">
+        <.table rows={if Enum.empty?(@filtered_games), do: @games, else: @filtered_games}>
+          <:col :let={game} label="Title">
+            <%= game.title %>
+          </:col>
+          <:col :let={game} label="Description">
+            <%= game.description %>
+          </:col>
+          <:col :let={game} label="Manage">
+            <div class="flex justify-end space-x-2">
+              <.link
+                navigate={Routes.games_edit_path(@socket, :edit, game)}
+                class="px-1 pb-1 text-sm font-medium hover:text-primary-dark whitespace-nowrap"
+              >
+                Edit
+              </.link>
+              <div
+                :if={game.deleted_at}
+                phx-click="enable"
+                phx-value-id={game.id}
+                class="px-1 pb-1 text-sm font-medium cursor-pointer hover:text-primary-dark text-primary whitespace-nowrap"
+              >
+                Enable
+              </div>
+              <div
+                :if={is_nil(game.deleted_at)}
+                phx-click="disable"
+                phx-value-id={game.id}
+                class="px-1 pb-1 text-sm font-medium cursor-pointer hover:text-secondary-dark text-secondary whitespace-nowrap"
+              >
+                Disable
+              </div>
+            </div>
+          </:col>
+        </.table>
+      </section>
+      <section id="genres-table" class="mt-8">
+        <h3>Genres</h3>
+        <.link
+          navigate={Routes.genres_create_path(@socket, :create)}
+          class="btn btn--primary my-2"
+        >
+          Add Genre
+        </.link>
+
+        <.table rows={@genres}>
+          <:col :let={genre} label="Genre Name">
+            <%= genre.genre_name %>
+          </:col>
+          <:col :let={genre} label="Manage">
+            <div class="flex justify-end space-x-2">
+              <.link
+                navigate={Routes.genres_edit_path(@socket, :edit, genre)}
+                class="px-1 pb-1 text-sm font-medium hover:text-primary-dark whitespace-nowrap"
+              >
+                Edit
+              </.link>
+              <div
+                :if={genre.hidden}
+                phx-click="enable-genre"
+                phx-value-id={genre.id}
+                class="px-1 pb-1 text-sm font-medium cursor-pointer hover:text-primary-dark text-primary whitespace-nowrap"
+              >
+                Enable
+              </div>
+              <div
+                :if={not genre.hidden}
+                phx-click="disable-genre"
+                phx-value-id={genre.id}
+                class="px-1 pb-1 text-sm font-medium cursor-pointer hover:text-secondary-dark text-secondary whitespace-nowrap"
+              >
+                Disable
+              </div>
+            </div>
+          </:col>
+        </.table>
+      </section>
+    </div>
+  </div>
+</div>

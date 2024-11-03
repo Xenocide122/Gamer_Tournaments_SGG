@@ -1,0 +1,92 @@
+<div id="interested-player" phx-hook="InterestedPlayer">
+  <%= if @show_interested_player_form do %>
+    <div class="bg-blackish py-12 px-8 md:px-12" id="interested-player-form-container">
+      <h3 class="uppercase mb-4">
+        Tell us more about you
+      </h3>
+
+      <p class="text-grey-light mb-14">
+        With this information we will be able to hand-pick interesting content for you.
+      </p>
+
+      <.form
+        :let={f}
+        for={@changeset}
+        id="interested-player-form"
+        class="max-w-md"
+        phx-submit="create"
+        phx-change="validate"
+        phx-target={@myself}
+      >
+        <div class="mb-10">
+          <%= label(f, :personal_name, "Your Name") %>
+          <%= text_input(f, :personal_name, required: true, class: "form-input") %>
+          <%= error_tag(f, :personal_name) %>
+        </div>
+
+        <div class="mb-10">
+          <%= label(f, :team_name, "Your Team's Name (optional)") %>
+          <%= text_input(f, :team_name, required: false, class: "form-input") %>
+          <%= error_tag(f, :team_name) %>
+        </div>
+
+        <div class="mb-10">
+          <%= label(f, :email, "Email Address") %>
+          <%= text_input(f, :email, required: true, class: "form-input") %>
+          <%= error_tag(f, :email) %>
+        </div>
+
+        <div class="mb-10">
+          <%= label(f, :game_profiles, "Strident Profiles") %>
+          <%= for game <- Ecto.Changeset.get_field(@changeset, :game_profiles, [""]) do %>
+            <%= text_input(f, :game_profiles,
+              name: "interested_player[game_profiles][]",
+              value: game,
+              class: "form-input",
+              placeholder: "e.g. twitch.com/my-stream"
+            ) %>
+          <% end %>
+          <%= error_tag(f, :game_profiles) %>
+        </div>
+
+        <div class="mb-10">
+          <%= label(f, :social_profiles, "Social Media Profiles") %>
+          <%= for game <- Ecto.Changeset.get_field(@changeset, :social_profiles, [""]) do %>
+            <%= text_input(f, :social_profiles,
+              name: "interested_player[social_profiles][]",
+              value: game,
+              class: "form-input",
+              placeholder: "e.g. twitter.com/my-profile"
+            ) %>
+          <% end %>
+          <%= error_tag(f, :social_profiles) %>
+        </div>
+
+        <div class="mb-10">
+          <%= label(f, :favorite_games, "Favorite Games") %>
+          <%= for game <- Ecto.Changeset.get_field(@changeset, :favorite_games, [""]) do %>
+            <%= text_input(f, :favorite_games,
+              name: "interested_player[favorite_games][]",
+              value: game,
+              class: "form-input",
+              placeholder: "e.g. Crash Bandicoot"
+            ) %>
+          <% end %>
+          <%= error_tag(f, :favorite_games) %>
+        </div>
+
+        <div class="mb-10">
+          <%= submit("Send it", class: "btn btn--primary w-40") %>
+        </div>
+
+        <.flash flash={@flash} phx-target={@myself} class="absolute" />
+      </.form>
+    </div>
+  <% end %>
+
+  <%= if @show_interest_registered do %>
+    <h3 class="text-center">
+      Thanks for your interest!
+    </h3>
+  <% end %>
+</div>

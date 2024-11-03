@@ -1,0 +1,922 @@
+<div class="pb-10 overflow-hidden">
+  <.back_button
+    hide={@show == :statistic}
+    phx-click={JS.navigate("/user/#{@user.slug}") |> JS.push("open-statistic")}
+  >
+    Back to profile
+  </.back_button>
+
+  <div
+    class="profile-background mt-16 md:mt-24"
+    x-data="navbarMargin"
+    @window.resize.debounce="resize();"
+  >
+    <img
+      src={Strident.Accounts.banner_url(@user)}
+      class="w-full object-cover h-32 md:h-80 2xl:h-96"
+    />
+  </div>
+  <div class="diagonal-border"></div>
+
+  <div class="relative pb-40 mt-20 md:mt-72 md:pt-8">
+    <div class="mb-12 md:mb-auto">
+      <div class="container">
+        <div class="flex flex-col items-start mb-10 md:flex-row">
+          <div class="flex items-end justify-center md:justify-between w-full md:w-fit">
+            <img
+              src={Strident.Accounts.avatar_url(@user)}
+              alt={@user.display_name}
+              class="w-40 h-40 mr-8 bg-blackish border-4 border-black rounded-full"
+            />
+            <%= unless is_my_profile?(@current_user, @user) do %>
+              <div class="mb-2 md:hidden">
+                <.live_component
+                  id="follow-mobile"
+                  module={StridentWeb.Components.Follow}
+                  following_user={@following_user}
+                  timezone={@timezone}
+                  locale={@locale}
+                />
+              </div>
+            <% end %>
+          </div>
+          <div class="w-full md:mt-24">
+            <div class="block md:flex gap-x-6 items-center items-end">
+              <div class="font-display uppercase text-lg md:text-3xl font-semibold">
+                <%= @user.display_name %>
+              </div>
+              <%= if is_my_profile?(@current_user, @user) do %>
+                <%= if @edit_details do %>
+                  <div class="ml-4 text-muted">
+                    Editing user details
+                  </div>
+                <% else %>
+                  <div
+                    id="edit-user-details-button"
+                    class="ml-4 link"
+                    phx-click="toggle-edit-details"
+                  >
+                    Edit user details
+                  </div>
+                <% end %>
+              <% end %>
+              <div class="flex flex-col">
+                <.live_component
+                  id="social-links"
+                  module={StridentWeb.Components.SocialLinks}
+                  social_media_links={@user.social_media_links}
+                  timezone={@timezone}
+                  locale={@locale}
+                />
+              </div>
+            </div>
+
+            <div
+              :if={!!@user.discord_credential && Enum.any?(@user.discord_connections)}
+              id="discord-connections-panel"
+              class="mt-4"
+            >
+              <div class="md:flex md:gap-x-4 md:items-center">
+                <div class="font-display text-2xl font-bold">
+                  Gamer ID's:
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-y-4 gap-x-4 items-center">
+                  <div
+                    :for={connection <- @user.discord_connections}
+                    class="rounded-full border border-2 border-white flex items-center gap-x-2 px-4 py-2"
+                  >
+                    <img
+                      src={"https://strident-games.s3.amazonaws.com/brand-logo-#{connection.type}.svg"}
+                      alt={connection.type}
+                      class="w-8 h-8"
+                    />
+                    <div class="font-semibold text-xl">
+                      <%= connection.name %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex flex-col justify-between md:flex-row">
+              <div>
+                <div class="flex flex-wrap mb-6 space-x-4">
+                  <div class="flex items-center gap-2">
+                    <.render_badges user={@user} ) />
+                  </div>
+
+                  <%= unless Strident.StringUtils.is_empty?(@user.real_name) do %>
+                    <div class="flex items-center space-x-1 text-muted">
+                      <svg width="16" height="16" viewBox="0 0 512 512" fill="currentColor">
+                        <path d={StridentWeb.Common.SvgUtils.path(:player)} />
+                      </svg>
+
+                      <div><%= @user.real_name %></div>
+                    </div>
+                  <% end %>
+                  <%= if @user.team_user_feature do %>
+                    <% primary_team =
+                      Enum.find(@user.teams, &(&1.id == @user.team_user_feature.team_id)) %>
+                    <.link
+                      navigate={
+                        Routes.live_path(
+                          @socket,
+                          StridentWeb.TeamProfileLive.Show,
+                          primary_team.slug
+                        )
+                      }
+                      class="flex items-center space-x-1 link"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d={StridentWeb.Common.SvgUtils.path(:users)} />
+                      </svg>
+
+                      <div><%= primary_team.name %></div>
+                    </.link>
+                  <% end %>
+
+                  <div :if={@user.birthday} class="flex items-center space-x-1 text-muted">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 448 512"
+                      width="16"
+                      height="16"
+                      fill="currentColor"
+                    >
+                      <path d={StridentWeb.Common.SvgUtils.path(:birthday)} />
+                    </svg>
+                    <div>
+                      <.localised_date
+                        date={@user.birthday}
+                        locale={@locale}
+                        type={:day_and_month}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="flex flex-col items-start w-full md:justify-between md:flex-row">
+                  <div>
+                    <div class="flex items-center space-x-6">
+                      <.live_component
+                        :if={is_my_profile?(@current_user, @user)}
+                        id="profile-picture-form"
+                        module={StridentWeb.Components.UploadImageForm}
+                        current_user={@current_user}
+                        modalized={true}
+                        timezone={@timezone}
+                        locale={@locale}
+                      >
+                        <p class="link clickable">
+                          Upload profile picture
+                        </p>
+                      </.live_component>
+
+                      <.live_component
+                        :if={is_my_profile?(@current_user, @user)}
+                        id="profile-banner-form"
+                        module={StridentWeb.Components.UploadImageForm}
+                        current_user={@current_user}
+                        modalized={true}
+                        timezone={@timezone}
+                        locale={@locale}
+                        banner={true}
+                      >
+                        <p class="link clickable">
+                          Upload profile banner
+                        </p>
+                      </.live_component>
+
+                      <div :if={not is_my_profile?(@current_user, @user)} class="hidden md:block">
+                        <.live_component
+                          id="follow-desktop"
+                          module={StridentWeb.Components.Follow}
+                          following_user={@following_user}
+                          timezone={@timezone}
+                          locale={@locale}
+                        />
+                      </div>
+
+                      <div
+                        class={"link hidden #{if(@show == :statistic, do: "md:block")}"}
+                        phx-click="open-followers"
+                      >
+                        <span class="font-bold">
+                          <%= length(@followers) %>
+                        </span>
+                        Followers
+                      </div>
+                      <div
+                        class={"link hidden #{if(@show == :statistic, do: "md:block")}"}
+                        phx-click="open-following"
+                      >
+                        <span class="font-bold">
+                          <%= length(@following) %>
+                        </span>
+                        Following
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="flex flex-row">
+              <button
+                class="flex items-center justify-center py-2 mt-2 mr-2 border rounded-lg w-36 text-primary border-primary inner-glow"
+                phx-click={show_modal("share-user-profile-page")}
+              >
+                <p class="mr-2 uppercase text-primary">Share</p>
+                <.svg icon={:share} width="14" height="16" class="fill-primary" />
+              </button>
+              <button
+                class="flex items-center justify-center py-2 mt-2 border rounded-lg w-11 text-primary border-primary inner-glow"
+                phx-click={show_modal("share-qr-code")}
+              >
+                <p class="uppercase text-primary">QR</p>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class={
+          "flex justify-start space-x-6 text-primary md:mb-10 md:justify-start #{if(@show == :statistic, do: "md:hidden")}"
+        }>
+          <div
+            class={"link #{if(@show == :followers, do: "text-white")}"}
+            phx-click={if @show == :followers, do: "open-statistic", else: "open-followers"}
+          >
+            <span class="font-bold">
+              <%= length(@followers) %>
+            </span>
+            Followers
+          </div>
+          <div
+            class={"link #{if(@show == :following, do: "text-white")}"}
+            phx-click={if @show == :following, do: "open-statistic", else: "open-following"}
+          >
+            <span class="font-bold">
+              <%= length(@following) %>
+            </span>
+            Following
+          </div>
+        </div>
+
+        <div class={if(@show == :statistic, do: "hidden", else: "md:hidden")}>
+          <hr class="mt-4 mb-4 border-grey-medium" />
+        </div>
+      </div>
+    </div>
+
+    <div id="profile">
+      <div class="container">
+        <div class="items-start lg:flex">
+          <%= case @show do %>
+            <% :statistic -> %>
+              <div x-data="profileScroll" class="w-full">
+                <%= if @has_tournaments do %>
+                  <div class="hidden py-1 mb-4 space-x-4 border-b border-grey-dark profile-menu md:flex">
+                    <h5
+                      x-bind:class="position === 0 ? 'text-primary' : 'link text-white'"
+                      class="relative uppercase"
+                      x-bind="menuItem"
+                      value="0"
+                    >
+                      Profile
+                    </h5>
+                    <h5
+                      id={"my-tournaments-#{@user.id}"}
+                      x-bind:class="position === 1 ? 'text-primary' : 'link text-white'"
+                      class="relative uppercase"
+                      x-bind="menuItem"
+                      value="1"
+                    >
+                      Tournaments
+                    </h5>
+                  </div>
+                  <div class="md:hidden">
+                    <select class="mb-4 form-input" x-bind:value="position">
+                      <option x-bind="menuItem" value="0">Profile</option>
+                      <option x-bind="menuItem" value="1">Tournaments</option>
+                    </select>
+                  </div>
+                <% end %>
+                <div x-bind="pane" position="0">
+                  <%= if is_my_profile?(@current_user, @user) and @edit_details do %>
+                    <div class="flex items-end justify-center space-x-2 md:justify-start">
+                      <%= StridentWeb.Components.UnderlinedHeader.header("User Details") %>
+                      <div class="relative">
+                        <div class="text-muted mb-3.5 absolute left-0 bottom-0">
+                          Editing
+                        </div>
+                      </div>
+                    </div>
+                    <div class="card">
+                      <.form
+                        :let={f}
+                        for={@changeset}
+                        id="update-user-details-form"
+                        phx-submit="update-user-details"
+                        phx-change="validate-social-media"
+                      >
+                        <div>I&apos;m a...</div>
+                        <div class="flex items-center my-3">
+                          <%= checkbox(f, :is_pro,
+                            class:
+                              "h-4 w-4 text-primary focus:ring-indigo-500 border-gray-300 rounded"
+                          ) %>
+                          <.form_label
+                            form={f}
+                            field={:is_pro}
+                            label="Player"
+                            class="pl-2 mb-0 mr-6 select-none"
+                          />
+                          <%= checkbox(f, :is_tournament_organizer,
+                            class:
+                              "h-4 w-4 text-primary focus:ring-indigo-500 border-gray-300 rounded"
+                          ) %>
+                          <.form_label
+                            form={f}
+                            field={:is_tournament_organizer}
+                            label="Tournament Organizer"
+                            class="pl-2 mb-0 mr-6 select-none"
+                          />
+
+                          <%= checkbox(f, :is_caster,
+                            class:
+                              "h-4 w-4 text-primary focus:ring-indigo-500 border-gray-300 rounded"
+                          ) %>
+
+                          <.form_label
+                            form={f}
+                            field={:is_caster}
+                            label="Caster"
+                            class="pl-2 mb-0 mr-6 select-none"
+                          />
+                          <%= checkbox(f, :is_graphic_designer,
+                            class:
+                              "h-4 w-4 text-primary focus:ring-indigo-500 border-gray-300 rounded"
+                          ) %>
+                          <.form_label
+                            form={f}
+                            field={:is_graphic_designer}
+                            label="Graphic Designer"
+                            class="pl-2 mb-0 mr-6 select-none"
+                          />
+                          <%= checkbox(f, :is_producer,
+                            class:
+                              "h-4 w-4 text-primary focus:ring-indigo-500 border-gray-300 rounded"
+                          ) %>
+                          <.form_label
+                            form={f}
+                            field={:is_producer}
+                            label="Producer"
+                            class="pl-2 mb-0 mr-6 select-none"
+                          />
+                        </div>
+
+                        <div class="my-5 divider--horizontal"></div>
+
+                        <div class="grid md:grid-cols-2 gap-x-16">
+                          <div class="form-group">
+                            <.form_label form={f} field={:real_name} label="Real Name" />
+                            <.form_text_input form={f} field={:real_name} />
+                            <.form_feedback form={f} field={:real_name} />
+                          </div>
+
+                          <div class="form-group">
+                            <.form_label form={f} field={:display_name} label="Display Name" />
+                            <.form_text_input form={f} field={:display_name} />
+                            <.form_feedback form={f} field={:display_name} />
+                          </div>
+
+                          <div class="form-group">
+                            <.form_label form={f} field={:featured_team_id} />
+
+                            <.form_select
+                              form={f}
+                              field={:featured_team_id}
+                              values={my_teams(@user)}
+                              selected={
+                                (@user.team_user_feature && @user.team_user_feature.team_id) || ""
+                              }
+                              prompt="None"
+                            />
+
+                            <.form_feedback form={f} field={:featured_team_id} />
+                          </div>
+
+                          <div class="form-group">
+                            <.form_label form={f} field={:birthday} />
+                            <.form_datetime_local_input
+                              form={f}
+                              field={:birthday}
+                              timezone={@timezone}
+                              notime
+                              returndate
+                            />
+                            <.form_feedback form={f} field={:birthday} />
+                          </div>
+
+                          <div class="form-group">
+                            <.form_label form={f} field={:social_media} label="Social Media" />
+                            <%= if Enum.all?(inputs_for(f, :social_media_link_user), &Enum.all?(inputs_for(&1, :social_media_link), fn %{source: source} -> Changeset.get_field(source, :delete) end)) do %>
+                              <span class="italic text-muted">
+                                No social media accounts
+                              </span>
+                            <% end %>
+
+                            <%= for i <- inputs_for(f, :social_media_link_user) do %>
+                              <%= for x <- inputs_for(i, :social_media_link) do %>
+                                <div class={
+                                  if Changeset.get_field(x.source, :delete),
+                                    do: "hidden",
+                                    else: "mb-2"
+                                }>
+                                  <div class="flex items-center">
+                                    <.form_text_input
+                                      form={x}
+                                      field={:user_input}
+                                      class="form-input"
+                                      placeholder="e.g. twitter.com/Stride"
+                                      phx-debounce="300"
+                                    />
+                                    <div class="hidden">
+                                      <%= checkbox(x, :delete) %>
+                                    </div>
+                                    <div
+                                      class="text-primary"
+                                      phx-click="remove-social-media"
+                                      phx-value-index={i.index}
+                                    >
+                                      <svg
+                                        width="20"
+                                        height="20"
+                                        viewBox="0 0 20 20"
+                                        fill="currentColor"
+                                      >
+                                        <path d={StridentWeb.Common.SvgUtils.path(:x)} />
+                                      </svg>
+                                    </div>
+                                  </div>
+                                  <%= if Map.has_key?(x.source.changes, :user_input) do %>
+                                    <span class="form-feedback--error invalid-feedback">
+                                      <%= elem(Keyword.get(x.source.errors, :handle, {""}), 0) %>
+                                    </span>
+                                  <% end %>
+                                </div>
+                              <% end %>
+                            <% end %>
+
+                            <div class="flex justify-end">
+                              <div
+                                class="flex items-center text-primary"
+                                phx-click="add-new-social-media"
+                                style="cursor: pointer;"
+                              >
+                                <span class="mr-1">
+                                  Add another
+                                </span>
+
+                                <svg
+                                  width="20"
+                                  height="20"
+                                  viewBox="0 0 20 20"
+                                  fill="currentColor"
+                                >
+                                  <path d={StridentWeb.Common.SvgUtils.path(:add_fill)} />
+                                </svg>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="flex justify-center">
+                          <div class="grid items-center w-64 grid-cols-2 gap-4 md:w-96">
+                            <div
+                              class="text-center text-white uppercase btn btn--primary-ghost"
+                              phx-click="toggle-edit-details"
+                            >
+                              Cancel
+                            </div>
+                            <%= submit("Save", class: "btn btn--primary uppercase text-center") %>
+                          </div>
+                        </div>
+                      </.form>
+                    </div>
+                  <% end %>
+
+                  <%= if Enum.any?(@user.photos) or (is_my_profile?(@current_user, @user) and is_graphical_designer?(@user)) do %>
+                    <div class="flex items-end justify-center space-x-2 md:justify-start">
+                      <%= StridentWeb.Components.UnderlinedHeader.header("Gallery") %>
+                      <%= if is_my_profile?(@current_user, @user) do %>
+                        <div class="relative">
+                          <button
+                            id="edit-button"
+                            class="text-primary mb-3.5 absolute left-0 bottom-0"
+                            phx-click={PhotoGallery.open_edit_opts()}
+                          >
+                            Edit
+                          </button>
+
+                          <button
+                            id="close-edit-button"
+                            class="hidden text-muted mb-3.5 absolute left-0 bottom-0"
+                            phx-click={PhotoGallery.close_edit_opts()}
+                          >
+                            Editing
+                          </button>
+                        </div>
+                      <% end %>
+                    </div>
+
+                    <%= if Enum.empty?(@user.photos) and is_my_profile?(@current_user, @user) and is_graphical_designer?(@user) do %>
+                      <div id="no-images-section">
+                        <div class="text-center text-muted">
+                          So empty...
+                        </div>
+                        <div class="flex justify-center mt-4">
+                          <div
+                            class="inner-glow p-2.5 md:p-1.5 md:px-4 border border-primary rounded-md uppercase cursor-pointer select-none"
+                            phx-click={PhotoGallery.open_edit_opts()}
+                          >
+                            Upload Images
+                          </div>
+                        </div>
+                      </div>
+                    <% end %>
+
+                    <.live_component
+                      id="example-designs"
+                      module={PhotoGallery}
+                      upload_for={@user}
+                      current_user={@current_user}
+                      timezone={@timezone}
+                      locale={@locale}
+                    />
+                  <% end %>
+
+                  <%= if Enum.any?(@recent_results) or Enum.any?(@recent_placements) or is_my_profile?(@current_user, @user) do %>
+                    <div class="flex items-end justify-center space-x-2 md:justify-start">
+                      <%= StridentWeb.Components.UnderlinedHeader.header(
+                        "Recent Tournament Results"
+                      ) %>
+                      <%= if is_my_profile?(@current_user, @user) do %>
+                        <div class="relative">
+                          <%= if @edit_recent_results do %>
+                            <div class="text-muted mb-3.5 absolute left-0 bottom-0">
+                              Editing
+                            </div>
+                          <% else %>
+                            <div
+                              class="link mb-3.5 absolute left-0 bottom-0"
+                              phx-click="toggle-edit-recent-results"
+                            >
+                              Edit
+                            </div>
+                          <% end %>
+                        </div>
+                      <% end %>
+                    </div>
+
+                    <%= if is_my_profile?(@current_user, @user) and @edit_recent_results do %>
+                      <div class="card">
+                        <.form
+                          :let={f}
+                          for={@profile_importer_changeset}
+                          id="update-user-recent-results-form"
+                          phx-submit="update-user-recent-results"
+                          phx-change="validate-user-recent-results"
+                        >
+                          <div class="grid md:grid-cols-2 gap-x-16">
+                            <div class="form-group">
+                              <.form_label
+                                form={f}
+                                field={:battlefy_profile}
+                                label="Battlefy Profile Link"
+                              />
+                              <.form_text_input
+                                form={f}
+                                field={:battlefy_profile}
+                                placeholder="battlefy.com/users/<your account name>"
+                                phx-debounce="300"
+                              />
+                              <.form_feedback
+                                form={f}
+                                field={:battlefy_profile}
+                                always_show={true}
+                              />
+                            </div>
+
+                            <div class="form-group">
+                              <.form_label
+                                form={f}
+                                field={:challonge_profile}
+                                label="Challonge Profile Link"
+                              />
+                              <.form_text_input
+                                form={f}
+                                field={:challonge_profile}
+                                placeholder="challonge.com/users/<your account name>"
+                                phx-debounce="300"
+                              />
+                              <.form_feedback form={f} field={:challonge_profile} />
+                            </div>
+
+                            <div class="form-group">
+                              <.form_label
+                                form={f}
+                                field={:smashgg_profile}
+                                label="Start.gg Profile Link"
+                              />
+                              <.form_text_input
+                                form={f}
+                                field={:smashgg_profile}
+                                placeholder="www.start.gg/user/<your profile code>"
+                                phx-debounce="300"
+                              />
+                              <.form_feedback form={f} field={:smashgg_profile} />
+                            </div>
+                          </div>
+                          <div class="flex justify-center mt-4">
+                            <div class="grid items-center w-64 grid-cols-2 gap-4 md:w-96">
+                              <div
+                                class="text-center text-white uppercase btn btn--primary-ghost"
+                                phx-click="toggle-edit-recent-results"
+                              >
+                                Cancel
+                              </div>
+                              <%= submit("Save", class: "btn btn--primary uppercase text-center") %>
+                            </div>
+                          </div>
+                        </.form>
+                      </div>
+                    <% else %>
+                      <%= if Enum.empty?(@recent_results) and Enum.empty?(@recent_placements) do %>
+                        <div class="text-center text-muted">
+                          So empty...
+                        </div>
+                        <div class="flex justify-center mt-4">
+                          <div
+                            class="inner-glow p-2.5 md:p-1.5 md:px-4 border border-primary rounded-md uppercase cursor-pointer select-none"
+                            phx-click="toggle-edit-recent-results"
+                          >
+                            Link accounts
+                          </div>
+                        </div>
+                      <% else %>
+                        <.live_component
+                          id="recent-results"
+                          module={StridentWeb.Components.RecentTournamentResults}
+                          recent_results={@recent_results}
+                          recent_placements={@recent_placements}
+                          timezone={@timezone}
+                          locale={@locale}
+                        />
+                      <% end %>
+                    <% end %>
+                  <% end %>
+
+                  <%= if @upcoming_tournaments.total_entries > 0 do %>
+                    <div class="my-10">
+                      <%= StridentWeb.Components.UnderlinedHeader.header("Upcoming Tournaments") %>
+                      <div class="grid gap-10 mt-8 mb-12 sm:grid-cols-2 lg:grid-cols-4">
+                        <.live_component
+                          :for={tournament <- @upcoming_tournaments.entries}
+                          id={"upcoming-tournament-hover-#{tournament.id}"}
+                          module={StridentWeb.Components.Tournaments.HoverTournamentCard}
+                          tournament={tournament}
+                          timezone={@timezone}
+                          locale={@locale}
+                          allow_hover_default={true}
+                        />
+                      </div>
+                      <div class="flex justify-center mt-6">
+                        <button
+                          class="text-primary border-primary border rounded inner-glow w-full md:w-[300px] py-2 uppercase"
+                          x-bind="menuItem"
+                          value="1"
+                        >
+                          View All
+                        </button>
+                      </div>
+                    </div>
+                  <% else %>
+                    <%= if is_my_profile?(@current_user, @user) and @show_tournament_page_link do %>
+                      <div class="my-10">
+                        <%= StridentWeb.Components.UnderlinedHeader.header("Upcoming Tournaments") %>
+
+                        <div class="text-center text-muted">
+                          So empty...
+                        </div>
+                        <div class="flex justify-center mt-4">
+                          <.link navigate={
+                            Routes.tournament_index_path(@socket, :index, %{
+                              status: "open-registration"
+                            })
+                          }>
+                            <div class="inner-glow p-2.5 md:p-1.5 md:px-4 border border-primary rounded-md uppercase cursor-pointer select-none">
+                              Find Tournaments
+                            </div>
+                          </.link>
+                        </div>
+                      </div>
+                    <% end %>
+                  <% end %>
+
+                  <.live_component
+                    id="stream-and-vods"
+                    module={StreamAndVods}
+                    user={@user}
+                    current_user={@current_user}
+                    timezone={@timezone}
+                    locale={@locale}
+                  />
+
+                  <.live_component
+                    id="favorite-games"
+                    module={StridentWeb.Components.FavoriteGamesComponent}
+                    games={@games}
+                    user={@user}
+                    current_user={@current_user}
+                    timezone={@timezone}
+                    locale={@locale}
+                  />
+
+                  <%= unless Strident.StringUtils.is_empty?(@user.bio) and not is_my_profile?(@current_user, @user) do %>
+                    <div class="flex items-end justify-center space-x-2 md:justify-start">
+                      <%= StridentWeb.Components.UnderlinedHeader.header("Player Bio") %>
+                      <%= if is_my_profile?(@user, @current_user) do %>
+                        <div class="relative">
+                          <%= if @edit_bio do %>
+                            <div class="text-muted mb-3.5 absolute left-0 bottom-0">
+                              Editing
+                            </div>
+                          <% else %>
+                            <div
+                              class="link mb-3.5 absolute left-0 bottom-0"
+                              phx-click="toggle-edit-bio"
+                            >
+                              Edit
+                            </div>
+                          <% end %>
+                        </div>
+                      <% end %>
+                    </div>
+                    <%= if is_my_profile?(@current_user, @user) and @edit_bio do %>
+                      <div class="card">
+                        <.form
+                          :let={f}
+                          for={@bio_changeset}
+                          id="update-user-bio-form"
+                          phx-submit="update-user-bio"
+                        >
+                          <div class="flex justify-center">
+                            <div class="w-full md:mx-40">
+                              <h4 class="mb-2">Your Player Bio</h4>
+                              <.form_textarea
+                                form={f}
+                                field={:bio}
+                                placeholder="Write your player bio here"
+                              />
+                              <.form_feedback form={f} field={:bio} />
+                            </div>
+                          </div>
+                          <div class="flex justify-center mt-4">
+                            <div class="grid items-center w-64 grid-cols-2 gap-4 md:w-96">
+                              <div
+                                class="text-center text-white uppercase btn btn--primary-ghost"
+                                phx-click="toggle-edit-bio"
+                              >
+                                Cancel
+                              </div>
+                              <%= submit("Save", class: "btn btn--primary uppercase text-center") %>
+                            </div>
+                          </div>
+                        </.form>
+                      </div>
+                    <% else %>
+                      <%= if Strident.StringUtils.is_empty?(@user.bio) do %>
+                        <div class="text-center text-muted">
+                          So empty...
+                        </div>
+                        <div class="flex justify-center mt-4">
+                          <div
+                            class="inner-glow p-2.5 md:p-1.5 md:px-4 border border-primary rounded-md uppercase cursor-pointer select-none"
+                            phx-click="toggle-edit-bio"
+                          >
+                            Add player bio
+                          </div>
+                        </div>
+                      <% else %>
+                        <p class="mb-8">
+                          <%= @user.bio %>
+                        </p>
+                      <% end %>
+                    <% end %>
+                  <% end %>
+
+                  <div :if={Enum.any?(@teammates)}>
+                    <%= StridentWeb.Components.UnderlinedHeader.header("Teammates") %>
+
+                    <div>
+                      <.live_component
+                        id="teammates"
+                        module={StridentWeb.Components.RosterThin}
+                        players={Enum.map(@teammates, &%{user: &1})}
+                        timezone={@timezone}
+                        locale={@locale}
+                        position={:grid}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div x-bind="pane" position="1">
+                  <div>
+                    <.form
+                      :let={f}
+                      for={@form}
+                      id="user-tournamets-filter-by-status"
+                      phx-change="filter-status"
+                    >
+                      <p class="text-muted text-sm mb-0.5">
+                        Filter tournaments
+                      </p>
+                      <.form_select
+                        form={f}
+                        field={:filter}
+                        values={@status_filters}
+                        selected={@filtered_status}
+                        class="max-w-xs mb-10"
+                      />
+                    </.form>
+
+                    <div
+                      :if={@tournaments.total_entries > 0}
+                      class="grid gap-10 mt-8 mb-12 sm:grid-cols-2 lg:grid-cols-4"
+                    >
+                      <.live_component
+                        :for={tournament <- @tournaments.entries}
+                        id={"tournament-hover-#{tournament.id}"}
+                        module={StridentWeb.Components.Tournaments.HoverTournamentCard}
+                        tournament={tournament}
+                        timezone={@timezone}
+                        locale={@locale}
+                        allow_hover_default={true}
+                      />
+                    </div>
+
+                    <div :if={@tournaments.total_pages > 1} class="text-center">
+                      <button
+                        phx-click="load-more"
+                        class="w-full max-w-xs font-semibold btn btn--primary"
+                      >
+                        Load More
+                      </button>
+                    </div>
+
+                    <div :if={@tournaments.total_entries == 0} class="flex justify-center">
+                      <p class="text-lg text-muted">
+                        No tournaments with the selected filters.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% :following -> %>
+              <.live_component
+                timezone={@timezone}
+                locale={@locale}
+                id="user-following"
+                module={StridentWeb.Components.Profile.Grid}
+                profiles={@following}
+                current_user={@current_user}
+              />
+            <% :followers -> %>
+              <.live_component
+                timezone={@timezone}
+                locale={@locale}
+                id="user-followers"
+                module={StridentWeb.Components.Profile.Grid}
+                profiles={@followers}
+                current_user={@current_user}
+              />
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <.live_component
+    id="share-user-profile-page"
+    module={StridentWeb.Components.SocialMediaShareComponent}
+    current_user={@current_user}
+    page_link={@page_share_link}
+    timezone={@timezone}
+    locale={@locale}
+  />
+
+  <.live_component
+    id="share-qr-code"
+    module={StridentWeb.Components.QrCodeComponent}
+    page_link={@page_share_link}
+  />
+</div>

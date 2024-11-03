@@ -1,0 +1,43 @@
+<mjml>
+  <mj-include path="./components/header.mjml" />
+
+  <mj-body mj-class='bg-blackish'>
+    <mj-section mj-class='bg-blackish' background-url='https://strident-games.s3.amazonaws.com/new-email-bg-1.jpg' background-size='cover' background-repeat='no-repeat'>
+      <mj-column>
+        <mj-spacer height="350px" />
+      </mj-column>
+    </mj-section>
+    <mj-section mj-class='bg-blackish' padding='0 0 20px 0'>
+      <mj-column>
+        <mj-text css-class='header-title' mj-class='text-lg text-white' padding-bottom='0'>
+          Participants still need to check in!
+        </mj-text>
+
+        <mj-text mj-class='text-base text-white' padding='25px'>
+          These participants haven't checked in to {{tournament_title}}
+          yet.
+        </mj-text>
+
+        <mj-text mj-class='text-base text-white' padding='25px'>
+          <ul>
+            {{#each participant_details}}
+              <li>{{ name }}</li>
+            {{/each}}
+          </ul>
+        </mj-text>
+
+        <mj-text mj-class='text-base text-white' padding='25px'>
+          Click here to go to your tournament dashboard and remind your
+          participants.
+        </mj-text>
+
+        <mj-button align='left' mj-class='text-base font-bold text-black bg-green' href='{{tournament_url}}'>
+          Go to your tournament
+        </mj-button>
+
+        <mj-spacer height="60px" />
+        <mj-include path="./components/footer.mjml" />
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

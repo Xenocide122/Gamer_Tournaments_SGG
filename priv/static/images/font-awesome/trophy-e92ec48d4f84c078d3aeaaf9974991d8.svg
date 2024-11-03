@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="38.5" height="36" viewBox="0 0 38.5 36">
+  <defs>
+    <filter id="Icon_awesome-trophy" x="0" y="0" width="38.5" height="36" filterUnits="userSpaceOnUse">
+      <feOffset input="SourceAlpha"/>
+      <feGaussianBlur stdDeviation="2.5" result="blur"/>
+      <feFlood flood-color="#03d5fb"/>
+      <feComposite operator="in" in2="blur"/>
+    </filter>
+    <filter id="Icon_awesome-trophy-2" x="0" y="0" width="38.5" height="36" filterUnits="userSpaceOnUse">
+      <feOffset input="SourceAlpha"/>
+      <feGaussianBlur stdDeviation="2" result="blur-2"/>
+      <feFlood flood-color="#03d5fb" result="color"/>
+      <feComposite operator="out" in="SourceGraphic" in2="blur-2"/>
+      <feComposite operator="in" in="color"/>
+      <feComposite operator="in" in2="SourceGraphic"/>
+    </filter>
+  </defs>
+  <g data-type="innerShadowGroup">
+    <g transform="matrix(1, 0, 0, 1, 0, 0)" filter="url(#Icon_awesome-trophy)">
+      <path id="Icon_awesome-trophy-3" data-name="Icon awesome-trophy" d="M21.563,2.5H17.5V.938A.935.935,0,0,0,16.563,0H5.938A.935.935,0,0,0,5,.938V2.5H.938A.935.935,0,0,0,0,3.438V5.625A5.1,5.1,0,0,0,2.418,9.559a9.151,9.151,0,0,0,4.3,1.629,8.641,8.641,0,0,0,2.66,2.875v2.813H7.5A2.254,2.254,0,0,0,5,19.063v.469A.47.47,0,0,0,5.469,20H17.031a.47.47,0,0,0,.469-.469v-.469A2.254,2.254,0,0,0,15,16.875H13.125V14.063a8.641,8.641,0,0,0,2.66-2.875,9.12,9.12,0,0,0,4.3-1.629A5.108,5.108,0,0,0,22.5,5.625V3.438A.935.935,0,0,0,21.563,2.5ZM3.879,7.531A2.873,2.873,0,0,1,2.5,5.625V5H5.008a14.03,14.03,0,0,0,.5,3.367,6.3,6.3,0,0,1-1.629-.836ZM20,5.625a3,3,0,0,1-1.379,1.906,6.32,6.32,0,0,1-1.633.836A14.03,14.03,0,0,0,17.488,5H20Z" transform="translate(8 8)" fill="none" stroke="#03d5fb" stroke-width="1"/>
+    </g>
+    <g transform="matrix(1, 0, 0, 1, 0, 0)" filter="url(#Icon_awesome-trophy-2)">
+      <path id="Icon_awesome-trophy-4" data-name="Icon awesome-trophy" d="M21.563,2.5H17.5V.938A.935.935,0,0,0,16.563,0H5.938A.935.935,0,0,0,5,.938V2.5H.938A.935.935,0,0,0,0,3.438V5.625A5.1,5.1,0,0,0,2.418,9.559a9.151,9.151,0,0,0,4.3,1.629,8.641,8.641,0,0,0,2.66,2.875v2.813H7.5A2.254,2.254,0,0,0,5,19.063v.469A.47.47,0,0,0,5.469,20H17.031a.47.47,0,0,0,.469-.469v-.469A2.254,2.254,0,0,0,15,16.875H13.125V14.063a8.641,8.641,0,0,0,2.66-2.875,9.12,9.12,0,0,0,4.3-1.629A5.108,5.108,0,0,0,22.5,5.625V3.438A.935.935,0,0,0,21.563,2.5ZM3.879,7.531A2.873,2.873,0,0,1,2.5,5.625V5H5.008a14.03,14.03,0,0,0,.5,3.367,6.3,6.3,0,0,1-1.629-.836ZM20,5.625a3,3,0,0,1-1.379,1.906,6.32,6.32,0,0,1-1.633.836A14.03,14.03,0,0,0,17.488,5H20Z" transform="translate(8 8)" fill="#fff"/>
+    </g>
+    <path id="Icon_awesome-trophy-5" data-name="Icon awesome-trophy" d="M21.563,2.5H17.5V.938A.935.935,0,0,0,16.563,0H5.938A.935.935,0,0,0,5,.938V2.5H.938A.935.935,0,0,0,0,3.438V5.625A5.1,5.1,0,0,0,2.418,9.559a9.151,9.151,0,0,0,4.3,1.629,8.641,8.641,0,0,0,2.66,2.875v2.813H7.5A2.254,2.254,0,0,0,5,19.063v.469A.47.47,0,0,0,5.469,20H17.031a.47.47,0,0,0,.469-.469v-.469A2.254,2.254,0,0,0,15,16.875H13.125V14.063a8.641,8.641,0,0,0,2.66-2.875,9.12,9.12,0,0,0,4.3-1.629A5.108,5.108,0,0,0,22.5,5.625V3.438A.935.935,0,0,0,21.563,2.5ZM3.879,7.531A2.873,2.873,0,0,1,2.5,5.625V5H5.008a14.03,14.03,0,0,0,.5,3.367,6.3,6.3,0,0,1-1.629-.836ZM20,5.625a3,3,0,0,1-1.379,1.906,6.32,6.32,0,0,1-1.633.836A14.03,14.03,0,0,0,17.488,5H20Z" transform="translate(8 8)" fill="none" stroke="#03d5fb" stroke-width="1"/>
+  </g>
+</svg>

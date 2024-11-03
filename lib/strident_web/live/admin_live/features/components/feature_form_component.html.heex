@@ -1,0 +1,153 @@
+<div>
+  <.form :let={f} for={@changeset} phx-change="validate" phx-submit="save" phx-target={@myself}>
+    <div class="form-group">
+      <.form_label form={f} field={:title} label="Feature Title" class="mb-0 text-sm text-white" />
+      <.form_text_input form={f} field={:title} phx-debounce={1000} />
+      <.form_feedback form={f} field={:title} />
+    </div>
+
+    <div class="form-group">
+      <.form_label
+        form={f}
+        field={:description}
+        label="Feature Description"
+        class="mb-0 text-sm text-white"
+      />
+      <.form_textarea form={f} field={:description} phx-debounce={1000} />
+      <.form_feedback form={f} field={:description} />
+    </div>
+
+    <div class="form-group">
+      <.form_label
+        form={f}
+        field={:blog_url}
+        label="Feature Blog URL"
+        class="mb-0 text-sm text-white"
+      />
+      <.form_text_input form={f} field={:blog_url} phx-debounce={1000} />
+      <.form_feedback form={f} field={:blog_url} />
+    </div>
+
+    <div class="form-group">
+      <.form_label form={f} field={:tags} label="Tags" class="mb-0 text-sm text-white" />
+      <div class="flex items-center gap-2 form-input !p-1">
+        <div
+          :for={tag <- @selected_tags}
+          class="flex gap-1 p-2 border rounded-xl border-grey-light"
+        >
+          <%= humanize(tag) %>
+          <.svg
+            icon={:x}
+            height="10"
+            width="10"
+            phx-click="remove-tag"
+            class="fill-grey-light"
+            phx-value-tag={tag}
+            phx-target={@myself}
+          />
+        </div>
+        <%= text_input(f, :searched_tag,
+          phx_change: "searched_tags",
+          class: "bg-transparent border-none rounded-xl focus:outline-none"
+        ) %>
+      </div>
+      <div :if={Enum.any?(@search_results)} class="relative">
+        <div class="absolute left-0 right-0 z-50 py-1 border rounded shadow border-grey-medium bg-blackish">
+          <div
+            :for={result <- @search_results}
+            phx-value-tag={result}
+            phx-click="select-tag"
+            phx-target={@myself}
+            class="hover:bg-grey-light"
+          >
+            <%= humanize(result) %>
+          </div>
+        </div>
+      </div>
+      <%= multiple_select(f, :tags, @tags_option, selected: @selected_tags, class: "hidden") %>
+      <.form_feedback form={f} field={:tags} />
+    </div>
+
+    <div class="form-group">
+      <label>Upload Feature Popup Image</label>
+      <%= if not is_nil(@feature) and @feature.image_url do %>
+        <p class="mb-4 text-grey-light">Current Background Image</p>
+        <img src={@feature.image_url} alt="Popup image" class="mb-8 h-36" />
+      <% end %>
+
+      <%= label(class: "#{if(Enum.count(@uploads.image.entries) > 0, do: "hidden")}") do %>
+        <div phx-drop-target={@uploads.image.ref}>
+          <%= live_file_input(@uploads.image, class: "hidden") %>
+          <div class="flex justify-start">
+            <div class="grid h-40 upload-box place-items-center w-96">
+              <img class="w-20 mb-1 h-15" src="/images/file_group.png" />
+              <p class="mb-1">
+                Drag and Drop Your File
+              </p>
+
+              <div class="flex text-xs text-grey-light">
+                <p class="mr-1">
+                  Or
+                </p>
+                <p class="mr-1 link clickable">
+                  Select File
+                </p>
+                <p>
+                  from your computer
+                </p>
+              </div>
+            </div>
+          </div>
+          <p class="text-xs font-light tracking-wider text-grey-light">
+            Recommended: 16:9 PNG
+          </p>
+        </div>
+      <% end %>
+      <.form_feedback form={f} field={:image_url} />
+
+      <%= for entry <- @uploads.image.entries do %>
+        <div class="flex flex-col">
+          <div class="relative">
+            <div phx-click="remove-photo" phx-value-ref={entry.ref}>
+              <.svg
+                icon={:x}
+                class="absolute z-10 fill-primary top-2 left-2"
+                height="20"
+                width="20"
+              />
+            </div>
+
+            <.live_img_preview entry={entry} width={384} />
+          </div>
+
+          <div class="my-2 progress-bar w-96">
+            <div
+              class="progress-bar__fill"
+              style={"transform: translateX(-#{100 - entry.progress}%)"}
+            >
+            </div>
+          </div>
+        </div>
+
+        <%= for error <- upload_errors(@uploads.image, entry) do %>
+          <p class="alert alert-danger">
+            <%= error_to_string(error) %>
+          </p>
+        <% end %>
+      <% end %>
+    </div>
+
+    <div class="flex justify-end space-x-4">
+      <.link
+        navigate={@return_to}
+        class="inline-block cursor-pointer font-medium border rounded py-2.5 px-4 select-none border-primary text-primary"
+      >
+        Cancel
+      </.link>
+      <%= submit("Save",
+        phx_disable_with: "Sending...",
+        class: "btn btn--wide btn--primary"
+      ) %>
+    </div>
+  </.form>
+</div>

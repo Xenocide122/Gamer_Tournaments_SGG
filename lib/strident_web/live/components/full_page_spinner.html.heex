@@ -1,0 +1,20 @@
+<div
+  id="full-page-spinner"
+  class="fixed top-0 left-0 z-50 grid items-center content-center justify-center w-screen h-screen bg-blackish opacity-80"
+>
+  <div class="flex justify-center w-full">
+    <svg
+      width={@svg_size}
+      height={@svg_size}
+      fill="none"
+      stroke="currentColor"
+      stroke-width="5"
+      class="items-center mr-3 animate-spin text-primary"
+    >
+      <circle cx={@radius} cy={@radius} r={@radius} stroke-dasharray={@dash_array}></circle>
+    </svg>
+  </div>
+  <div class="w-full mt-6 text-2xl text-center text-primary">
+    <%= @message %>
+  </div>
+</div>

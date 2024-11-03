@@ -1,0 +1,7 @@
+<div class="flex flex-col items-center w-full">
+  <%= StridentWeb.Oauth2View.render("login_button_twitch.html") %>
+  <%= StridentWeb.Oauth2View.render("login_button_discord.html") %>
+  <%= if @show_apple_login do %>
+    <%= StridentWeb.Oauth2View.render("login_button_apple.html") %>
+  <% end %>
+</div>

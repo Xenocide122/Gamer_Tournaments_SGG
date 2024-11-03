@@ -1,0 +1,240 @@
+<div class="container mx-auto mb-10 max-w-7xl">
+  <div class="relative pt-28 md:pt-32 lg:flex">
+    <div>
+      <.live_component
+        id="side-Update"
+        module={StridentWeb.TeamLive.SideMenu}
+        team={@team}
+        current_menu_item={@team_site}
+      />
+    </div>
+    <div class="py-4 pl-4 min-w-[640px]">
+      <h3 class="mb-4 uppercase">
+        Rosters
+      </h3>
+      <%= if length(@team.team_rosters) != 0 do %>
+        <div class="rounded-[10px] gradient p-[2px]">
+          <div class="rounded-[8px] bg-blackish py-[8px]">
+            <div>
+              <%= for roster <- @team.team_rosters do %>
+                <.live_component
+                  id={"edit-roster-#{roster.id}"}
+                  module={StridentWeb.TeamRostersLive.EditRoster}
+                  roster={roster}
+                  team={@team}
+                  can_edit={@can_edit}
+                  open_roster_id={@open_roster_id}
+                  timezone={@timezone}
+                  locale={@locale}
+                />
+              <% end %>
+            </div>
+
+            <%= if @can_edit do %>
+              <.live_component
+                id="new-roster"
+                module={StridentWeb.TeamRostersLive.NewRoster}
+                new_roster_name={@new_roster_name}
+                new_roster_name_error={@new_roster_name_error}
+                new_roster_game={@new_roster_game}
+                new_roster_members={@new_roster_members}
+                team={@team}
+                games={@games}
+                timezone={@timezone}
+                locale={@locale}
+              />
+            <% end %>
+          </div>
+        </div>
+      <% else %>
+        <%= if @can_edit do %>
+          <.live_component
+            timezone={@timezone}
+            locale={@locale}
+            id="new-roster"
+            module={StridentWeb.TeamRostersLive.NewRoster}
+            new_roster_name={@new_roster_name}
+            new_roster_name_error={@new_roster_name_error}
+            new_roster_game={@new_roster_game}
+            new_roster_members={@new_roster_members}
+            team={@team}
+            games={@games}
+          />
+        <% end %>
+      <% end %>
+    </div>
+    <div class="py-4 pl-8">
+      <%= if @can_edit do %>
+        <h3 class="uppercase">
+          Invite to Team
+        </h3>
+        <p class="mb-4 text-sm text-muted">
+          Enter their email address, and we&#39;ll send an email inviting them to join the team.
+        </p>
+
+        <.form :let={f} for={@invite_changeset} phx-submit="invite-user">
+          <div class="my-2">
+            <.form_text_input form={f} field={:email} />
+            <.form_feedback form={f} field={:email} />
+          </div>
+          <div class="flex justify-center w-full mt-3 mb-14">
+            <button class="px-5 py-2 btn btn--primary">
+              Invite to Team
+            </button>
+          </div>
+        </.form>
+      <% end %>
+      <div x-data="{manage: false}">
+        <div class="flex items-center content-center justify-between">
+          <h3 class="uppercase">
+            Full Roster
+          </h3>
+          <%= if @can_edit do %>
+            <p class="link" @click="manage = true" x-show="!manage">
+              Manage
+            </p>
+            <p class="link" @click="manage = false" x-show="manage" x-cloak>
+              Done
+            </p>
+          <% end %>
+        </div>
+        <div>
+          <%= for invitee <- @invites do %>
+            <div class="border-b-[1px] border-grey-medium last:border-b-0 py-1.5">
+              <div class="flex items-center content-center justify-between">
+                <%= if invitee.team_user_invitation_user do %>
+                  <img
+                    src={invitee.team_user_invitation_user.user.avatar_url}
+                    alt={invitee.team_user_invitation_user.user.avatar_url}
+                    class="flex-none mr-3 rounded-full opacity-50 w-9 h-9"
+                  />
+                  <div class="flex-1 min-w-0 mr-3 opacity-50">
+                    <p class="min-w-0 truncate">
+                      <%= invitee.team_user_invitation_user.user.display_name %>
+                    </p>
+                    <p class="min-w-0 text-xs truncate text-muted">
+                      <%= invitee.email %>
+                    </p>
+                  </div>
+                <% else %>
+                  <img
+                    src={Strident.Accounts.return_default_avatar()}
+                    class="flex-none mr-3 opacity-50 w-9 h-9"
+                  />
+                  <div class="flex-grow min-w-0 mr-3 opacity-50">
+                    <p class="min-w-0 truncate">
+                      <%= invitee.email %>
+                    </p>
+                    <p class="min-w-0 text-xs truncate text-muted">
+                      Does not have an account
+                    </p>
+                  </div>
+                <% end %>
+                <p
+                  class="flex-none text-sm uppercase opacity-50 whitespace-nowrap"
+                  x-show="!manage"
+                >
+                  <%= invitee.status %>
+                </p>
+                <p
+                  class="flex-none text-sm uppercase link text-secondary active:text-secondary-dark whitespace-nowrap"
+                  x-show="manage"
+                  x-cloak
+                  phx-click="cancel-invite"
+                  phx-value-invitee={invitee.id}
+                >
+                  Cancel Invite
+                </p>
+              </div>
+            </div>
+          <% end %>
+
+          <%= for member <- @team.team_members do %>
+            <div class="border-b-[1px] border-grey-medium last:border-b-0 py-1.5">
+              <div class="flex items-center content-center justify-between">
+                <img
+                  src={member.user.avatar_url}
+                  alt={member.user.avatar_url}
+                  class="flex-none mr-3 rounded-full w-9 h-9"
+                />
+                <div class="flex-1 min-w-0">
+                  <p class="min-w-0 overflow-hidden text-ellipsis">
+                    <%= member.user.display_name %>
+                  </p>
+                  <p class="min-w-0 overflow-hidden text-xs text-muted text-ellipsis">
+                    <%= if member.user.password_credential do %>
+                      <%= member.user.password_credential.email %>
+                    <% end %>
+                  </p>
+                </div>
+
+                <%= if(member.type == :team_manager) do %>
+                  <p class="flex-none text-sm capitalize text-muted">
+                    Manager
+                  </p>
+                  <div x-show="manage" x-cloak>
+                    <svg
+                      width="20"
+                      height="20"
+                      viewbox="0 0 22 22"
+                      aria-hidden="true"
+                      class="ml-2 opacity-50 text-secondary"
+                    >
+                      <path fill="currentColor" d={StridentWeb.Common.SvgUtils.path(:remove)}>
+                      </path>
+                    </svg>
+                  </div>
+                <% else %>
+                  <div x-show="manage" x-cloak>
+                    <div
+                      x-data="remover"
+                      class="flex items-center content-center justify-between overflow-hidden"
+                    >
+                      <div x-bind="removeTrigger">
+                        <svg
+                          width="20"
+                          height="20"
+                          viewbox="0 0 22 22"
+                          aria-hidden="true"
+                          class="cursor-pointer text-secondary"
+                        >
+                          <path fill="currentColor" d={StridentWeb.Common.SvgUtils.path(:remove)}>
+                          </path>
+                        </svg>
+                      </div>
+
+                      <div x-bind="removeClose" x-cloak class="mr-2 cursor-pointer">
+                        <svg
+                          width="20"
+                          height="20"
+                          viewbox="0 0 22 22"
+                          aria-hidden="true"
+                          class="text-muted"
+                        >
+                          <path fill="currentColor" d={StridentWeb.Common.SvgUtils.path(:close)}>
+                          </path>
+                        </svg>
+                      </div>
+
+                      <div
+                        x-bind="remove"
+                        x-cloak
+                        class="min-w-0 p-2 -mr-4 overflow-hidden text-sm cursor-pointer select-none bg-secondary rounded-l-md text-clip h-9"
+                        phx-click="remove-team-member"
+                        phx-value-member={member.id}
+                      >
+                        <div class="pr-4">
+                          Remove?
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

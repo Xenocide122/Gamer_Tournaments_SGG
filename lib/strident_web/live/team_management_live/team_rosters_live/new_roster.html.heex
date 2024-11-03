@@ -1,0 +1,278 @@
+<div class="relative" x-data="rosterManager">
+  <span x-bind="rosterAutoClose" />
+  <div x-bind="rosterWrapper" x-cloak>
+    <div class="p-4 bg-blackish" x-bind="roster">
+      <h4 class="text-center uppercase">
+        New Roster
+      </h4>
+
+      <.form
+        :let={f}
+        for={to_form(%{}, as: :new_roster)}
+        phx-change="validate-new-roster-name"
+        phx-submit="create-new-roster"
+      >
+        <div class="flex justify-between border-b-[1px] border-grey-medium py-2">
+          <div class="form__group">
+            <.form_label form={f} field={:roster_name} class="text-sm" />
+
+            <.form_text_input
+              form={f}
+              field={:roster_name}
+              class={
+                "form-input text-sm pl-3 pr-2 py-1#{if @new_roster_name_error, do: " form-input--error"}"
+              }
+              phx-debounce="300"
+              value={@new_roster_name}
+            />
+            <%= if @new_roster_name_error do %>
+              <span
+                phx-feedback-for={input_name(:new_roster, :roster_name)}
+                class="form-feedback--error invalid-feedback"
+              >
+                <%= @new_roster_name_error %>
+              </span>
+            <% end %>
+          </div>
+          <div x-data="dropdown">
+            <span class="text-sm">
+              Game
+            </span>
+            <div class="relative w-min">
+              <div
+                class="flex items-center content-center justify-between py-1 pl-3 pr-2 mb-1 space-x-6 text-sm cursor-pointer form-input text-muted w-fit"
+                x-bind:class="{'border-primary': isOpen, 'text-white': isOpen}"
+                x-bind="trigger"
+              >
+                <span class="select-none min-w-max w-52">
+                  <%= if @new_roster_game do %>
+                    <%= @new_roster_game.title %>
+                  <% else %>
+                    What game are they playing?
+                  <% end %>
+                </span>
+                <svg viewBox="0 0 18 18" width="20" height="20" aria-hidden="true">
+                  <path fill="currentColor" d={StridentWeb.Common.SvgUtils.path(:chevron_down)}>
+                  </path>
+                </svg>
+              </div>
+              <div
+                x-bind="menu_wrapper"
+                class="absolute z-50 w-full p-0 text-sm form-input border-primary"
+                x-cloak
+              >
+                <div x-bind="menu">
+                  <%= for game <- @games do %>
+                    <div
+                      class="px-3 py-[2px] text-muted cursor-pointer hover:bg-primary hover:text-grey-medium"
+                      phx-click="set-game"
+                      phx-value-game={game.id}
+                      @click="isOpen = false"
+                    >
+                      <%= game.title %>
+                    </div>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="py-2 mb-6">
+          <p class="text-sm">
+            Add to Roster
+          </p>
+          <div class="relative w-min">
+            <div
+              class="flex items-center content-center justify-between py-1 pl-3 pr-2 mb-1 space-x-6 text-sm cursor-pointer form-input text-muted w-fit"
+              x-bind:class="{'border-primary': addMemberOpen, 'text-white': addMemberOpen}"
+              x-bind="addMemberTrigger"
+            >
+              <span class="select-none min-w-max">
+                You must add at least 1 player
+              </span>
+              <svg viewBox="0 0 18 18" width="20" height="20" aria-hidden="true">
+                <path fill="currentColor" d={StridentWeb.Common.SvgUtils.path(:chevron_down)}>
+                </path>
+              </svg>
+            </div>
+            <div
+              x-bind="addMemberWrapper"
+              class="absolute z-50 w-full p-0 text-sm form-input border-primary"
+              x-cloak
+            >
+              <div x-bind="addMember">
+                <%= for member <- @team.team_members do %>
+                  <%= if Enum.any?(@new_roster_members, &(&1.team_member.id == member.id)) do %>
+                    <div class="px-3 pt-0.5 text-primary flex justify-between items-center cursor-default">
+                      <span class="min-w-0 overflow-hidden text-ellipsis">
+                        <%= member.user.display_name %>
+                      </span>
+                      <svg viewBox="0 0 18 18" width="15" height="15" aria-hidden="true">
+                        <path
+                          fill="currentColor"
+                          d={StridentWeb.Common.SvgUtils.path(:solid_check)}
+                        >
+                        </path>
+                      </svg>
+                    </div>
+                  <% else %>
+                    <div
+                      class="px-3 py-[2px] text-muted cursor-pointer hover:bg-primary hover:text-grey-medium min-w-0 overflow-hidden text-ellipsis"
+                      phx-click="add-new-roster-member"
+                      phx-value-member={member.id}
+                    >
+                      <%= member.user.display_name %>
+                    </div>
+                  <% end %>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="py-2 mb-8">
+          <%= for member <- @new_roster_members do %>
+            <div
+              class="flex items-center border-t-[1px] border-grey-medium py-1.5"
+              x-data="remover"
+            >
+              <img
+                src={member.team_member.user.avatar_url}
+                alt={member.team_member.user.display_name}
+                class="flex-none mr-3 rounded-full w-9 h-9"
+              />
+              <p class="flex-grow min-w-0 mr-3 overflow-hidden text-ellipsis">
+                <%= member.team_member.user.display_name %>
+              </p>
+
+              <%= if member.is_starter do %>
+                <div class="flex items-center flex-none mr-3 space-x-2 cursor-default">
+                  <div class="radio w-[14px]" on>
+                    <div class="radio--border" />
+                    <div class="radio--inner" />
+                  </div>
+                  <div class="flex-none text-sm text-primary">
+                    Starter
+                  </div>
+                </div>
+
+                <div
+                  class="flex items-center flex-none mr-3 space-x-2 cursor-pointer"
+                  phx-click="update-new-roster-member"
+                  phx-value-change="sub"
+                  phx-value-member={member.team_member.id}
+                >
+                  <div class="radio w-[14px]">
+                    <div class="radio--border" />
+                    <div class="radio--inner" />
+                  </div>
+                  <div class="flex-none text-sm text-muted">
+                    Sub
+                  </div>
+                </div>
+              <% else %>
+                <div
+                  class="flex items-center flex-none mr-3 space-x-2 cursor-pointer"
+                  phx-click="update-new-roster-member"
+                  phx-value-change="starter"
+                  phx-value-member={member.team_member.id}
+                >
+                  <div class="radio w-[14px]">
+                    <div class="radio--border" />
+                    <div class="radio--inner" />
+                  </div>
+                  <div class="flex-none text-sm text-muted">
+                    Starter
+                  </div>
+                </div>
+
+                <div class="flex items-center flex-none mr-3 space-x-2 cursor-default">
+                  <div class="radio w-[14px]" on>
+                    <div class="radio--border" />
+                    <div class="radio--inner" />
+                  </div>
+                  <div class="flex-none text-sm text-primary">
+                    Sub
+                  </div>
+                </div>
+              <% end %>
+
+              <div
+                class="flex items-center flex-none pl-4 mr-3 space-x-2 cursor-pointer"
+                phx-click="update-new-roster-member"
+                phx-value-change={if member.type == :captain, do: "player", else: "captain"}
+                phx-value-member={member.team_member.id}
+              >
+                <div class={
+                  if(member.type == :captain,
+                    do: "text-sm text-primary",
+                    else: "text-sm text-muted"
+                  )
+                }>
+                  Captain
+                </div>
+                <div class="toggle w-[20px]" on={member.type == :captain}>
+                  <div class="toggle--back" />
+                  <div class="toggle--button" />
+                </div>
+              </div>
+
+              <div x-bind="removeTrigger">
+                <svg
+                  width="20"
+                  height="20"
+                  viewbox="0 0 22 22"
+                  aria-hidden="true"
+                  class="cursor-pointer text-secondary"
+                >
+                  <path fill="currentColor" d={StridentWeb.Common.SvgUtils.path(:remove)}></path>
+                </svg>
+              </div>
+
+              <div x-bind="removeClose" x-cloak class="mr-2 cursor-pointer">
+                <svg
+                  width="20"
+                  height="20"
+                  viewbox="0 0 22 22"
+                  aria-hidden="true"
+                  class="text-muted"
+                >
+                  <path fill="currentColor" d={StridentWeb.Common.SvgUtils.path(:close)}></path>
+                </svg>
+              </div>
+
+              <div
+                phx-click="remove-new-roster-member"
+                phx-value-member={member.team_member.id}
+                x-bind="remove"
+                x-cloak
+                class="min-w-0 p-2 -mr-4 overflow-hidden text-sm cursor-pointer select-none bg-secondary rounded-l-md text-clip h-9"
+              >
+                Remove <%= member.team_member.user.display_name %> ?
+              </div>
+            </div>
+          <% end %>
+        </div>
+        <div class="flex justify-center pt-32">
+          <%= if @new_roster_name_error == nil and length(@new_roster_members) > 0 and @new_roster_game do %>
+            <button class="w-40 text-sm btn btn--primary px-auto">
+              Create Roster
+            </button>
+          <% else %>
+            <span class="w-40 text-sm text-center opacity-50 cursor-default select-none btn btn--primary px-auto">
+              Create Roster
+            </span>
+          <% end %>
+        </div>
+      </.form>
+    </div>
+  </div>
+  <div class="absolute left-0 flex justify-center w-full mt-16" x-show="!rosterOpen">
+    <button class="px-6 pt-4 pb-3 btn btn--primary" x-bind="rosterTrigger">
+      <h4 class="uppercase">
+        Create Roster
+      </h4>
+    </button>
+  </div>
+</div>

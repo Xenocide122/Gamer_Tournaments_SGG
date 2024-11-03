@@ -1,0 +1,19 @@
+<div class="max-w-md">
+  <.flash id="timezone-flash" flash={@flash} myself={@myself} />
+  <.form :let={f} for={@changeset} id="timezone-form" phx-submit="save" phx-target={@myself}>
+    <div class="inline-flex items-center space-x-2 form-group">
+      <.form_select
+        form={f}
+        field={:timezone}
+        values={@timezones}
+        selected={@current_user.timezone}
+        phx_debounce="300"
+        class="w-64"
+      />
+    </div>
+
+    <div>
+      <%= submit("Update", class: "btn btn--primary") %>
+    </div>
+  </.form>
+</div>

@@ -1,0 +1,27 @@
+<div class="flex flex-wrap justify-center mb-24 gap-x-10">
+  <%= for stages_structure <- @stages_structures do %>
+    <.card
+      colored={true}
+      inner_class="tournament-type-inner-card h-full"
+      id={"stages-structure-#{stages_structure.id}"}
+      class="card--glowing-two-tone flex flex-col w-96 mb-10 cursor-pointer transition duration-200 hover:scale-110 p-0.5"
+      phx-click="clicked-stages-structure"
+      phx-value-type={stages_structure.id}
+      phx-hook="ScrollToTop"
+    >
+      <h4 class="uppercase text-primary">
+        <%= stages_structure.title %>
+      </h4>
+      <div class="text-sm">
+        <%= stages_structure.description %>
+      </div>
+      <div class="flex justify-center h-24 rounded-b">
+        <img
+          class="rounded-b max-h-24"
+          src={stages_structure.img_src}
+          alt={stages_structure.title}
+        />
+      </div>
+    </.card>
+  <% end %>
+</div>

@@ -1,0 +1,29 @@
+<mjml>
+  <mj-include path="./components/header.mjml" />
+
+  <mj-body mj-class='bg-blackish'>
+    <mj-section mj-class='bg-blackish' background-url='https://strident-games.s3.amazonaws.com/new-email-bg-2.jpg' background-size='cover' background-repeat='no-repeat'>
+      <mj-column>
+        <mj-spacer height="350px" />
+      </mj-column>
+    </mj-section>
+    <mj-section mj-class='bg-blackish' padding='0 0 20px 0'>
+      <mj-column>
+        <mj-text css-class='header-title' mj-class='text-lg text-white' padding-bottom='0'>
+          You're invited to play in {{tournament_name}}!
+        </mj-text>
+        <mj-text mj-class='text-base text-white' padding='25px'>
+          This is being organized by {{organizer_name}}.
+        </mj-text>
+        <mj-text mj-class='text-base text-white' padding='25px'>
+          Use the buttons below to accept or decline the invitation.
+        </mj-text>
+
+        <mj-button align='left' mj-class='text-base font-bold text-black bg-green' href='{{accept_url}}'>Accept Invitation</mj-button>
+        <mj-button align='left' mj-class='text-base font-bold text-black bg-pink' href='{{decline_url}}'>Decline Invitation</mj-button>
+        <mj-spacer height="60px" />
+        <mj-include path="./components/footer.mjml" />
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

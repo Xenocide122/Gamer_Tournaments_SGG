@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <g id="alert_symbol" data-name="alert symbol" transform="translate(-787 -379)">
+    <circle id="Ellipse_16" data-name="Ellipse 16" cx="16" cy="16" r="16" transform="translate(787 379)" fill="#ef4444" opacity="0.2"/>
+    <g id="Icon_feather-alert-triangle" data-name="Icon feather-alert-triangle" transform="translate(792.672 382.725)">
+      <path id="Path_30" data-name="Path 30" d="M9.019,5.083,2.533,15.91a1.531,1.531,0,0,0,1.309,2.3H16.813a1.531,1.531,0,0,0,1.309-2.3L11.637,5.083a1.531,1.531,0,0,0-2.619,0Z" transform="translate(0 0)" fill="none" stroke="#ef4444" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      <path id="Path_31" data-name="Path 31" d="M18,13.5v3.246" transform="translate(-7.672 -4.561)" fill="none" stroke="#ef4444" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      <path id="Path_32" data-name="Path 32" d="M18,25.5h0" transform="translate(-7.672 -10.356)" fill="none" stroke="#ef4444" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+    </g>
+  </g>
+</svg>

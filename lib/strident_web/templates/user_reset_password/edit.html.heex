@@ -1,0 +1,49 @@
+<div class="pt-12 md:pt-44">
+  <div class="container">
+    <div class="max-w-lg mx-auto">
+      <h1>Reset password</h1>
+
+      <.form
+        :let={f}
+        for={@changeset}
+        action={Routes.user_reset_password_path(@conn, :update, @token)}
+      >
+        <%= if @changeset.action do %>
+          <div class="alert alert-danger">
+            <p>Oops, something went wrong! Please check the errors below.</p>
+          </div>
+        <% end %>
+
+        <div class="mb-6">
+          <%= label(f, :password, "New password") %>
+          <%= password_input(f, :password, required: true, class: "form-input") %>
+          <%= error_tag(f, :password) %>
+        </div>
+
+        <div class="mb-6">
+          <%= label(f, :password_confirmation, "Confirm new password") %>
+          <%= password_input(f, :password_confirmation, required: true, class: "form-input") %>
+          <%= error_tag(f, :password_confirmation) %>
+        </div>
+
+        <div class="mb-6">
+          <%= submit("Reset password", class: "btn btn--block btn--primary btn--wide") %>
+        </div>
+      </.form>
+
+      <div class="flex items-center justify-center mb-16">
+        <%= link("Register",
+          to: Routes.live_path(@conn, StridentWeb.UserRegistrationLive),
+          class: "text-sm font-bold uppercase text-primary"
+        ) %>
+        <div class="mx-6 text-gray-700">
+          |
+        </div>
+        <%= link("Log in",
+          to: Routes.live_path(@conn, StridentWeb.UserLogInLive),
+          class: "text-sm font-bold uppercase text-primary"
+        ) %>
+      </div>
+    </div>
+  </div>
+</div>

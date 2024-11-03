@@ -1,0 +1,59 @@
+<div class="relative h-80 md:h-112">
+<div class="relative h-80 md:h-112">
+  <div class="group absolute w-full overflow-hidden border-2 border-gray-600 cursor-pointer hover:z-40 hover:border-4 hover:bg-gray-50 hover:border-white hover:drop-shadow-3xl rounded-md max-h-[500px] md:max-h-[296px] hover:max-h-[500px] transition-[max-height] duration-1000 ease-in-out ">
+    <.link navigate={@tournament_link_to} class="w-full">
+      <div
+        class="w-full h-48 overflow-hidden bg-center bg-cover bg-blackish"
+        style={"background-image: url(#{imgproxy_url(@tournament.thumbnail_image_url || @tournament.game.default_game_banner_url, width: 512, height: 512, resize: :fit, enlarge: false)})"}
+      >
+      </div>
+      <div class="bg-primary-dark font-display font-medium py-4 px-6 group-hover:px-[22px] text-2xl md:text-3xl">
+        <div>
+          <.localised_datetime
+            datetime={@tournament.starts_at}
+            timezone={@timezone}
+            locale={@locale}
+          />
+        </div>
+        <div class="flex text-grilla-pink font-bold text-2xl">
+          <%= @team_size_label %>
+          <%= if @tournament.is_scrim, do: " | Scrims" %>
+        </div>
+        <div class="mt-4 space-y-4 text-xl uppercase hidden md:block">
+          <div class="flex gap-x-2">
+            <div class="text-primary">
+              <.svg icon={:calendar} width="29" height="25" />
+            </div>
+            <div>
+              <.localised_datetime
+                datetime={@tournament.starts_at}
+                timezone={@timezone}
+                locale={@locale}
+              />
+            </div>
+          </div>
+          <div>
+            <div class="flex gap-x-2">
+              <div class="text-primary">
+                <.svg icon={:map_pin} width="24" height="25" />
+              </div>
+              <div class="text-white">
+                <%= @tournament.location %>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="flex gap-x-2">
+              <div class="text-primary">
+                <.svg icon={:joystick} width="23" height="24" />
+              </div>
+              <div class="text-white">
+                <%= @tournament.platform %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </.link>
+  </div>
+</div>

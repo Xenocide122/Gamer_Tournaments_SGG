@@ -1,0 +1,96 @@
+<div>
+  <.flash flash={@flash} phx-target={@myself} class="absolute top-32" />
+  <h3 class="pb-2 uppercase text-secondary">Caution!</h3>
+  <p class="pb-8">
+    This action cannot be undone. All participants and fan contributions (if any) will be fully refunded.
+  </p>
+
+  <button
+    id={"cancel-tournament-button-#{@tournament.id}"}
+    class="text-white btn btn--secondary"
+    phx-click={show_modal("cancel-tournament-modal-#{@tournament.id}")}
+  >
+    Cancel Tournament
+  </button>
+
+  <.form
+    :let={f}
+    :if={!!@current_user.is_staff and !!System.get_env("IS_STAGING")}
+    for={@stage_types_form}
+    phx-change="change-stage-types"
+    phx-target={@myself}
+  >
+    <%= select(
+      f,
+      :stage_types,
+      BracketsStructures.valid_stage_type_permutations()
+      |> Enum.with_index()
+      |> Enum.map(fn {stage_type_atoms, index} ->
+        {stage_type_atoms |> Enum.map(&to_string/1) |> Enum.join(", "), index}
+      end)
+    ) %>
+  </.form>
+
+  <.modal_small id={"cancel-tournament-modal-#{@tournament.id}"}>
+    <:header>
+      <div class="flex items-center">
+        <img
+          class="rounded-b"
+          height="32"
+          width="32"
+          src="/images/font-awesome/alert.svg"
+          alt="alert"
+        />
+        <p class="ml-2">Cancel <%= @tournament.title %>?</p>
+      </div>
+    </:header>
+    <p class="text-xs text-grey-light">
+      Are you sure you want to cancel this tournament? This cannot be undone. Participants and contributors will be refunded immediately.
+    </p>
+    <.form
+      :let={f}
+      id={"tournament-cancellation-form-#{@tournament.id}"}
+      for={to_form(%{}, as: :cancel_tournament_form)}
+      phx-change="cancel-tournament-concession"
+      phx-target={@myself}
+      class="flex items-center mt-4"
+    >
+      <div class={
+        "flex items-center justify-center flex-shrink-0 w-6 h-6 mr-2 bg-transparent border-2 rounded-md #{if(@cancel_tournament_concession, do: "border-primary", else: "border-grey-light")}"
+      }>
+        <%= checkbox(f, :concession,
+          class: "opacity-0 absolute",
+          checked: @cancel_tournament_concession
+        ) %>
+        <.svg
+          icon={:solid_check}
+          class="hidden w-4 h-4 transition pointer-events-none fill-primary"
+        />
+      </div>
+      <p class={if @cancel_tournament_concession, do: "text-primary"}>
+        I want to cancel the tournament
+      </p>
+    </.form>
+    <:cancel>
+      <button
+        class="btn border-grey-light text-grey-light"
+        phx-click={hide_modal("cancel-tournament-modal-#{@tournament.id}")}
+      >
+        Back
+      </button>
+    </:cancel>
+    <:confirm>
+      <button
+        id={"tournament-cancellation-button-#{@tournament.id}"}
+        class={
+          "text-white btn btn--secondary#{if(not @cancel_tournament_concession, do: " opacity-50 cursor-not-allowed")}"
+        }
+        phx-click="cancel-tournament"
+        phx-target={@myself}
+        disabled={not @cancel_tournament_concession}
+      >
+        Cancel Tournament
+      </button>
+    </:confirm>
+  </.modal_small>
+</div>

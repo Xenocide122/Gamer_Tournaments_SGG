@@ -1,0 +1,87 @@
+@layer components {
+  foreignObject > body {
+    @apply min-h-auto;
+  }
+
+  .matches-graph-panel {
+    @apply border-2 border-primary relative;
+  }
+
+  .matches-graph {
+    @apply flex w-full aspect-[4/5] md:aspect-auto h-screen relative;
+  }
+
+  .match-graph-participant-logo {
+    @apply w-6 h-6 rounded-full border-black border-2 bg-gray-900 mr-2;
+  }
+
+  .match-graph-node-wrapper {
+    @apply w-full h-full flex items-center;
+  }
+
+  .match-graph-node {
+    @apply rounded-md bg-gray-900 w-full h-full grid grid-cols-1 divide-black divide-y-2 text-white;
+  }
+
+  .match-graph-node-finished {
+    @apply match-graph-node border-[1px] border-primary;
+  }
+
+  .match-graph-node-unfinished {
+    @apply match-graph-node p-[1px];
+    background: linear-gradient(
+        120deg,
+        var(--color-grilla-blue) 0%,
+        var(--color-grilla-pink) 100%
+      )
+      0% 0%;
+  }
+
+  .match-graph-match-participant {
+    @apply flex justify-between items-center;
+  }
+
+  .match-graph-match-winner {
+    @apply flex justify-between text-primary;
+  }
+
+  .match-graph-participant-details {
+    @apply flex truncate grow;
+  }
+
+  .match-graph-tbd-participant {
+    @apply text-grey-light;
+  }
+
+  .match-graph-participant-score {
+    @apply text-white px-2;
+  }
+
+  .match-graph-winner-score {
+    @apply match-graph-participant-score bg-primary text-black;
+  }
+
+  .match-graph-bracket-label {
+    @apply uppercase text-primary font-bold font-display text-2xl flex items-end;
+  }
+
+  .final-winner-logo-container {
+    @apply flex justify-center items-center h-36;
+  }
+
+  .final-winner-label {
+    @apply uppercase text-center text-primary font-bold mt-6;
+  }
+
+  .match-graph-loading-message {
+    @apply flex justify-around items-center;
+  }
+
+  .match-graph-node-label {
+    @apply border-[1px] rounded-l-lg px-1 border-grilla-blue text-grilla-pink min-w-[20];
+  }
+
+  .reset-match-button {
+    @apply absolute bottom-0 left-full cursor-pointer;
+  }
+}

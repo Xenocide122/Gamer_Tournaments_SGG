@@ -1,0 +1,38 @@
+@layer components {
+  label {
+    @apply block mb-2 text-white;
+  }
+
+  .form-group {
+    @apply mb-5;
+  }
+
+  .form-input {
+    @apply w-full bg-blackish border border-primary rounded py-2.5 px-5 focus:border-primary focus:ring-1 focus:ring-primary;
+  }
+
+  /* Commented out while this is still an issue: https://github.com/phoenixframework/phoenix_live_view/issues/1313#issuecomment-1130051344 */
+  /* .form-input--error:not(.phx-no-feedback):not(.no-feedback) { */
+  /*   @apply border-red-500 ring-1 ring-red-500 focus:border-red-500 focus:ring-red-500; */
+  /* } */
+
+  input[type='text'] + .password-svg-wrapper .password-svg-show {
+    @apply hidden;
+  }
+
+  input[type='password'] + .password-svg-wrapper .password-svg-hide {
+    @apply hidden;
+  }
+
+  .form-feedback--error {
+    @apply text-sm text-red-500 mt-0.5;
+  }
+
+  input[type='text']:disabled {
+    @apply opacity-70;
+  }
+
+  ::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+  }
+}

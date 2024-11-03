@@ -1,0 +1,32 @@
+<div class="py-16 mt-16 text-center md:text-left">
+  <div class="container space-y-4 ">
+    <div class="lg:px-3">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-6xl leading-none tracking-normal font-display">Cluster</h3>
+        </div>
+      </div>
+      <div class="pb-5 mb-4 border-b border-gray-200 sm:pb-0">
+        <div class="mt-3 sm:mt-4">
+          <div>
+            <Menus.tabs selected={:cluster} />
+          </div>
+        </div>
+      </div>
+      <section id="cluster-table" class="mt-8">
+        <.table rows={@node_details}>
+          <:col :let={node} label="node">
+            <%= node.id %>
+          </:col>
+          <:col :let={node} label="Region">
+            <%= node.region %>
+          </:col>
+        </.table>
+
+        <div>
+          Image tag: <%= Application.get_env(:strident, :image_tag) %>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>

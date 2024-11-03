@@ -1,0 +1,75 @@
+<div class="mt-1 relative">
+  <form phx-change="search" phx-target={@myself}>
+    <div class="relative w-fit">
+      <input
+        class="h-14 w-96 pl-10 pr-20 rounded-lg z-0 focus:shadow focus:outline-none form-input"
+        type="text"
+        name="search_term"
+        phx-debounce="800"
+        x-trap.inert="true"
+        value={@search_term}
+        placeholder={@placeholder}
+        autocomplete="off"
+      />
+      <svg
+        class="absolute right-0 top-0 mt-5 mr-4 text-gray-600 h-4 w-4 fill-current"
+        xmlns="http://www.w3.org/2000/svg"
+        xmlns:xlink="http://www.w3.org/1999/xlink"
+        version="1.1"
+        id="Capa_1"
+        x="0px"
+        y="0px"
+        viewBox="0 0 56.966 56.966"
+        style="enable-background:new 0 0 56.966 56.966;"
+        xml:space="preserve"
+        width="512px"
+        height="512px"
+      >
+        <path d={StridentWeb.Common.SvgUtils.path(:magnifying_glass)}></path>
+      </svg>
+    </div>
+  </form>
+
+  <%= if Enum.any?(@games) do %>
+    <ul
+      class="dropdown-menu mt-0 absolute z-10 w-full shadow-lg max-h-56 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm w-96"
+      tabindex="-1"
+    >
+      <%= for game <- @games do %>
+        <li
+          class="cursor-pointer relative py-2 pl-3 pr-9 hover:bg-gray-100 dark:hover:bg-gray-600"
+          x-data="{focused: false}"
+          @mouseover.away="focused = false"
+          @mouseover="focused = true"
+          phx-click="game-clicked"
+          phx-value-game_id={game.id}
+        >
+          <div class="flex items-center">
+            <img src={game.cover_image_url} alt="" class="flex-shrink-0 h-6 w-6 rounded-full" />
+            <span class="font-normal ml-3 block truncate">
+              <%= game.title %>
+            </span>
+          </div>
+
+          <%= if game in @checked_games do %>
+            <span class="absolute inset-y-0 right-0 flex items-center pr-4">
+              <svg
+                class="h-5 w-5"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d={StridentWeb.Common.SvgUtils.path(:solid_check)}
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </span>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+</div>

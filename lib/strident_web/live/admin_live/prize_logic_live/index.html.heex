@@ -1,0 +1,84 @@
+<div class="flex px-10 mt-32">
+  <.form
+    :let={f}
+    for={@changeset}
+    id="prize-logic-form"
+    phx-change="change"
+    phx-submit="submit"
+    class="mr-4"
+  >
+    <div class="flex justify-between">
+      <div class="mr-6">
+        <%= label(f, :number_of_participants, "How many teams are playing?") %>
+        <%= number_input(
+          f,
+          :number_of_participants,
+          min: 2,
+          phx_debounce: @debounce,
+          class: "bg-blackish text-primary mb-4"
+        ) %>
+      </div>
+
+      <div>
+        <%= label(f, :buy_in_amount, "What's the buy-in?") %>
+        <.live_component
+          id="amount_input"
+          module={StridentWeb.Common.MoneyInput}
+          f={f}
+          min={1}
+          phx_debounce={@debounce}
+          field={:buy_in_amount}
+          timezone={@timezone}
+          locale={@locale}
+        />
+      </div>
+    </div>
+
+    <%= label(f, :prize_reducer_magnified, "What kind of prize distribution do you want?") %>
+    <div class="flex mb-4">
+      <div class="mr-2">
+        A few high-value prizes
+      </div>
+      <%= range_input(
+        f,
+        :prize_reducer_magnified,
+        min: 1,
+        max: 999,
+        phx_debounce: @debounce,
+        class: "bg-blackish text-primary mb-8"
+      ) %>
+      <div class="ml-2">
+        Many low-value prizes
+      </div>
+    </div>
+
+    <%= label(
+      f,
+      :required_min_split,
+      "What do you want the minimum split to be? (must be between 0 and 1, inclusive)"
+    ) %>
+    <%= number_input(
+      f,
+      :required_min_split,
+      min: 0,
+      max: 1,
+      step: 0.001,
+      phx_debounce: @debounce,
+      class: "bg-blackish text-primary mb-4 w-full"
+    ) %>
+    <div class="max-w-md text-sm">
+      A higher minimum split means backers are guaranteed more money. It can result in having more prizes (albeit lower-value prizes) but may deter participants looking to make as much money as possible. By contrast, a lower minimum split allows the team/party captains to offer their backers very little money and will result in a small amount of high-value prizes.
+    </div>
+  </.form>
+
+  <div id="recommended prize pool" class="py-20 ml-10">
+    <div>Recommended prize pool</div>
+    <.live_component
+      id="prize-logic-recommended-prize-pool"
+      module={StridentWeb.Components.PrizePool}
+      prize_pool={Ecto.Changeset.get_field(@changeset, :recommended_prize_pool)}
+      timezone={@timezone}
+      locale={@locale}
+    />
+  </div>
+</div>

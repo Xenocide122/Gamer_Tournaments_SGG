@@ -1,0 +1,52 @@
+<div
+  class="overflow-y-visible overflow-x-clip relative -mx-[40px] select-none"
+  x-data="tournamentHoverGroup"
+  number-tournaments={length(@tournaments)}
+  @resize.window="resize();"
+>
+  <div
+    class="flex space-x-[24px] items-center transition duration-1000"
+    x-bind="bar"
+    style="transform: translate(60px, 0)"
+  >
+    <%= for tournament <- @tournaments do %>
+      <div class="flex-none" x-bind="tournamentContainer">
+        <.live_component
+          id={"tournament-#{@myself}-hover-#{tournament.id}"}
+          module={StridentWeb.Components.Tournaments.HoverTournamentCard}
+          tournament={tournament}
+          timezone={@timezone}
+          locale={@locale}
+          allow_hover_default={false}
+        />
+      </div>
+    <% end %>
+  </div>
+
+  <div
+    class="absolute left-0 top-0 h-32 w-[60px] bg-gradient-to-r from-black flex items-center justify-center cursor-pointer"
+    x-bind="pageLeft"
+  >
+    <.svg icon={:chevron_left} width="120" height="120" class="fill-current" />
+  </div>
+  <div
+    class="absolute right-0 top-0 h-32 w-[60px] bg-gradient-to-l from-black flex items-center justify-center cursor-pointer"
+    x-bind="pageRight"
+  >
+    <.svg icon={:chevron_right} width="120" height="120" class="fill-current" />
+  </div>
+
+  <div
+    class="absolute right-0 top-0 -mt-7 flex min-w-max mr-[60px]"
+    x-bind="pageIndicator"
+    x-cloak
+  >
+    <template x-for="i in Math.ceil(numberTournaments / tournamentsPerScroll)">
+      <div
+        class="w-4 h-4 rounded-full"
+        x-bind:class="(i-1)*tournamentsPerScroll >= position && (i-2)*tournamentsPerScroll < position ? 'bg-primary' : 'bg-grey-medium'"
+      >
+      </div>
+    </template>
+  </div>
+</div>

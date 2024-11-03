@@ -1,0 +1,78 @@
+<div class="pt-12 md:pt-44">
+  <div class="container">
+    <div class="max-w-lg mx-auto">
+      <div class="p-6 mb-20 card">
+        <h2 class="mb-4">
+          Log in
+        </h2>
+        <p class="mb-6 text-sm text-muted">
+          Need an account?
+          <.link
+            navigate={Routes.live_path(@socket, StridentWeb.UserRegistrationLive)}
+            class="cursor-pointer text-primary"
+          >
+            Create an account
+          </.link>
+        </p>
+
+        <%= StridentWeb.Oauth2View.render("menu.html", %{show_apple_login: @show_apple_login}) %>
+
+        <p class="my-6 text-center text-muted">OR</p>
+
+        <.form
+          :let={f}
+          id="login-form"
+          class="space-y-6"
+          for={@changeset}
+          action={Routes.user_session_path(@socket, :create, user_return_to: @user_return_to)}
+          as={:user}
+          phx-submit="login"
+          phx-change="validate"
+          phx-trigger-action={@trigger_login}
+        >
+          <div class="form__group">
+            <.form_label form={f} field={:email} />
+            <.form_email_input
+              form={f}
+              field={:email}
+              phx_debounce="blur"
+              autocomplete="username"
+              autofocus={true}
+            />
+            <.form_feedback form={f} field={:email} />
+          </div>
+
+          <div class="form__group">
+            <.form_label form={f} field={:password} />
+            <.form_password_input
+              form={f}
+              field={:password}
+              phx_debounce="blur"
+              value={input_value(f, :password)}
+              autocomplete="current-password"
+            />
+          </div>
+
+          <div class="text-sm">
+            <%= link("Forgot your password?",
+              to: Routes.user_reset_password_path(@socket, :new),
+              class: "block h-full font-medium text-primary"
+            ) %>
+          </div>
+
+          <%= if @invalid_login do %>
+            <div class="invalid-feedback">
+              Incorrect username or password
+            </div>
+          <% end %>
+
+          <%= checkbox(f, :remember_me, class: "hidden", checked: "true") %>
+
+          <div>
+            <%= submit("Log in", class: "btn btn--block btn--primary btn--wide") %>
+          </div>
+        </.form>
+      </div>
+    </div>
+  </div>
+</div>

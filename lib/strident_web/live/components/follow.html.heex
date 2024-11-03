@@ -1,0 +1,43 @@
+<div x-data="follow" x-init={"isFollowing = #{@following_user};"}>
+  <div class="relative">
+    <div class="" x-bind="following" x-cloak={not @following_user}>
+      <div class="grid place-items-center md:flex justify-between items-center h-[2.875rem]">
+        <div class="flex items-center mr-4 uppercase text-primary">
+          <div class="pr-2">
+            <svg
+              class="w-10 h-10"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 -8 528 528"
+              fill="currentColor"
+            >
+              <path d={StridentWeb.Common.SvgUtils.path(:circle_check)} />
+            </svg>
+          </div>
+          Following
+        </div>
+
+        <button
+          class="px-2 text-xs underline uppercase border-none rounded text-grey-light"
+          phx-click="unfollow"
+        >
+          Unfollow
+        </button>
+      </div>
+    </div>
+    <div class="" x-bind="notFollowing" x-cloak={not @following_user}>
+      <button class="btn btn--primary" phx-click="follow">
+        <div class="flex items-center space-x-2">
+          <svg
+            class="w-6 h-6"
+            xmlns="https://www.w3.org/2000/svg"
+            viewBox="0 0 576 512"
+            fill="currentColor"
+          >
+            <path d={StridentWeb.Common.SvgUtils.path(:star)} />
+          </svg>
+          <h4 class="uppercase">Follow</h4>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>

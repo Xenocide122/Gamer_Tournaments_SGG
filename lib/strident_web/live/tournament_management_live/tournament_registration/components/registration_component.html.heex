@@ -1,0 +1,181 @@
+<div>
+  <.card id={@id} colored class="card--glowing-two-tone p-0.5">
+    <h3><%= @tournament.title %></h3>
+    <.form
+      :let={f}
+      for={@changeset}
+      id="tournament-participant-form"
+      phx-change="change-tournament-participant"
+      phx-submit="create-tournament-participant"
+      phx-target={@myself}
+    >
+      <div class="grid grid-cols-1 gap-8 mb-4 lg:grid-cols-2">
+        <div class="col-span-1">
+          <div class="lg:mb-10">
+            <h6 class="mb-2 uppercase text-grey-light">
+              Game
+            </h6>
+            <%= @tournament.game.title %>
+          </div>
+
+          <div class="lg:mb-10">
+            <.prize_pool
+              prize_strategy={@tournament.prize_strategy}
+              prize_pool={@tournament.prize_pool}
+              prize_distribution={@tournament.prize_distribution}
+            />
+          </div>
+
+          <section :if={Enum.any?(@tournament.registration_fields)} class="lg:mb-10">
+            <%= for registration_field_form <- inputs_for(f, :registration_fields) do %>
+              <%= hidden_input(registration_field_form, :name) %>
+              <%= hidden_input(registration_field_form, :type) %>
+
+              <p class="text-xs text-grey-light">
+                <%= Changeset.get_change(registration_field_form.source, :name) %> (Required)
+              </p>
+
+              <.form_text_input
+                :if={Changeset.get_change(registration_field_form.source, :type) == :text}
+                form={registration_field_form}
+                field={:value}
+                phx_debounce="300"
+                class="mb-2"
+              />
+
+              <.form_textarea
+                :if={Changeset.get_change(registration_field_form.source, :type) == :text_box}
+                form={registration_field_form}
+                field={:value}
+                rows="3"
+                class="mb-2"
+                phx_debounce="300"
+              />
+
+              <.form_feedback form={registration_field_form} field={:value} />
+            <% end %>
+          </section>
+
+          <div :if={@tournament.players_per_participant > 1} class="grid">
+            <h3 class="w-full py-2 text-white uppercase">
+              Team Information
+            </h3>
+
+            <div class="mb-4">
+              <h4 class="mb-2 uppercase text-grey-light">
+                Team Name
+              </h4>
+              <div class="divide-y divide-black">
+                <div class="">
+                  <%= get_party_name_from_changeset(@party_changeset) %>
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <h4 class="mb-2 uppercase text-grey-light">
+                Team Logo/Image
+              </h4>
+              <span :if={!get_logo_url_from_changeset(@party_changeset)}>
+                No logo provided
+              </span>
+              <img
+                :if={!!get_logo_url_from_changeset(@party_changeset)}
+                src={Changeset.get_change(@party_changeset, :logo_url)}
+                alt="Party Image"
+                class="h-30  mr-2.5"
+              />
+            </div>
+
+            <div class="mb-4">
+              <h4 class="mb-2 uppercase text-grey-light">
+                Your Roster
+              </h4>
+              <div :if={Enum.any?(@roster_details)} class="divide-y divide-black">
+                <div class="grid mb-6 gap-y-2">
+                  <div
+                    :for={%{user: user, email: email, type: type} <- @roster_details}
+                    class="flex items-center gap-x-3"
+                  >
+                    <img :if={user} src={user.avatar_url} alt="avi" class="w-8 h-8 rounded-full" />
+
+                    <div>
+                      <div class="flex items-center">
+                        <div class="text-white">
+                          <%= if user, do: user.display_name, else: email %>
+                        </div>
+                      </div>
+
+                      <div :if={type} class="text-xs text-grey-light">
+                        <%= type %>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div :if={@tournament.allow_staking} class="lg:mb-10">
+            <h6 class="mb-2 uppercase text-grey-light">
+              How would you like to pay the entry fee?
+            </h6>
+
+            <div class="flex flex-col">
+              <div class="flex items-center grilla-radio">
+                <%= label(class: "control-label m-0") do %>
+                  <%= radio_button(f, :status, :confirmed,
+                    checked: Changeset.get_change(@changeset, :status) == :confirmed
+                  ) %>
+                  <span class="mb-0">
+                    Pay entry fee in full myself
+                  </span>
+                  <p class="text-xs text-grey-light">
+                    Pay your entry fee now to guarantee your spot in the tournament. You can turn on fan contributions after registration if you want your fans to help chip away at the entry fee.
+                  </p>
+                <% end %>
+              </div>
+
+              <div class="flex items-center grilla-radio">
+                <%= label(class: "control-label m-0") do %>
+                  <%= radio_button(f, :status, :contribution_to_entry_fee,
+                    checked:
+                      Changeset.get_change(@changeset, :status) == :contribution_to_entry_fee
+                  ) %>
+                  <span class="mb-0">
+                    Open fan contributions to crowdsource entry fee
+                  </span>
+                  <p class="text-xs text-grey-light">
+                    You won't be guaranteed a spot in the tournament until your entry fee is raised via fan contributions, but you owe nothing up front. You can opt to pay the remaining entry fee at any time to lock in your spot.
+                  </p>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-span-1">
+          <.button
+            id="back-button"
+            type="button"
+            button_type={:primary_ghost}
+            class="font-bold px-2 md:px-8 py-3 text-base !no-underline uppercase border-white border-2 rounded-lg btn--primary font-display md:text-3xl text-center align-center"
+            phx-click="back"
+            phx-value-current_page={@current_page}
+            phx-hook="ScrollToTop"
+          >
+            Back
+          </.button>
+          <.button
+            id={"join-tournament-#{@tournament.id}"}
+            type="submit"
+            button_type={:primary}
+            class="mx-4"
+            disabled={not @changeset.valid?}
+          >
+            Join Tournament
+          </.button>
+        </div>
+      </div>
+    </.form>
+  </.card>
+</div>

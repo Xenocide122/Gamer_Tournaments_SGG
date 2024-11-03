@@ -1,0 +1,18 @@
+<div>
+  <.link
+    navigate={Routes.tournament_index_path(@socket, :index, %{games: @game.slug})}
+    class="cursor-pointer"
+  >
+    <div class="aspect-square rounded-lg w-full relative bg-grey-medium overflow-clip group/hovergame">
+      <div class="w-full h-full transition-opacity ease-linear opacity-0 group-hover/hovergame:opacity-100">
+        <img
+          class="w-full h-full transition-transform ease-out duration-200 scale-0 rounded-lg group-hover/hovergame:scale-100"
+          src={@game.cover_image_url}
+        />
+      </div>
+      <div class="absolute w-full h-full top-0 left-0 bottom-0 right-0 p-8 transition-opacity ease-linear group-hover/hovergame:opacity-0">
+        <img class="w-full h-full" src={Games.logo_url(@game)} />
+      </div>
+    </div>
+  </.link>
+</div>

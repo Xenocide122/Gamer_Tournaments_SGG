@@ -1,0 +1,307 @@
+<div x-data="modal">
+  <div class="modal__overlay">
+    <div class="modal__frame">
+      <div
+        class="modal__backdrop"
+        phx-capture-click="close-tournament-participant"
+        phx-value-tournament={@tournament.id}
+      >
+      </div>
+
+      <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">
+        &#8203;
+      </span>
+
+      <div class="my-24 modal__dialog modal__dialog--medium">
+        <.wide_card colored={true}>
+          <div class="flex justify-between mb-4">
+            <div>
+              <h3>
+                <%= @tournament.title %>
+              </h3>
+
+              <.localised_datetime
+                datetime={@tournament.starts_at}
+                timezone={@timezone}
+                locale={@locale}
+                class="block mb-4 text-sm text-grey-light"
+              />
+            </div>
+
+            <div
+              class="hidden lg:flex"
+              phx-click="close-tournament-participant"
+              phx-value-tournament={@tournament.id}
+            >
+              <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+                <path
+                  fill-rule="evenodd"
+                  d={StridentWeb.Common.SvgUtils.path(:x_circle)}
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
+            <div class="col-span-1">
+              <div class="mb-4">
+                <div class="font-display text-grey-light">
+                  Game
+                </div>
+                <%= @tournament.game.title %>
+              </div>
+
+              <div class="mb-4">
+                <div class="font-display text-grey-light">
+                  Prize pool
+                </div>
+
+                <.live_component
+                  id={"tournament-prize-pool-#{@tournament.id}"}
+                  module={
+                    case @tournament.prize_strategy do
+                      :prize_pool -> StridentWeb.Components.PrizePool
+                      :prize_distribution -> StridentWeb.Components.PrizeDistribution
+                    end
+                  }
+                  prize_strategy={@tournament.prize_strategy}
+                  prize_pool={@tournament.prize_pool}
+                  prize_distribution={@tournament.prize_distribution}
+                  position={:vertical}
+                  timezone={@timezone}
+                  locale={@locale}
+                />
+              </div>
+
+              <div class="mb-4">
+                <div class="mb-2 font-display text-grey-light">
+                  Split with contributors
+                </div>
+
+                <div class="text-xs text-grey-light">
+                  Contributor %
+                </div>
+                <.form
+                  :let={f}
+                  for={to_form(%{}, as: :participant_stake)}
+                  phx-change="validate-participant-stake"
+                  phx-target={@myself}
+                  class="mb-2"
+                >
+                  <%= number_input(f, :stake_percentage,
+                    class: "form-input",
+                    min: get_mininum_split_stake(@tournament),
+                    max: 100,
+                    value: @stake_percentage,
+                    disabled: not is_future?(@tournament.registrations_open_at)
+                  ) %>
+                </.form>
+
+                <div class="text-xs text-grey-light">
+                  Your team takes home <%= @stake_percentage %> %
+                </div>
+              </div>
+            </div>
+
+            <div class="col-span-2" x-data="rosterManager">
+              <div class="mb-2 font-display text-grey-light">
+                Roster
+              </div>
+
+              <div x-cloak>
+                <div class="bg-blackish">
+                  <div class="border-b-[1px] border-grey-medium">
+                    <div class="relative w-min">
+                      <div
+                        class="flex items-center content-center justify-between py-1 pl-3 pr-2 mb-1 space-x-6 text-sm cursor-pointer form-input text-muted w-fit"
+                        x-bind:class="{'border-primary': addMemberOpen, 'text-white': addMemberOpen}"
+                        x-bind="addMemberTrigger"
+                      >
+                        <span class="select-none min-w-max">
+                          Select players to add
+                        </span>
+                        <svg viewBox="0 0 18 18" width="20" height="20" aria-hidden="true">
+                          <path
+                            fill="currentColor"
+                            d={StridentWeb.Common.SvgUtils.path(:chevron_down)}
+                          >
+                          </path>
+                        </svg>
+                      </div>
+                      <div
+                        x-bind="addMemberWrapper"
+                        class="absolute z-50 w-full p-0 text-sm form-input border-primary"
+                        x-cloak
+                      >
+                        <div x-bind="addMember">
+                          <%= for member <- @team.team_members do %>
+                            <%= if Enum.any?(@roster, &(&1.id == member.user.id)) do %>
+                              <div class="px-3 py-[2px] text-primary flex justify-between items-center cursor-default select-none">
+                                <span class="min-w-0 overflow-hidden select-none text-ellipsis">
+                                  <%= Accounts.user_display_name(member.user) %>
+                                </span>
+                                <svg viewBox="0 0 18 18" width="15" height="15" aria-hidden="true">
+                                  <path
+                                    fill="currentColor"
+                                    d={StridentWeb.Common.SvgUtils.path(:solid_check)}
+                                  >
+                                  </path>
+                                </svg>
+                              </div>
+                            <% else %>
+                              <div
+                                class="px-3 py-[2px] text-muted cursor-pointer hover:bg-primary hover:text-grey-medium min-w-0 overflow-hidden text-ellipsis"
+                                phx-click="add-roster-player"
+                                phx-value-user={member.user.id}
+                                phx-target={@myself}
+                              >
+                                <%= Accounts.user_display_name(member.user) %>
+                              </div>
+                            <% end %>
+                          <% end %>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="py-2">
+                  <%= for user = %{players: [player]} <- @roster do %>
+                    <div
+                      class="flex items-center border-b-[1px] border-grey-medium py-1.5 last:border-b-0"
+                      x-data="remover"
+                    >
+                      <img
+                        src={Accounts.avatar_url(user)}
+                        alt={Accounts.user_display_name(user)}
+                        class="flex-none mr-3 rounded-full w-9 h-9"
+                      />
+
+                      <p class="flex-grow min-w-0 mr-3 overflow-hidden text-ellipsis">
+                        <%= Accounts.user_display_name(user) %>
+                      </p>
+
+                      <div class="flex items-center flex-none mr-3 space-x-2 cursor-default">
+                        <%= if player.is_starter do %>
+                          <div class="mr-2 text-sm text-primary">
+                            Starter
+                          </div>
+
+                          <div class="radio w-[14px]" on>
+                            <div class="radio--border"></div>
+                            <div class="radio--inner"></div>
+                          </div>
+                        <% else %>
+                          <div class="mr-2 text-sm text-muted">
+                            Starter
+                          </div>
+
+                          <div
+                            class="radio w-[14px]"
+                            phx-click="make-starter"
+                            phx-value-player={player.id}
+                            phx-target={@myself}
+                          >
+                            <div class="radio--border"></div>
+                            <div class="radio--inner"></div>
+                          </div>
+                        <% end %>
+                      </div>
+
+                      <div class="flex items-center flex-none mr-3 space-x-2 cursor-pointer">
+                        <%= if not player.is_starter do %>
+                          <div class="mr-2 text-sm text-primary">
+                            Sub
+                          </div>
+
+                          <div class="radio w-[14px]" on>
+                            <div class="radio--border"></div>
+                            <div class="radio--inner"></div>
+                          </div>
+                        <% else %>
+                          <div class="mr-2 text-sm text-muted">
+                            Sub
+                          </div>
+
+                          <div
+                            class="radio w-[14px]"
+                            phx-click="make-sub"
+                            phx-value-player={player.id}
+                            phx-target={@myself}
+                          >
+                            <div class="radio--border"></div>
+                            <div class="radio--inner"></div>
+                          </div>
+                        <% end %>
+                      </div>
+
+                      <div
+                        class="flex items-center flex-none pl-4 mr-3 space-x-2 cursor-pointer"
+                        phx-click="toggle-captain"
+                        phx-value-player={player.id}
+                        phx-value-type={player.type}
+                        phx-target={@myself}
+                      >
+                        <div class={
+                          if(player.type == :captain,
+                            do: "text-sm text-primary",
+                            else: "text-sm text-muted"
+                          )
+                        }>
+                          Captain
+                        </div>
+
+                        <div class="toggle w-[20px]" on={player.type == :captain}>
+                          <div class="toggle--back"></div>
+                          <div class="toggle--button"></div>
+                        </div>
+                      </div>
+
+                      <div x-bind="removeTrigger">
+                        <svg
+                          width="20"
+                          height="20"
+                          viewbox="0 0 22 22"
+                          aria-hidden="true"
+                          class="cursor-pointer text-secondary"
+                        >
+                          <path fill="currentColor" d={StridentWeb.Common.SvgUtils.path(:remove)}>
+                          </path>
+                        </svg>
+                      </div>
+
+                      <div x-bind="removeClose" x-cloak class="mr-2 cursor-pointer">
+                        <svg
+                          width="20"
+                          height="20"
+                          viewbox="0 0 22 22"
+                          aria-hidden="true"
+                          class="text-muted"
+                        >
+                          <path fill="currentColor" d={StridentWeb.Common.SvgUtils.path(:close)}>
+                          </path>
+                        </svg>
+                      </div>
+
+                      <div
+                        phx-click="remove-roster-player"
+                        phx-value-player={player.id}
+                        phx-target={@myself}
+                        x-bind="remove"
+                        x-cloak
+                        class="min-w-0 p-2 -mr-4 overflow-hidden text-sm cursor-pointer select-none bg-secondary rounded-l-md text-clip h-9"
+                      >
+                        Remove
+                      </div>
+                    </div>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+          </div>
+        </.wide_card>
+      </div>
+    </div>
+  </div>
+</div>

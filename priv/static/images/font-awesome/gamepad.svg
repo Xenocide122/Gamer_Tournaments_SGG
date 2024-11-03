@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="55.994" height="36" viewBox="0 0 55.994 36">
+  <defs>
+    <filter id="Icon_awesome-gamepad" x="0" y="0" width="55.994" height="36" filterUnits="userSpaceOnUse">
+      <feOffset input="SourceAlpha"/>
+      <feGaussianBlur stdDeviation="2.5" result="blur"/>
+      <feFlood flood-color="#03d5fb"/>
+      <feComposite operator="in" in2="blur"/>
+    </filter>
+    <filter id="Icon_awesome-gamepad-2" x="0" y="0" width="55.994" height="36" filterUnits="userSpaceOnUse">
+      <feOffset input="SourceAlpha"/>
+      <feGaussianBlur stdDeviation="2" result="blur-2"/>
+      <feFlood flood-color="#03d5fb" result="color"/>
+      <feComposite operator="out" in="SourceGraphic" in2="blur-2"/>
+      <feComposite operator="in" in="color"/>
+      <feComposite operator="in" in2="SourceGraphic"/>
+    </filter>
+  </defs>
+  <g data-type="innerShadowGroup">
+    <g transform="matrix(1, 0, 0, 1, 0, 0)" filter="url(#Icon_awesome-gamepad)">
+      <path id="Icon_awesome-gamepad-3" data-name="Icon awesome-gamepad" d="M30,6.75H10a10,10,0,1,0,7.138,17h5.719A10,10,0,1,0,30,6.75ZM16,18a.752.752,0,0,1-.75.75H12V22a.752.752,0,0,1-.75.75H8.75A.752.752,0,0,1,8,22V18.75H4.75A.752.752,0,0,1,4,18V15.5a.752.752,0,0,1,.75-.75H8V11.5a.752.752,0,0,1,.75-.75h2.5a.752.752,0,0,1,.75.75v3.25h3.25a.752.752,0,0,1,.75.75Zm11.5,4.25a3,3,0,1,1,3-3A3,3,0,0,1,27.5,22.25Zm5-5a3,3,0,1,1,3-3A3,3,0,0,1,32.5,17.25Z" transform="translate(8 1.25)" fill="none" stroke="#03d5fb" stroke-width="1"/>
+    </g>
+    <g transform="matrix(1, 0, 0, 1, 0, 0)" filter="url(#Icon_awesome-gamepad-2)">
+      <path id="Icon_awesome-gamepad-4" data-name="Icon awesome-gamepad" d="M30,6.75H10a10,10,0,1,0,7.138,17h5.719A10,10,0,1,0,30,6.75ZM16,18a.752.752,0,0,1-.75.75H12V22a.752.752,0,0,1-.75.75H8.75A.752.752,0,0,1,8,22V18.75H4.75A.752.752,0,0,1,4,18V15.5a.752.752,0,0,1,.75-.75H8V11.5a.752.752,0,0,1,.75-.75h2.5a.752.752,0,0,1,.75.75v3.25h3.25a.752.752,0,0,1,.75.75Zm11.5,4.25a3,3,0,1,1,3-3A3,3,0,0,1,27.5,22.25Zm5-5a3,3,0,1,1,3-3A3,3,0,0,1,32.5,17.25Z" transform="translate(8 1.25)" fill="#fff"/>
+    </g>
+    <path id="Icon_awesome-gamepad-5" data-name="Icon awesome-gamepad" d="M30,6.75H10a10,10,0,1,0,7.138,17h5.719A10,10,0,1,0,30,6.75ZM16,18a.752.752,0,0,1-.75.75H12V22a.752.752,0,0,1-.75.75H8.75A.752.752,0,0,1,8,22V18.75H4.75A.752.752,0,0,1,4,18V15.5a.752.752,0,0,1,.75-.75H8V11.5a.752.752,0,0,1,.75-.75h2.5a.752.752,0,0,1,.75.75v3.25h3.25a.752.752,0,0,1,.75.75Zm11.5,4.25a3,3,0,1,1,3-3A3,3,0,0,1,27.5,22.25Zm5-5a3,3,0,1,1,3-3A3,3,0,0,1,32.5,17.25Z" transform="translate(8 1.25)" fill="none" stroke="#03d5fb" stroke-width="1"/>
+  </g>
+</svg>

@@ -1,0 +1,216 @@
+<div id="bracket-seeding" class="relative">
+  <.flash flash={@flash} phx-target={@myself} class="fixed !bottom-8 !left-8 w-1/2 h-0" />
+  <.focus_wrap id="seed-places-panel-focus-wrap">
+    <div id="seeds-two-panel-seeding-interface" class="grid grid-cols-12 gap-x-6">
+      <div id="seed-places-panel" class="col-span-8">
+        <div id="seed-places-container" class="px-4 py-6 rounded bg-blackish">
+          <div id="seed-places-title-and-controls" class="flex justify-between text-2xl">
+            <p id="seed-places-title" class="font-display">Seeding</p>
+            <div
+              :if={not @read_only}
+              id="seed-places-controls"
+              class="flex justify-end gap-x-4 text-primary"
+            >
+              <div
+                id="seed-places-control-add"
+                class="cursor-pointer hover:underline"
+                title="Add Participants"
+                phx-click="show-participants-modal"
+                phx-target={@myself}
+              >
+                + Add
+              </div>
+              <div
+                id="seed-places-control-shuffle"
+                class="cursor-pointer hover:underline text-primary"
+                title="Shuffle Unlocked"
+                phx-click="shuffle-unlocked"
+                phx-target={@myself}
+              >
+                🔀
+              </div>
+              <div
+                id="seed-places-control-reset"
+                class="cursor-pointer hover:underline text-transparent [text-shadow:_0_0_0_var(--color-primary)]"
+                title="Reset"
+                phx-click="reset-seeds-clicked"
+                phx-target={@myself}
+              >
+                ↺
+              </div>
+            </div>
+          </div>
+          <div id="seed-places" class="divide-y divide-grey-light">
+            <div
+              id="seed-places-header"
+              class="flex items-center justify-between w-full px-2 mt-4"
+            >
+              <div id="seed-places-header-l" class="flex items-center gap-x-12">
+                <div>#</div>
+                <div>Name</div>
+                <div :if={not @read_only} class="text-grey-light">
+                  <%= Enum.count(@seeded_tps) %> / <%= Enum.count(@seeded_tps) +
+                    Enum.count(@unseeded_tps) %> seeded
+                </div>
+              </div>
+              <div id="seed-places-header-r" class="flex items-center gap-x-4">
+                <div :if={not @read_only} class="text-grey-light">
+                  <%= Enum.count(@seeded_tps, & &1.is_seed_index_locked) %> / <%= Enum.count(
+                    @seeded_tps
+                  ) %> locked
+                </div>
+                <div
+                  :if={not @read_only}
+                  phx-click="lock-all-integer-seed-indexes-clicked"
+                  phx-target={@myself}
+                  class="cursor-pointer hover:underline text-transparent [text-shadow:_0_0_0_var(--color-primary)]"
+                >
+                  <div class="flex items-center">
+                    <div class="text-lg">🔒</div>
+                    <div class="text-sm uppercase">all</div>
+                  </div>
+                </div>
+                <div
+                  :if={not @read_only}
+                  phx-click="unlock-all-integer-seed-indexes-clicked"
+                  phx-target={@myself}
+                  class="cursor-pointer hover:underline text-2xl text-transparent [text-shadow:_0_0_0_var(--color-secondary)]"
+                >
+                  <div class="flex items-center">
+                    <div class="text-lg">🔓</div>
+                    <div class="text-sm uppercase">all</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              :for={{seed_place_index, tp_detail} <- @seed_places}
+              id={"seed-place-row-#{seed_place_index}"}
+              class="flex items-center px-2 py-4 flex-between gap-x-4"
+            >
+              <div>
+                <%= seed_place_index + 1 %>
+              </div>
+              <div
+                :if={not @read_only}
+                id={"show-single-participant-modal-button-#{seed_place_index}"}
+                class={[
+                  if(!!tp_detail && !tp_detail.is_seed_index_locked, do: "text-2xl"),
+                  if(!!tp_detail && tp_detail.is_seed_index_locked,
+                    do: "text-grey-light",
+                    else: "cursor-pointer hover:underline text-primary"
+                  )
+                ]}
+                phx-click={
+                  if !tp_detail || (!!tp_detail && !tp_detail.is_seed_index_locked),
+                    do: "show-single-participant-modal"
+                }
+                phx-target={@myself}
+                phx-value-seed-index={seed_place_index}
+              >
+                <%= if !!tp_detail, do: "🖉", else: "+" %>
+              </div>
+              <div :if={tp_detail} class="flex items-center justify-between w-full">
+                <div>
+                  <%= tp_detail.name %>
+                </div>
+                <div
+                  :if={not @read_only}
+                  phx-click="update-is-seed-index-locked"
+                  phx-target={@myself}
+                  phx-value-tp-id={tp_detail.id}
+                  phx-value-seed-index={seed_place_index}
+                  phx-value-is-locked={to_string(!tp_detail.is_seed_index_locked)}
+                  class={[
+                    "cursor-pointer hover:underline text-2xl text-transparent",
+                    if(tp_detail.is_seed_index_locked,
+                      do: "[text-shadow:_0_0_0_var(--color-primary)]",
+                      else: "[text-shadow:_0_0_0_var(--color-secondary)]"
+                    )
+                  ]}
+                >
+                  <%= if tp_detail.is_seed_index_locked, do: "🔒", else: "🔓" %>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        id="first-round-matches-panel"
+        class="relative col-span-4"
+        x-data="bracketLiveParticipant"
+      >
+        <button
+          :if={@show_regenerate_button and not @read_only}
+          id="bracket-seeding-regenerate-matches-button"
+          class="absolute left-0 -top-24 btn btn--primary"
+          type="button"
+          phx-click="regenerate-matches-with-seeding"
+          phx-target={@myself}
+        >
+          Regen matches
+        </button>
+        <div
+          :for={%{match: match, match_label: label} <- @inferred_first_round_matches}
+          class="flex items-center justify-end w-full mb-2 even:mb-4"
+        >
+          <div class="border-[1px] rounded-l-lg px-1 border-grilla-blue text-grilla-pink min-w-[20]">
+            <%= label %>
+          </div>
+          <StridentWeb.BracketLive.build_match
+            tournament_status={:scheduled}
+            stage_status={:scheduled}
+            match={match}
+            edit_mode={false}
+            debug_mode={false}
+            can_manage_tournament={false}
+            all_participant_details={@all_participant_details}
+            is_match_finished={false}
+          />
+        </div>
+      </div>
+    </div>
+  </.focus_wrap>
+  <SelectParticipantsModals.unseeded_participants_modal
+    :if={not @read_only}
+    timezone={@timezone}
+    locale={@locale}
+    show={@show_participants_modal}
+    target={@myself}
+    hide_callback="hide-participants-modal"
+    search_term={@search_term}
+    unseeded_only={@unseeded_participants_only}
+    unlocked_only={@unlocked_participants_only}
+    selected_ids={@selected_unseeded_participant_ids}
+    seeded_tps={@seeded_tps}
+    unseeded_tps={@unseeded_tps}
+  />
+  <SelectParticipantsModals.single_participant_modal
+    :if={not @read_only}
+    timezone={@timezone}
+    locale={@locale}
+    show={@show_seed_place_modal_for_seed_index}
+    target={@myself}
+    hide_callback="hide-single-participant-modal"
+    search_term={@search_term}
+    unseeded_only={@unseeded_participants_only}
+    unlocked_only={@unlocked_participants_only}
+    selected_ids={@selected_unseeded_participant_ids}
+    seeded_tps={@seeded_tps}
+    unseeded_tps={@unseeded_tps}
+    seed_index={@show_seed_place_modal_for_seed_index}
+  />
+
+  <.live_component
+    :if={@show_confirmation}
+    id="bracket-seeding-confirmation"
+    module={StridentWeb.Components.Confirmation}
+    confirm_event={@confirmation_confirm_event}
+    confirm_values={@confirmation_confirm_values}
+    message={@confirmation_message}
+    target={@myself}
+    timezone={@timezone}
+    locale={@locale}
+  />
+</div>

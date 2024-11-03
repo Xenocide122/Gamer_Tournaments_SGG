@@ -1,0 +1,110 @@
+<.socket_suspense :if={Enum.any?(@chats)} show_inner_block={@is_connected}>
+  <h3 class="mb-4">Chat</h3>
+  <.card colored={true} class="rounded" inner_class="rounded">
+    <div class="flex justify-between w-full">
+      <div
+        :if={Enum.count(@chats) > 1}
+        class="flex-none w-40 p-2 mr-2 overflow-y-auto border h-60 border-grey-light rounded-xl scrollbar-hidden"
+      >
+        <div
+          :for={{room_name, chat} <- @chats}
+          id={"chat-room-#{chat.id}"}
+          phx-value-chat={room_name}
+          phx-click="select-chat-room"
+          class={[
+            "cursor-pointer mb-1 text-xs",
+            if(room_name == @selected_chat_room,
+              do: "bg-grilla-pink text-grey-dark rounded",
+              else: "text-primary odd:bg-grey-medium"
+            )
+          ]}
+        >
+          <%= chat.name %>
+        </div>
+      </div>
+
+      <div class="flex flex-col-reverse w-full min-h-full mr-2 overflow-auto border h-60 rounded-xl border-grey-light scrollbar-hidden">
+        <div class="px-2 pt-2 pb-4">
+          <ul :if={!!@selected_chat} id={"messages-#{@selected_chat.id}"} class="break-words">
+            <li
+              :for={message <- @selected_chat.messages}
+              id={"message-#{message.id}"}
+              class="mb-1"
+            >
+              <% participant =
+                Enum.find(@selected_chat.participants, fn %{user: user} ->
+                  !!user && user.id == message.user_id
+                end) %>
+              <.chat_participant_template
+                :if={!!participant && !!participant.user}
+                id={"message-#{message.user_id}-#{message.id}"}
+                user={participant.user}
+                type={participant.type}
+              />
+
+              <p class="break-normal"><%= message.content %></p>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div
+        :if={!!@selected_chat}
+        class="flex-none hidden w-40 p-2 overflow-y-auto border md:block h-60 border-grey-light rounded-xl scrollbar-hidden"
+      >
+        <div :for={participant <- @selected_chat.participants} class="mb-2">
+          <.chat_participant_template
+            :if={!!participant && !!participant.user}
+            id={"chat-participant-#{participant.id}"}
+            user={participant.user}
+            type={participant.type}
+            inactive?={participant.inactive?}
+          />
+        </div>
+      </div>
+    </div>
+
+    <div :if={!!@selected_chat} class="flex justify-between w-full mt-4">
+      <.form
+        :let={f}
+        id="chat-form-input"
+        for={@message}
+        phx-change="typing"
+        phx-submit="send-message"
+        class="w-full"
+      >
+        <%= hidden_input(f, :user_id, value: @current_user.id) %>
+        <%= hidden_input(f, :chat_id, value: @selected_chat.id) %>
+        <.form_text_input
+          form={f}
+          field={:content}
+          value={@message.changes[:content]}
+          phx-debounce={200}
+          phx-blur="stop_typing"
+          placeholder="write your message here..."
+        />
+      </.form>
+
+      <.button
+        id="send-to-chat-button"
+        form="chat-form-input"
+        button_type={:primary_ghost}
+        class="px-4 ml-2 inner-glow"
+        phx-disable-with="Sending..."
+      >
+        Send
+      </.button>
+    </div>
+
+    <.typing_template
+      :if={!!@selected_chat_room}
+      typing_usernames={
+        @chats
+        |> Map.get(@selected_chat_room, %{})
+        |> Map.get(:participants)
+        |> Enum.filter(& &1.typing)
+        |> Enum.map(&Accounts.user_display_name(&1.user))
+      }
+    />
+  </.card>
+</.socket_suspense>

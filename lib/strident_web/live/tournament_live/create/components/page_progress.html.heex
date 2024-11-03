@@ -1,0 +1,29 @@
+<div class="relative md:w-96 mb-2">
+  <div class="sticky top-24">
+    <.card colored class="flex flex-col card--glowing-two-tone p-0.5 h-fit">
+      <ul class="w-full wizard-steps">
+        <%= for {page, is_previous_page, prev_page_valid} <- @pages do %>
+          <li
+            class={
+              "xl:flex text-center items-center #{if is_previous_page or prev_page_valid, do: "cursor-pointer"} #{if is_previous_page, do: "completed", else: if(page in @active_pages, do: "active")}"
+            }
+            phx-click={
+              if is_previous_page or prev_page_valid, do: "change-page", else: "do-nothing"
+            }
+            phx-value-page={page}
+          >
+            <%= humanize(page) %>
+          </li>
+        <% end %>
+      </ul>
+    </.card>
+
+    <div
+      id="reset-form-button"
+      class="text-primary cursor-pointer mt-6 hover:text-primary-dark hidden xl:block"
+      phx-click="reset-form-clicked"
+    >
+      Reset Form
+    </div>
+  </div>
+</div>

@@ -1,0 +1,59 @@
+<div class="max-w-md">
+  <.flash id="locale-flash" flash={@flash} myself={@myself} />
+  <button
+    id={"delete-account-button-#{@current_user.id}"}
+    class="inline-block cursor-pointer font-medium border rounded py-2.5 px-4 select-none text-black uppercase bg-secondary border-secondary"
+    phx-click={
+      show_modal("delete-user-account-modal-#{@current_user.id}")
+      |> JS.focus(to: "#delete-account-form-#{@current_user.id}_input")
+    }
+  >
+    Delete Account
+  </button>
+
+  <.modal_small id={"delete-user-account-modal-#{@current_user.id}"}>
+    <p class="px-4 mb-4">
+      You are about to delete your account. To delete it write:
+      <span class="italic text-primary">F in the Chat</span>
+      in the input field.
+    </p>
+    <.form
+      :let={f}
+      id={"delete-account-form-#{@current_user.id}"}
+      for={to_form(%{}, as: :delete_me_text)}
+      class="flex justify-center"
+      phx-change="validate-delete-me-text"
+      phx-submit="actual-delete-account"
+      phx-target={@myself}
+      action={Routes.user_session_path(Endpoint, :delete)}
+      phx-trigger-action={@trigger_submit}
+      method="delete"
+    >
+      <div class="inline-flex items-center space-x-2 form-group">
+        <.form_text_input form={f} field={:input} phx-debounce={1000} required={true} />
+      </div>
+    </.form>
+
+    <:cancel>
+      <button
+        id={"close-modal-#{@current_user.id}"}
+        class="inline-block cursor-pointer font-medium border rounded py-2.5 px-4 select-none border-primary text-primary"
+        phx-click={hide_modal("delete-user-account-modal-#{@current_user.id}")}
+      >
+        Cancel
+      </button>
+    </:cancel>
+
+    <:confirm>
+      <button
+        id={"actual-delete-me-button-#{@current_user.id}"}
+        form={"delete-account-form-#{@current_user.id}"}
+        type="submit"
+        class="inline-block cursor-pointer font-medium border rounded py-2.5 px-4 select-none text-black uppercase bg-secondary border-secondary disabled:opacity-50"
+        disabled={@disable_delete_account_button}
+      >
+        Delete My Account
+      </button>
+    </:confirm>
+  </.modal_small>
+</div>

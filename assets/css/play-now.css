@@ -1,0 +1,39 @@
+@layer components {
+  .play-now {
+    @apply pt-28 mb-24;
+    background: transparent
+      linear-gradient(
+        90deg,
+        var(--color-grilla-pink-transparent) 0%,
+        rgba(178, 93, 210, 0.2) 25%,
+        rgba(88, 128, 214, 0.2) 75%,
+        var(--color-grilla-blue-transparent) 100%
+      )
+      0% 0% no-repeat;
+  }
+
+  .play-now__form {
+    @apply max-w-4xl mx-auto p-[3px] mb-36;
+    background: transparent
+      linear-gradient(
+        140deg,
+        var(--color-grilla-blue) 0%,
+        #7774d561 51%,
+        var(--color-grilla-pink) 100%
+      )
+      0% 0% no-repeat;
+  }
+
+  .play-now__line {
+    @apply h-[3px];
+    background: transparent
+      linear-gradient(
+        90deg,
+        var(--color-grilla-pink-transparent) 0%,
+        var(--color-grilla-pink) 26%,
+        var(--color-grilla-blue) 74%,
+        var(--color-grilla-blue-transparent) 100%
+      )
+      0% 0% no-repeat;
+  }
+}

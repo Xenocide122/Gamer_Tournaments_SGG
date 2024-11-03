@@ -1,0 +1,25 @@
+<div class="relative">
+  <.flash flash={@flash} phx-target={@myself} class="absolute !inset-auto !-top-10 w-max p-1" />
+  <button
+    id={"mark-match-tie-button-#{@match.id}"}
+    class="btn btn--primary-ghost text-sm font-semibold py-2 whitespace-nowrap"
+    phx-click="mark-tie-clicked"
+    phx-target={@myself}
+    disabled={not @is_connected}
+  >
+    Tie match
+  </button>
+
+  <%= if @show_confirmation do %>
+    <.live_component
+      id="mark-match-tie-confirmation"
+      module={StridentWeb.Components.Confirmation}
+      target={@myself}
+      confirm_event={@confirmation_confirm_event}
+      confirm_values={@confirmation_confirm_values}
+      message={@confirmation_message}
+      timezone={@timezone}
+      locale={@locale}
+    />
+  <% end %>
+</div>

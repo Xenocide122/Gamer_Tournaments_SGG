@@ -1,0 +1,94 @@
+<div class="py-16 mt-16 text-center md:text-left">
+  <div class="container space-y-4 ">
+    <div class="lg:px-3">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-6xl leading-none tracking-normal font-display">Reports</h3>
+        </div>
+      </div>
+      <div class="pb-5 mb-4 border-b border-gray-200 sm:pb-0">
+        <div class="mt-3 sm:mt-4">
+          <div>
+            <Menus.tabs selected={:reports} />
+          </div>
+        </div>
+      </div>
+      <section class="mt-8">
+        <div class="flex items-center justify-between mb-8 ">
+          <div>
+            <h3 class="text-4xl leading-none tracking-normal font-display">
+              <%= @report_details.label %>
+            </h3>
+          </div>
+          <div>
+            <.button
+              :if={@automation in [:inactive]}
+              id={"automate-#{@report_details.type}"}
+              button_type={:primary_ghost}
+              class="px-4 ml-2 inner-glow"
+              phx-click="automate-report"
+              phx-value-type={@report_details.type}
+            >
+              Automate Report
+            </.button>
+            <.button
+              :if={@automation in [:active]}
+              id={"automate-#{@report_details.type}"}
+              button_type={:secondary}
+              class="px-4 ml-2 inner-glow"
+              phx-click="unautomate-report"
+              phx-value-type={@report_details.type}
+            >
+              Deactivate Automation
+            </.button>
+            <.button
+              :if={@automation in [:inactive] and @report_details.type not in [:trial_balance]}
+              id={"generate-#{@report_details.type}"}
+              button_type={:primary_ghost}
+              class="px-4 ml-2 inner-glow"
+              phx-click="generate-report"
+              phx-value-type={@report_details.type}
+            >
+              Generate Report
+            </.button>
+          </div>
+        </div>
+        <div class="space-y-6">
+          <.table :if={!Enum.empty?(@reports)} rows={@reports}>
+            <:col :let={report} label="Report"><%= report.report_title %></:col>
+            <:col :let={report} label="Status"><%= report.status %></:col>
+            <:col :let={report} label="Report for"><%= report.report_for_date %></:col>
+            <:col :let={report} label="Report Sent">
+              <.localised_datetime
+                datetime={report.updated_at}
+                timezone="UTC"
+                locale={@locale}
+                type={:datetime}
+              />
+            </:col>
+          </.table>
+          <div :if={Enum.empty?(@reports)}>
+            <h4 class="text-3xl leading-none tracking-normal font-display">
+              No reports
+            </h4>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+  <div
+    id="spinner"
+    class="hidden"
+    js-trigger-close-spinner
+    js-action-close-spinner={JS.hide(to: "#spinner")}
+    js-trigger-show-spinner
+    js-action-show-spinner={JS.show(to: "#spinner")}
+  >
+    <.live_component
+      id="report-spinner"
+      current_user={@current_user}
+      module={StridentWeb.Components.FullPageSpinner}
+      message={@spinner_message}
+    />
+  </div>
+</div>

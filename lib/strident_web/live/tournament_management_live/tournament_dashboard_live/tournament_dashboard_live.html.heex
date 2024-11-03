@@ -1,0 +1,260 @@
+<%!-- <.container id={"tournament-dashboard-#{@tournament.id}"}>
+  <:side_menu> --%>
+<div>
+  <.live_component
+    id={"side-menu-#{@tournament.id}"}
+    module={StridentWeb.TournamentManagement.Components.SideMenu}
+    can_manage_tournament={@can_manage_tournament}
+    tournament={@tournament}
+    number_of_participants={
+      Tournaments.get_num_of_participants_with_status(
+        @tournament,
+        Tournaments.on_track_statuses()
+      )
+    }
+    current_user={@current_user}
+    live_action={@team_site}
+    timezone={@timezone}
+    locale={@locale}
+  />
+  <%!-- </:side_menu> --%>
+
+  <div class="min-h-[10vh]"></div>
+
+  <div class="px-4 lg:px-8">
+    <div :if={
+      Accounts.is_staff_member?(@current_user) and
+        @tournament.status not in [:under_review, :finished, :cancelled]
+    }>
+      <span
+        class="mb-2 text-xs underline capitalize text-secondary hover:cursor-pointer"
+        phx-click={JS.toggle(to: "#staff-menu-dashboard")}
+      >
+        Staff
+      </span>
+      <div
+        id="staff-menu-dashboard"
+        class="hidden w-auto px-4 py-5 border-2 rounded-md border-secondary-dark"
+      >
+        <h3 class="mb-4 text-2xl font-medium leading-6 text-secondary-dark">STAFF ONLY</h3>
+        <.remove_from_featured :if={@tournament.featured} tournament_id={@tournament.id} />
+        <.make_featured :if={not @tournament.featured} tournament_id={@tournament.id} />
+      </div>
+    </div>
+
+    <div :if={@tournament.status == :cancelled} class="mt-2 mb-8">
+      <.cancelled
+        tournament={@tournament}
+        current_user={@current_user}
+        timezone={@timezone}
+        locale={@locale}
+      />
+    </div>
+
+    <section class="mt-8 mb-8">
+      <div class="flex flex-col lg:flex-row justify-between">
+        <div class="">
+          <div class="flex flex-col justify-start gap-2">
+            <h1>
+              <%= @tournament.title %>
+              <span
+                :if={@tournament.status in [:in_progress, :under_review, :cancelled, :finished]}
+                class=""
+              >
+                (<%= @tournament.status %>)
+              </span>
+            </h1>
+            <div id="tournament-summary" class="lg:w-1/2">
+              <%= @tournament.summary %>
+            </div>
+          </div>
+        </div>
+        <div class="">
+          <p class="text-sm text-grey-light">Share via:</p>
+          <div class="flex justify-items-center">
+            <.button
+              :for={
+                {link, type} <- [
+                  {@twitter_link, :twitter},
+                  {@reddit_link, :reddit},
+                  {@mailto_link, :envelope2}
+                ]
+              }
+              id={"#{type}-link-button"}
+              button_type={:primary_ghost}
+              class="mr-2 p-3"
+              phx-click={JS.navigate(link)}
+            >
+              <.svg icon={type} width="24" height="24" class="fill-primary" />
+            </.button>
+            <.button
+              id={"copy-tournament-link-#{@tournament.id}"}
+              button_type={:primary_ghost}
+              type="button"
+              class="w-60"
+              phx-click={
+                JS.dispatch("grilla:clipcopyinput",
+                  to: "#copyable-tournament-id-#{@tournament.id}"
+                )
+              }
+              phx-hook="CopyLink"
+            >
+              Copy Link
+            </.button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section
+      :if={@tournament.status in [:scheduled, :registrations_open, :registrations_closed]}
+      id="tournament-management-section"
+      class="mt-8 mb-8"
+    >
+      <div class="flex flex-col justify-center md:flex-row gap-x-8 gap-y-4">
+        <.button
+          :if={@tournament.type == :casting_call}
+          id={"open-registrations-button-#{@tournament.id}"}
+          button_type={:primary}
+          phx-click="open-registrations-clicked"
+          disabled={@tournament.status != :scheduled}
+        >
+          Open Registrations Now
+        </.button>
+
+        <.button
+          id={"close-registrations-button-#{@tournament.id}"}
+          button_type={:primary}
+          phx-click="close-registrations-clicked"
+          disabled={
+            @tournament.status != :registrations_open or
+              Tournaments.get_num_of_participants_with_status(@tournament, [
+                :confirmed,
+                :chip_in_to_entry_fee
+              ]) < 3
+          }
+        >
+          Close Registrations Now
+        </.button>
+
+        <.button
+          :if={Tournaments.can_start?(@tournament)}
+          id={"start-tournament-button-#{@tournament.id}"}
+          button_type={:secondary}
+          phx-click="start-tournament-clicked"
+          disabled="true"
+        >
+          Collecting Entry Fees
+        </.button>
+
+        <.button
+          :if={not Tournaments.can_start?(@tournament)}
+          id={"start-tournament-button-#{@tournament.id}"}
+          button_type={:primary}
+          phx-click="start-tournament-clicked"
+          disabled="true"
+        >
+          Start Tournament
+        </.button>
+
+        <.button
+          :if={not Tournaments.can_start?(@tournament)}
+          id={"start-tournament-button-#{@tournament.id}"}
+          button_type={:primary}
+          phx-click="start-tournament-clicked"
+          disabled="true"
+        >
+          Start Tournament
+        </.button>
+
+        <.button
+          :if={Tournaments.can_start?(@tournament)}
+          id={"start-tournament-button-#{@tournament.id}"}
+          button_type={:primary}
+          phx-click="start-tournament-clicked"
+        >
+          Start Tournament
+        </.button>
+      </div>
+    </section>
+
+    <section :if={Enum.any?(@chats)} class="mt-8 mb-16">
+      <%= live_render(
+        @socket,
+        StridentWeb.ChatLive,
+        id: "match-chats-#{@tournament.id}",
+        session: %{
+          "tournament_id" => @tournament.id,
+          "current_user_id" => Map.get(@current_user || %{}, :id),
+          "timezone" => @timezone,
+          "locale" => @locale
+        }
+      ) %>
+    </section>
+
+    <section id="grid-players" class="mt-10 mb-10">
+      <div class="">
+        <div class="flex justify-start items-baseline gap-4">
+          <div class="">
+            <h3 class="uppercase">
+              Participants
+            </h3>
+          </div>
+
+          <.link
+            :if={@can_manage_tournament}
+            navigate={~p"/tournament/#{@tournament.slug}/participants"}
+            class="text-primary"
+          >
+            View all
+          </.link>
+        </div>
+
+        <div :if={Enum.empty?(@sorted_players)} class="">
+          Currently there are no participants registered
+        </div>
+        <div class="flex flex-row gap-y-4 gap-x-4 flex-wrap items-center">
+          <.live_component
+            :for={participant <- @sorted_players}
+            id={"participant-card-#{participant.id}"}
+            module={StridentWeb.TournamentDashboardLive.Components.ParticipantCard}
+            participant={participant}
+            tournament={@tournament}
+            current_user={@current_user}
+            timezone={@timezone}
+            locale={@locale}
+          />
+        </div>
+      </div>
+    </section>
+
+    <section class="mb-10">
+      <%!-- <p class="text-sm text-grey-light">Tournament Link</p> --%>
+      <form action="" class="flex mb-10">
+        <input
+          id={"copyable-tournament-id-#{@tournament.id}"}
+          class="mr-10 form-input w-72 max-h-9"
+          name="tournament_link"
+          type="hidden"
+          value={@tournament_link}
+          autocomplete="off"
+          placeholder="#{@page_title}"
+        />
+      </form>
+    </section>
+
+    <.live_component
+      :if={@show_confirmation}
+      id="tournament-dashboard-confirmation"
+      module={StridentWeb.Components.Confirmation}
+      confirm_event={@confirmation_confirm_event}
+      confirm_values={@confirmation_confirm_values}
+      message={@confirmation_message}
+      confirm_prompt={@confirmation_confirm_prompt}
+      cancel_prompt={@confirmation_cancel_prompt}
+      timezone={@timezone}
+      locale={@locale}
+    />
+  </div>
+</div>
+<%!-- </.container> --%>

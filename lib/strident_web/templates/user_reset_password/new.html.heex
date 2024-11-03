@@ -1,0 +1,40 @@
+<div class="pt-12 md:pt-44">
+  <div class="container">
+    <div class="max-w-lg mx-auto">
+      <div class="p-6 mb-8 card">
+        <h2 class="mb-6">
+          Forgot your password?
+        </h2>
+
+        <.form
+          :let={f}
+          for={to_form(%{}, as: :password_credential)}
+          action={Routes.user_reset_password_path(@conn, :create)}
+        >
+          <div class="mb-6">
+            <%= label(f, :email, class: "block mb-1") %>
+            <%= email_input(f, :email, required: true, class: "form-input") %>
+          </div>
+
+          <div>
+            <%= submit("Send instructions", class: "btn btn--block btn--primary btn--wide") %>
+          </div>
+        </.form>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-center mb-16">
+      <%= link("Register",
+        to: Routes.live_path(@conn, StridentWeb.UserRegistrationLive),
+        class: "text-sm font-bold uppercase text-primary"
+      ) %>
+      <div class="mx-6 text-gray-700">
+        |
+      </div>
+      <%= link("Log in",
+        to: Routes.live_path(@conn, StridentWeb.UserLogInLive),
+        class: "text-sm font-bold uppercase text-primary"
+      ) %>
+    </div>
+  </div>
+</div>

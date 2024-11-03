@@ -1,0 +1,28 @@
+<div>
+  <div
+    title={@stake_progress_explanation}
+    class={"overflow-hidden h-#{@height} text-xs flex rounded-full bg-grey-medium mb-1"}
+  >
+    <div class="hidden h-2.5"></div>
+    <div
+      style={"width:#{@backed_total_percent}%"}
+      class={
+        "flex flex-col text-center whitespace-nowrap text-white justify-center #{if(@backed_total_percent == 100, do: "gradient", else: "bg-primary")}"
+      }
+    >
+    </div>
+    <div
+      style={"width:#{@new_stake_percent}%"}
+      class="flex flex-col text-center whitespace-nowrap text-white justify-center bg-primary"
+    >
+    </div>
+  </div>
+
+  <%= if @show_percentage do %>
+    <p class={
+      "text-left text-xs #{if Decimal.eq?(@backed_total_percent, 100), do: "text-primary", else: "text-grey-light"}"
+    }>
+      <%= "#{@backed_total_percent}% staked" %>
+    </p>
+  <% end %>
+</div>

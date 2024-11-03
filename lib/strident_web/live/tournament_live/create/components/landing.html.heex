@@ -1,0 +1,78 @@
+<div class="container text-center">
+  <h2 class="mb-12 leading-none tracking-normal text-left uppercase font-display">
+    Create your own tournament
+  </h2>
+  <div class="mb-10 text-left heading-4">
+    Is this tournament easy mode? Yes, it is. Create a tournament in under 60 seconds.
+  </div>
+
+  <.live_component id="stages-structure-component" module={StagesStructureComponent} />
+
+  <div :if={Enum.any?(@saved_forms)}>
+    <div class="mb-10 text-left heading-4">
+      For convenience, copy one of your <%= Strident.DraftForms.max_number_saved_draft_forms() %> most recent tournaments.
+    </div>
+
+    <div class="mb-24">
+      <%= for {saved_form, index} <- Enum.with_index(@saved_forms, 1) do %>
+        <.card
+          colored={true}
+          inner_class="!pt-3  !pb-3 !px-4 !bg-blackish"
+          class="card--glowing-two-tone transition duration-200 hover:scale-110 p-0.5 cursor-pointer text-grey-light hover:text-primary mb-4 group/saved"
+        >
+          <button
+            id={"saved-form-#{index}"}
+            class="border-primary w-full flex justify-between"
+            phx-click="clicked-saved-form"
+            phx-value-id={saved_form.id}
+          >
+            <div class="flex flex-wrap w-full gap-x-8">
+              <div class="text-white">
+                <%= index %>
+              </div>
+              <div class="text-grey-light">
+                <.localised_datetime
+                  datetime={saved_form.updated_at}
+                  timezone={@timezone}
+                  locale={@locale}
+                />
+              </div>
+              <div class="font-display text-2xl">
+                <%= saved_form.title %>
+              </div>
+            </div>
+            <div class="uppercase hidden group-hover/saved:block">
+              Copy
+            </div>
+          </button>
+        </.card>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="mb-12 text-left heading-4">
+    Looking for something really custom? Get in touch!
+  </div>
+
+  <.card
+    colored={true}
+    inner_class="tournament-type-inner-card"
+    class="card--glowing-two-tone max-w-sm transition duration-200 hover:scale-110 p-0.5"
+  >
+    <button
+      id="custom-tournament"
+      class="btn--primary-ghost"
+      phx-click="clicked-stages-structure"
+      phx-value-type="custom-tournament"
+      phx-hook="ScrollToTop"
+    >
+      <div class="my-2 heading-4" uppercase>
+        Custom Tournament
+      </div>
+
+      <p class="block pb-3 mx-2 text-sm text-center text-white break-normal">
+        Looking to fine tune everything to your exact specifications? Give us a shout.
+      </p>
+    </button>
+  </.card>
+</div>

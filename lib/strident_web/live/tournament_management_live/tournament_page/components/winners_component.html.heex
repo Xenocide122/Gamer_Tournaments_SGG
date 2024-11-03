@@ -1,0 +1,14 @@
+<div class="grid grid-cols-3 gap-4">
+  <%= if @winners != [] do %>
+    <%= for winner <- @winners do %>
+      <div class={"card #{card_color(winner.rank)} flex items-center p-2 mb-2 mr-2 "}>
+        <div class="px-3 text-sm font-bold">
+          <%= Strident.Prizes.format_prize_rank(winner.rank) %>
+        </div>
+        <div class="px-3 text-sm font-bold capitalize">
+          <%= TournamentParticipants.participant_name(winner) %>
+        </div>
+      </div>
+    <% end %>
+  <% end %>
+</div>

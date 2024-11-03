@@ -1,0 +1,37 @@
+<div>
+  <h6 class="mb-4 uppercase">
+    Amount
+  </h6>
+  <div class="grid items-start grid-cols-2 gap-4 mb-8 md:grid-cols-3 md:gap-6">
+    <%= for preset_button <- @preset_buttons do %>
+      <%= if disable_button?(preset_button, @max_amount, @min_amount) do %>
+        <button
+          type="button"
+          class="py-4 border-l cursor-not-allowed btn border-grey-medium text-grey-light"
+        >
+          <%= preset_button %>
+        </button>
+      <% else %>
+        <%= build_active_button(Map.merge(assigns, %{preset_button: preset_button})) %>
+      <% end %>
+    <% end %>
+  </div>
+
+  <.form :let={f} id="set-amount" for={to_form(%{}, as: :keypad)} phx-change="set-amount">
+    <label class="text-xs" hidden={not @show_input_amount}>
+      Enter an amount
+    </label>
+    <.live_component
+      id="amount_input-keypad"
+      module={StridentWeb.Common.MoneyInput}
+      f={f}
+      min={1}
+      hidden={not @show_input_amount}
+      max={@max_amount.amount}
+      field={:input}
+      value={@selected_amount}
+      timezone={@timezone}
+      locale={@locale}
+    />
+  </.form>
+</div>

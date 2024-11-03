@@ -1,0 +1,37 @@
+<div class="container text-center">
+  <h2 class="mb-12 leading-none tracking-normal text-left uppercase font-display">
+    <%= humanize(@stages_structure) %> Tournament
+  </h2>
+
+  <div class="text-left heading-4">
+    Now let us know who is coming to this throw down:
+  </div>
+
+  <div class="max-w-screen-md mx-auto grid lg:grid-cols-2 gap-24 items-stretch my-24">
+    <%= for tournament_type <- @tournament_types do %>
+      <.card
+        colored={true}
+        inner_class="h-full !bg-blackish !p-6"
+        id={"tournament-type-#{tournament_type.id}"}
+        class="card--glowing-two-tone flex flex-col cursor-pointer transition duration-200 hover:scale-110 p-0.5"
+        phx-click="clicked-tournament-type"
+        phx-value-type={tournament_type.id}
+        phx-hook="ScrollToTop"
+      >
+        <h4 class="uppercase text-primary">
+          <%= tournament_type.title %>
+        </h4>
+        <div class="text-sm">
+          <%= tournament_type.description %>
+        </div>
+        <div class="flex justify-center h-24 rounded-b">
+          <img
+            class="rounded-b max-h-24"
+            src={tournament_type.img_src}
+            alt={tournament_type.title}
+          />
+        </div>
+      </.card>
+    <% end %>
+  </div>
+</div>

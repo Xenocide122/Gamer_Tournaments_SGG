@@ -1,0 +1,67 @@
+<div class="py-16 mt-16 text-center md:text-left">
+  <div class="container space-y-4 ">
+    <div class="lg:px-3">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-6xl leading-none tracking-normal font-display">
+            Tournaments Page Info Cards
+          </h3>
+        </div>
+        <div>
+          <.link
+            navigate={Routes.tournament_cards_create_path(@socket, :create)}
+            class="btn btn--primary"
+          >
+            Add Tournament Card
+          </.link>
+        </div>
+      </div>
+      <div class="pb-5 mb-4 border-b border-gray-200 sm:pb-0">
+        <div class="mt-3 sm:mt-4">
+          <div>
+            <Menus.tabs selected={:tournament_cards} />
+          </div>
+        </div>
+      </div>
+      <section id="cards-table" class="mt-8">
+        <.table rows={@cards}>
+          <:col :let={card} label="Sort">
+            <%= card.sort_index %>
+          </:col>
+          <:col :let={card} label="Header">
+            <%= card.header %>
+          </:col>
+          <:col :let={card} label="Body">
+            <%= card.body %>
+          </:col>
+          <:col :let={card} label="Manage">
+            <div class="flex justify-end space-x-2">
+              <.link
+                navigate={Routes.tournament_cards_edit_path(@socket, :edit, card)}
+                class="px-1 pb-1 text-sm font-medium hover:text-primary-dark whitespace-nowrap"
+              >
+                Edit
+              </.link>
+              <div
+                :if={card.hidden}
+                phx-click="enable"
+                phx-value-id={card.id}
+                class="px-1 pb-1 text-sm font-medium cursor-pointer hover:text-primary-dark text-primary whitespace-nowrap"
+              >
+                Enable
+              </div>
+              <div
+                :if={not card.hidden}
+                phx-click="disable"
+                phx-value-id={card.id}
+                class="px-1 pb-1 text-sm font-medium cursor-pointer hover:text-secondary-dark text-secondary whitespace-nowrap"
+              >
+                Disable
+              </div>
+            </div>
+          </:col>
+        </.table>
+      </section>
+    </div>
+  </div>
+</div>

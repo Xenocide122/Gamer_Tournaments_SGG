@@ -1,0 +1,143 @@
+<div class="mb-10">
+  <%= if @current_user_is_user or @any_links do %>
+    <div class="flex items-end justify-center space-x-2 md:justify-start">
+      <%= StridentWeb.Components.UnderlinedHeader.header("Stream & VODs") %>
+      <%= if @current_user_is_user do %>
+        <div class="relative">
+          <%= if @edit do %>
+            <div class="text-muted mb-3.5 absolute left-0 bottom-0">
+              Editing
+            </div>
+          <% else %>
+            <div
+              class="link mb-3.5 absolute left-0 bottom-0"
+              phx-click="toggle-edit"
+              phx-target={@myself}
+            >
+              Edit
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+
+    <%= if @current_user_is_user and @edit do %>
+      <div class="card">
+        <.form
+          :let={f}
+          id="stream-and_vods-form"
+          for={to_form(%{}, as: :urls)}
+          phx-submit="submit"
+          phx-target={@myself}
+          class="relative"
+        >
+          <.flash flash={@flash} phx-target={@myself} class="absolute !top-0" />
+
+          <.form_label
+            form={f}
+            field={:twitch}
+            label="Twitch Username"
+            class="mt-5 mb-0 font-light tracking-wider text-white"
+          />
+          <div class="flex items-center">
+            <.form_text_input
+              form={f}
+              field={:twitch}
+              class="w-1/2"
+              phx_debounce="300"
+              placeholder="Your Twitch username, eg. grilla"
+              value={@twitch_sml && @twitch_sml.handle}
+            />
+            <%= if @twitch_sml do %>
+              <div phx-click="remove-link" phx-value-link={@twitch_sml.id} phx-target={@myself}>
+                <.svg icon={:x} height="30" width="30" class="cursor-pointer fill-grey-light" />
+              </div>
+            <% end %>
+          </div>
+
+          <.form_label
+            form={f}
+            field={:youtube}
+            label="YouTube Channel"
+            class="mt-5 mb-0 font-light tracking-wider text-white"
+          />
+
+          <div class="flex items-center">
+            <.form_text_input
+              form={f}
+              field={:youtube}
+              class="w-1/2"
+              phx_debounce="300"
+              placeholder="Channel ID or URL, eg. youtube.com/channel/UCblahblahblah/videos"
+              value={@youtube_sml && @youtube_sml.handle}
+            />
+
+            <%= if @youtube_sml do %>
+              <div phx-click="remove-link" phx-value-link={@youtube_sml.id} phx-target={@myself}>
+                <.svg icon={:x} height="30" width="30" class="cursor-pointer fill-grey-light" />
+              </div>
+            <% end %>
+          </div>
+
+          <div class="flex justify-center mt-4">
+            <div class="flex justify-center px-12 mt-4 gap-x-6">
+              <button
+                class="text-white btn btn--primary-ghost btn--wide"
+                type="button"
+                phx-click="toggle-edit"
+                phx-target={@myself}
+              >
+                Cancel
+              </button>
+
+              <%= submit("Save", class: "btn btn--primary btn--wide") %>
+            </div>
+          </div>
+        </.form>
+      </div>
+    <% else %>
+      <%= unless StringUtils.is_empty?(@twitch_sml && @twitch_sml.handle) do %>
+        <h5 class="mt-4">Twitch Stream</h5>
+        <div
+          id="twitch-embed"
+          class="py-6"
+          phx-hook="TwitchEmbed"
+          data-channel-name={@twitch_sml.handle}
+          data-width="100%"
+        >
+        </div>
+      <% end %>
+      <%= unless StringUtils.is_empty?(@youtube_sml && @youtube_sml.handle) do %>
+        <h5 class="mt-4">YouTube Feed</h5>
+        <div class="grid grid-cols-1 xl:grid-cols-4 md:grid-cols-2 gap-x-4 gap-y-4">
+          <%= for youtube_video_id <- @youtube_video_ids do %>
+            <div id={"youtube-embed-#{youtube_video_id}"}>
+              <iframe
+                id={"ytplayer-#{youtube_video_id}"}
+                type="text/html"
+                class="py-6"
+                src={"https://www.youtube.com/embed/#{youtube_video_id}"}
+                frameborder="0"
+              >
+              </iframe>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+      <%= unless @any_links do %>
+        <div class="text-center text-muted">
+          So empty...
+        </div>
+        <div class="flex justify-center mt-4">
+          <div
+            class="inner-glow p-2.5 md:p-1.5 md:px-4 border border-primary rounded-md uppercase cursor-pointer select-none"
+            phx-click="toggle-edit"
+            phx-target={@myself}
+          >
+            Link Stream Accounts
+          </div>
+        </div>
+      <% end %>
+    <% end %>
+  <% end %>
+</div>

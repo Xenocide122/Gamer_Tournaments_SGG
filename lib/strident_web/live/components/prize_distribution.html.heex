@@ -1,0 +1,81 @@
+<div class="flex-grow">
+  <div :if={@position == :vertical} class="{@class}">
+    <div class="block md:hidden">
+      <%= for {rank, percentage} <- @prize_distribution do %>
+        <div class="grid grid-cols-2 gap-6 p-6 mb-1 card">
+          <div class="text-sm">
+            <div class="font-bold">
+              RANK
+            </div>
+            <p>
+              <%= rank %>
+            </p>
+          </div>
+
+          <div class="text-sm">
+            <div class="font-bold">
+              PRIZE %
+            </div>
+            <p>
+              <%= percentage %>%
+            </p>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <table class="hidden min-w-full overflow-hidden divide-y-2 divide-black rounded md:table">
+      <thead class="text-sm font-bold card">
+        <tr>
+          <th scope="col" class="px-2 py-2 text-left">
+            RANK
+          </th>
+          <th scope="col" class="px-2 py-2 text-left">
+            PRIZE %
+          </th>
+        </tr>
+      </thead>
+
+      <tbody class="divide-y-2 divide-black">
+        <%= for {rank, percentage} <- @prize_distribution do %>
+          <tr class="text-sm card">
+            <td class="px-2 py-2 whitespace-nowrap">
+              <%= Prizes.format_prize_rank(rank) %>
+            </td>
+            <td class="px-2 py-2 whitespace-nowrap">
+              <%= percentage %>%
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <div :if={@position == :horizontal} class="tournament-prizes flex items-start {@class}">
+    <%= for {rank, percentage} <- @prize_distribution do %>
+      <div class="min-w-max" x-bind="prize" rank={rank}>
+        <span>
+          <%= Strident.Prizes.format_prize_rank(rank) %>
+        </span>
+        -
+        <span>
+          <%= percentage %>%
+        </span>
+      </div>
+    <% end %>
+  </div>
+
+  <div :if={@position == :vertical_min} class="flex flex-col items-start {@class} space-y-1">
+    <%= for {rank, percentage} <- @prize_distribution do %>
+      <div class="min-w-max" rank={rank}>
+        <span>
+          <%= Strident.Prizes.format_prize_rank(rank) %>
+        </span>
+        -
+        <span>
+          <%= percentage %>
+        </span>
+      </div>
+    <% end %>
+  </div>
+</div>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc><%= Routes.live_url(@conn, StridentWeb.HomeLive) %></loc>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <url>
+    <loc><%= Routes.live_url(@conn, StridentWeb.FaqLive) %></loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <url>
+    <loc><%= Routes.play_now_url(@conn, :index) %></loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <url>
+    <loc><%= Routes.live_url(@conn, StridentWeb.LegalLive.FairplayPolicy) %></loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <url>
+    <loc><%= Routes.live_url(@conn, StridentWeb.LegalLive.TermsOfService) %></loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <url>
+    <loc><%= Routes.live_url(@conn, StridentWeb.LegalLive.PrivacyPolicy) %></loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <url>
+    <loc><%= Routes.tournament_index_url(@conn, :index) %></loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url> 
+
+  <%= for tournament <- @tournaments do %>
+    <url>
+      <loc><%= Routes.tournament_show_pretty_url(@conn, :show, tournament.slug, []) %></loc>
+      <lastmod><%= format_date(tournament.updated_at) %></lastmod>
+      <changefreq>hourly</changefreq>
+      <priority>1</priority>
+    </url>
+  <% end %>
+
+  <%= for %{slug: slug} = user <- @users, is_binary(slug) do %>
+    <url>
+      <loc><%= Routes.user_show_url(@conn, :show, slug) %></loc>
+      <lastmod><%= format_date(user.updated_at) %></lastmod>
+      <changefreq>daily</changefreq>
+      <priority>1</priority>
+    </url>
+  <% end %>
+
+  <%= for team <- @teams do %>
+    <url>
+      <loc><%= Routes.live_url(@conn, StridentWeb.TeamProfileLive.Show, team.slug) %></loc>
+      <lastmod><%= format_date(team.updated_at) %></lastmod>
+      <changefreq>daily</changefreq>
+      <priority>1</priority>
+    </url>
+  <% end %>
+</urlset>

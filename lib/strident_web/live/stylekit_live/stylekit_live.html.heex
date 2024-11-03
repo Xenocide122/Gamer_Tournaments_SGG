@@ -1,0 +1,613 @@
+<div>
+  <div class="relative">
+    <div class="container absolute top-0 bottom-0 left-0 right-0 w-full h-min min-h-max z-[2]">
+      <div class="py-16 border-b border-gray-400">
+        <.live_component
+          id="tournaments-hover-group"
+          module={StridentWeb.Components.Tournaments.HoverTournamentGroup}
+          tournaments={@tournaments}
+          timezone={@timezone}
+          locale={@locale}
+        />
+      </div>
+    </div>
+    <div class="container w-full h-full pt-[20rem]">
+      <div class="py-16 border-b border-gray-400">
+        <div class="grid grid-cols-7 gap-4">
+          <%= for game <- Enum.take(@games, 7) do %>
+            <.live_component
+              id={"game-#{game.id}"}
+              module={StridentWeb.Components.GameHoverSquare}
+              game={game}
+              timezone={@timezone}
+              locale={@locale}
+            />
+          <% end %>
+        </div>
+      </div>
+      <div class="py-16 border-b border-gray-400">
+        <.live_component
+          id="tournaments-featured-small-carousel"
+          module={StridentWeb.Components.Tournaments.SmallCarouselTournamentScroll}
+          tournaments={Enum.take(@tournaments, 5)}
+          timezone={@timezone}
+          locale={@locale}
+        />
+      </div>
+
+      <div class="py-16 border-b border-gray-400">
+        <%= for card <- @cards do %>
+          <.live_component
+            id={"tournament-info-card-#{card.id}"}
+            module={StridentWeb.Components.Tournaments.TournamentsPageInfoCard}
+            card={card}
+            timezone={@timezone}
+            locale={@locale}
+          />
+        <% end %>
+      </div>
+
+      <div class="py-16 border-b border-gray-400">
+        <div class="grid grid-cols-4 gap-8">
+          <%= for tournament <- @tournaments do %>
+            <.live_component
+              id={"tournament-#{tournament.id}"}
+              module={StridentWeb.Components.NewTournamentCard}
+              tournament={tournament}
+              timezone={@timezone}
+              locale={@locale}
+            />
+          <% end %>
+        </div>
+      </div>
+
+      <section class="mb-16">
+        <h1>Typography</h1>
+
+        <hr class="mt-4 mb-4" />
+
+        <h1>h1 - First header</h1>
+        <h2>h2 - Second header</h2>
+        <h3>h3 - Third header</h3>
+        <h4>h4 - Fourth header</h4>
+        <h5>h5 - Fifth header</h5>
+        <h6>h6 - Sixth header</h6>
+
+        <p>&lt;p&gt; This is normal text, we use for long-form content.</p>
+        <p class="text-sm">
+          &lt;p class=&quot;text-sm&quot;&gt;This is smaller text we use for subtext content.
+        </p>
+        <p class="text-xs">
+          &lt;p class=&quot;text-xs&quot;&gt;This is smallest text we use for very small content.
+        </p>
+
+        <p class="text-grey-light">
+          &lt;p class=&quot;text-grey-light&quot;&gt; This is grey text, we use for other kinds of text.
+        </p>
+        <p class="text-sm text-grey-light">
+          &lt;p class=&quot;text-sm text-grey-light&quot;&gt;This is smaller grey text we use for grey subtext content.
+        </p>
+        <p class="text-xs text-grey-light">
+          &lt;p class=&quot;text-xs text-grey-light&quot;&gt;This is the smallest grey text we use for grey subtext content.
+        </p>
+      </section>
+
+      <section class="mb-16">
+        <h1>Containers</h1>
+
+        <hr class="mt-4 mb-4" />
+
+        <h3 class="mb5">
+          &lt;.card&gt;
+        </h3>
+
+        <div class="flex flex-row mb-5">
+          <div class="basis-1/2">
+            <.card>
+              <p>This is our standard card. It has padding on all sides.</p>
+              &lt;.card&gt;
+              HTML
+              &lt;/.card&gt;
+            </.card>
+          </div>
+
+          <div class="basis-1/2">
+            <.card colored={true}>
+              <p>
+                This is our colored card. It has padding on all sides
+                and a really nice colored border.
+              </p>
+              &lt;.card class="colored"&gt;
+              HTML
+              &lt;/.card&gt;
+            </.card>
+          </div>
+        </div>
+
+        <h3 class="mb5">
+          &lt;.wide_card&gt;
+        </h3>
+
+        <p class="mb-5">
+          wide_card is used for more horizontal content. An example is our upcoming match
+          card in the tournament details page.
+        </p>
+
+        <div class="flex flex-row mb-5">
+          <div class="basis-4/5">
+            <.wide_card>
+              <p>This is our wide card. It's padding is tailored for wide content.</p>
+              &lt;.wide_card&gt;
+              HTML
+              &lt;/.wide_card&gt;
+            </.wide_card>
+          </div>
+        </div>
+
+        <div class="flex flex-row mb-5">
+          <div class="basis-4/5">
+            <.wide_card colored={true}>
+              <p>This is our wide card. It's padding is tailored for wide content.</p>
+              &lt;.wide_card colored={true}&gt;
+              HTML
+              &lt;/.wide_card&gt;
+            </.wide_card>
+          </div>
+        </div>
+
+        <h3 class="mb5">
+          &lt;.tall_card&gt;
+        </h3>
+
+        <p class="mb-5">
+          tall_card is used for content that is more vertical in nature. Like a player
+          card in the tournament show page.
+        </p>
+
+        <div class="flex flex-row mb-5">
+          <div class="basis-1/5">
+            <.tall_card>
+              <p>This is our tall card. It's padding is tailored for tall content.</p>
+              <img src="https://picsum.photos/200" /> &lt;.tall_card&gt;
+              HTML
+              &lt;/.tall_card&gt;
+            </.tall_card>
+          </div>
+          <div class="basis-1/5">
+            <.tall_card colored={true}>
+              <p>This is our tall card. It's padding is tailored for tall content.</p>
+              <img src="https://picsum.photos/200" /> &lt;.tall_card class="colored"&gt;
+              HTML
+              &lt;/.tall_card&gt;
+            </.tall_card>
+          </div>
+        </div>
+      </section>
+
+      <section class="mb-16">
+        <h1>Colors</h1>
+
+        <hr class="mt-4 mb-4" />
+
+        <div class="flex flex-wrap items-center justify-center space-x-12">
+          <div class="bg-[#373737] rounded-md p-2.5 mb-12">
+            <div class="bg-blackish h-44 w-44">
+              bg-blackish
+            </div>
+          </div>
+          <div class="bg-[#373737] rounded-md p-2.5 mb-12">
+            <div class="h-44 w-44 bg-blackish">
+              bg-blackish
+            </div>
+          </div>
+          <div class="bg-[#373737] rounded-md p-2.5 mb-12">
+            <div class="h-44 w-44 bg-grey-medium">
+              bg-grey-medium
+            </div>
+          </div>
+          <div class="bg-[#373737] rounded-md p-2.5 mb-12">
+            <div class="h-44 w-44 bg-grey-light">
+              bg-grey-light
+            </div>
+          </div>
+          <div class="bg-[#373737] rounded-md p-2.5 mb-12">
+            <div class="bg-white h-44 w-44">
+              bg-white
+            </div>
+          </div>
+          <div class="bg-[#373737] rounded-md p-2.5 mb-12">
+            <div class="h-44 w-44 bg-primary">
+              bg-primary
+            </div>
+          </div>
+          <div class="bg-[#373737] rounded-md p-2.5 mb-12">
+            <div class="h-44 w-44 bg-primary-dark">
+              bg-primary-dark
+            </div>
+          </div>
+          <div class="bg-[#373737] rounded-md p-2.5 mb-12">
+            <div class="h-44 w-44 bg-secondary">
+              bg-secondary
+            </div>
+          </div>
+          <div class="bg-[#373737] rounded-md p-2.5 mb-12">
+            <div class="h-44 w-44 bg-secondary-dark">
+              bg-secondary-dark
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="mb-16">
+        <p class="mb-6 text-2xl font-light">
+          Links
+        </p>
+
+        <div class="flex space-x-12">
+          <a href="#" class="link">
+            Link
+          </a>
+          <a href="#" class="underline link">
+            Link
+          </a>
+          <a href="#" class="link text-primary-dark">
+            Link
+          </a>
+        </div>
+      </section>
+
+      <section class="mb-16">
+        <div class="grid grid-cols-2 gap-x-24">
+          <div>
+            <p class="mb-6 text-2xl font-light">
+              Forms
+            </p>
+            <div class="flex flex-col space-y-6">
+              <input type="text" class="form-input" />
+              <input type="text" class="form-input" value="Han Solo" />
+              <input type="text" class="form-input border-primary ring-1 ring-primary" />
+              <input type="text" class="form-input form-input--error" />
+
+              <select name="test" id="test" class="form-input">
+                <option value="ps5">
+                  PS5
+                </option>
+                <option value="ps4">
+                  PS4
+                </option>
+                <option value="xboxOne">
+                  Xbox One
+                </option>
+                <option value="xboxSeriesX">
+                  Xbox Series X
+                </option>
+              </select>
+
+              <input type="number" class="form-input" min="1" max="10" />
+            </div>
+          </div>
+
+          <div>
+            <p class="mb-6 text-2xl font-light">
+              Basic Buttons
+            </p>
+
+            <div class="mb-6">
+              <button class="mb-2 btn btn--primary btn--large">
+                Get started now
+              </button>
+              <button class="mb-2 btn btn--primary btn--wide">
+                Watch Now
+              </button>
+              <button class="mb-2 btn btn--primary">
+                Change password
+              </button>
+              <button class="mb-2 btn btn--primary">
+                Send message
+              </button>
+              <button class="mb-2 btn btn--primary">
+                Sign in
+              </button>
+            </div>
+
+            <div class="mb-6">
+              <button class="mb-2 btn btn--secondary btn--large">
+                Get started now
+              </button>
+              <button class="mb-2 btn btn--secondary btn--wide">
+                Watch Now
+              </button>
+              <button class="mb-2 btn btn--secondary">
+                Change password
+              </button>
+              <button class="mb-2 btn btn--secondary">
+                Send message
+              </button>
+              <button class="mb-2 btn btn--secondary">
+                Sign in
+              </button>
+            </div>
+
+            <p class="mb-6 text-2xl font-light">
+              Ghost Buttons
+            </p>
+
+            <div class="mb-6">
+              <button class="mb-2 text-white btn btn--primary-ghost btn--large">
+                Get started now
+              </button>
+              <button class="mb-2 text-white btn btn--primary-ghost btn--wide">
+                Watch Now
+              </button>
+              <button class="mb-2 btn btn--primary-ghost">
+                Change password
+              </button>
+              <button class="mb-2 btn btn--primary-ghost">
+                Send message
+              </button>
+              <button class="mb-2 btn btn--primary-ghost">
+                Sign in
+              </button>
+            </div>
+
+            <div class="mb-6">
+              <button class="mb-2 text-white btn btn--secondary-ghost btn--large">
+                Get started now
+              </button>
+              <button class="mb-2 text-white btn btn--secondary-ghost btn--wide">
+                Watch Now
+              </button>
+              <button class="mb-2 btn btn--secondary-ghost">
+                Change password
+              </button>
+              <button class="mb-2 btn btn--secondary-ghost">
+                Send message
+              </button>
+              <button class="mb-2 btn btn--secondary-ghost">
+                Sign in
+              </button>
+            </div>
+
+            <p class="mb-6 text-2xl font-light">
+              Social Links
+            </p>
+
+            <div class="flex space-x-4">
+              <button class="btn btn--social">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M4.265 3 3 6.236v13.223h4.502V21l2.531.85 2.392-2.391h3.658l4.923-4.924V3H4.265zm15.052 10.691-2.813 2.814h-4.502l-2.391 2.391v-2.391H5.813V4.688h13.504v9.003zm-2.812-5.767v4.923h-1.688V7.924h1.688zm-4.502 0v4.923h-1.688V7.924h1.688z">
+                  </path>
+                </svg>
+              </button>
+              <button class="btn btn--social">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M4.265 3 3 6.236v13.223h4.502V21l2.531.85 2.392-2.391h3.658l4.923-4.924V3H4.265zm15.052 10.691-2.813 2.814h-4.502l-2.391 2.391v-2.391H5.813V4.688h13.504v9.003zm-2.812-5.767v4.923h-1.688V7.924h1.688zm-4.502 0v4.923h-1.688V7.924h1.688z">
+                  </path>
+                </svg>
+              </button>
+              <button class="btn btn--social">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M4.265 3 3 6.236v13.223h4.502V21l2.531.85 2.392-2.391h3.658l4.923-4.924V3H4.265zm15.052 10.691-2.813 2.814h-4.502l-2.391 2.391v-2.391H5.813V4.688h13.504v9.003zm-2.812-5.767v4.923h-1.688V7.924h1.688zm-4.502 0v4.923h-1.688V7.924h1.688z">
+                  </path>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="mb-16">
+        <p class="mb-6 text-2xl font-light">
+          Progress bar
+        </p>
+
+        <div class="flex space-x-12">
+          <div class="progress-bar">
+            <div class="progress-bar__fill" style="transform: translateX(-100%)" />
+          </div>
+          <div class="progress-bar">
+            <div class="progress-bar__fill" style="transform: translateX(-25%)" />
+          </div>
+          <div class="progress-bar">
+            <div class="progress-bar__fill" style="transform: translateX(0%)" />
+          </div>
+        </div>
+      </section>
+
+      <section class="mb-16">
+        <p class="mb-6 text-2xl font-light">
+          Cards
+        </p>
+
+        <div class="grid grid-cols-3 gap-12">
+          <div class="overflow-hidden rounded bg-blackish">
+            <div class="relative h-56 bg-grey-medium"></div>
+
+            <div class="px-5 py-6">
+              <h4>Tournament Name</h4>
+              <p class="mb-4 text-sm text-grey-light">
+                12/23/2021, 4:00 PM EST
+              </p>
+
+              <h6 class="uppercase text-grey-light">
+                Prize Pool
+              </h6>
+
+              <div class="flex items-center text-sm">
+                <div class="flex-1">
+                  RANK
+                </div>
+                <div class="flex-1">
+                  PRIZE MONEY
+                </div>
+              </div>
+              <div class="flex items-center text-sm">
+                <div class="flex-1">
+                  1st
+                </div>
+                <div class="flex-1">
+                  $1,000
+                </div>
+              </div>
+              <div class="flex items-center text-sm">
+                <div class="flex-1">
+                  2nd
+                </div>
+                <div class="flex-1">
+                  $400
+                </div>
+              </div>
+              <div class="flex items-center text-sm">
+                <div class="flex-1">
+                  3rd
+                </div>
+                <div class="flex-1">
+                  $100
+                </div>
+              </div>
+
+              <button class="mt-6 btn btn--block btn--wide btn--primary">
+                Watch Now
+              </button>
+            </div>
+          </div>
+
+          <div class="overflow-hidden rounded bg-blackish">
+            <div class="relative h-56 bg-grey-medium"></div>
+
+            <div class="px-5 py-6">
+              <div class="text-sm text-secondary mb-1.5">
+                CATEGORY
+              </div>
+              <h4 class="mb-4">
+                Blog Title Long Title Very Long Title In German
+              </h4>
+              <p class="mb-6 text-grey-light">
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore
+              </p>
+
+              <div class="flex items-center">
+                <img src="http://placehold.it/32x32" alt="avatar" class="w-8 h-8 rounded-full" />
+                <div class="ml-2 text-xs text-white">
+                  Author Name
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="overflow-hidden rounded bg-blackish">
+            <div class="px-5 py-6">
+              <h6 class="uppercase text-grey-light">
+                Game
+              </h6>
+              <div class="text-sm">
+                Game Name
+              </div>
+
+              <h6 class="uppercase text-grey-light">
+                Date & Time
+              </h6>
+              <div class="text-sm">
+                Game Name
+              </div>
+
+              <h6 class="uppercase text-grey-light">
+                Prize Pool
+              </h6>
+              <div class="flex items-center text-sm">
+                <div class="flex-1">
+                  RANK
+                </div>
+                <div class="flex-1">
+                  PRIZE MONEY
+                </div>
+              </div>
+              <div class="flex items-center text-sm">
+                <div class="flex-1">
+                  1st
+                </div>
+                <div class="flex-1">
+                  $1,000
+                </div>
+              </div>
+              <div class="flex items-center text-sm">
+                <div class="flex-1">
+                  2nd
+                </div>
+                <div class="flex-1">
+                  $400
+                </div>
+              </div>
+              <div class="flex items-center text-sm">
+                <div class="flex-1">
+                  3rd
+                </div>
+                <div class="flex-1">
+                  $100
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="mb-16">
+        <p class="mb-6 text-2xl font-light">
+          SVG icons
+        </p>
+        <p class="mb-6 text-xl font-light">
+          We keep all our SVG paths centralised in one file with clear keys
+        </p>
+
+        <div class="grid grid-cols-6 gap-12 divide-x divide-y divide-dashed divide-primary">
+          <%= for {key, path} <- StridentWeb.Common.SvgUtils.paths() do %>
+            <div class="">
+              <div class="flex items-center justify-around">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" d={path} />
+                </svg>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d={path}></path>
+                </svg>
+              </div>
+              <div class="w-full ml-1 text-center">
+                <%= key %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>

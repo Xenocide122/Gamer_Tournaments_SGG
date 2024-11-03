@@ -1,0 +1,34 @@
+<div
+  id="appleid-signin"
+  data-color="black"
+  data-border="true"
+  data-type="sign in"
+  class="flex items-center justify-center text-white my-2 w-full btn btn--primary btn--wide bg-blackish border-black"
+>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="16"
+    height="16"
+    viewBox="0 0 16 16"
+    fill="currentColor"
+    class="mr-2"
+  >
+    <path d={StridentWeb.Common.SvgUtils.path(:apple)}></path>
+  </svg>
+
+  <script
+    type="text/javascript"
+    src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js"
+  >
+  </script>
+  <script type="text/javascript">
+    AppleID.auth.init({
+        clientId : '<%= Application.get_env(:ueberauth, Ueberauth.Strategy.Apple.OAuth)[:client_id] %>',
+        scope : 'email name',
+        redirectURI : '<%= Strident.UrlGeneration.absolute_path(Routes.auth_url(StridentWeb.Endpoint, :callback, "apple")) %>',
+        state : '[STATE]',
+        usePopup : true //or false defaults to false
+    });
+  </script>
+  Log in with Apple
+</div>

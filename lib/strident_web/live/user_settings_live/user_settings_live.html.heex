@@ -1,0 +1,109 @@
+<div class="container pb-20 mt-32">
+  <h2 class="text-center sm:text-left">Account Settings</h2>
+
+  <h3 class="text-center">Profile Picture</h3>
+
+  <.card>
+    <.live_component
+      id="profile-picture-form"
+      module={StridentWeb.Components.UploadImageForm}
+      current_user={@current_user}
+    />
+  </.card>
+
+  <%= if @current_user.password_credential do %>
+    <h3 class="mt-10 text-center">Account Security</h3>
+
+    <%= unless @current_user.password_credential.confirmed_at do %>
+      <.card class="mb-5">
+        <h4 class="mb-2">
+          Confirm your email
+        </h4>
+        <.live_component
+          timezone={@timezone}
+          locale={@locale}
+          id="confirm-email-component"
+          module={StridentWeb.UserSettingsLive.ConfirmEmailComponent}
+          current_user={@current_user}
+        />
+      </.card>
+    <% end %>
+
+    <.card class="mb-5">
+      <h4 class="mb-2">
+        Update your email
+      </h4>
+      <.live_component
+        timezone={@timezone}
+        locale={@locale}
+        id="update-email-form"
+        module={StridentWeb.UserSettingsLive.UpdateEmailForm}
+        current_user={@current_user}
+      />
+    </.card>
+
+    <.card>
+      <h4 class="mb-2">
+        Change password
+      </h4>
+      <.live_component
+        timezone={@timezone}
+        locale={@locale}
+        id="update-password-form"
+        module={StridentWeb.UserSettingsLive.UpdatePasswordForm}
+        current_user={@current_user}
+      />
+    </.card>
+  <% end %>
+
+  <h3 class="mt-10 text-center">User Details</h3>
+  <.card class="mb-5">
+    <.live_component
+      timezone={@timezone}
+      locale={@locale}
+      id="social-media-form"
+      module={StridentWeb.UserSettingsLive.SocialMediaForm}
+      current_user={@current_user}
+    />
+  </.card>
+
+  <h3 class="mt-10 text-center">Subscription Preferences</h3>
+  <.card>
+    <.live_component
+      id="subscription-preferences-form"
+      module={StridentWeb.UserSettingsLive.SubscriptionPreferencesForm}
+      current_user={@current_user}
+    />
+  </.card>
+
+  <h3 class="mt-10 text-center">Locale Settings</h3>
+  <.card>
+    <.live_component
+      id="locale-form"
+      module={StridentWeb.UserSettingsLive.LocaleForm}
+      current_user={@current_user}
+    />
+  </.card>
+
+  <h3 class="mt-10 text-center">Timezone Settings</h3>
+  <.card>
+    <.live_component
+      id="timezone-form"
+      module={StridentWeb.Live.UserSettingsLive.Components.TimezoneForm}
+      current_user={@current_user}
+    />
+  </.card>
+
+  <h3 class="mt-10 text-center">Delete Account</h3>
+  <.card>
+    <.live_component
+      id="delete-my-account"
+      module={StridentWeb.UserSettingsLive.Components.DeleteAccountComponent}
+      current_user={@current_user}
+      timezone={@timezone}
+      locale={@locale}
+    />
+  </.card>
+
+  <.flash flash={@flash} class="absolute top-0" />
+</div>

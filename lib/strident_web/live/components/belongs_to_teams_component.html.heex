@@ -1,0 +1,13 @@
+<div>
+  <%= for team <- @teams do %>
+    <.link navigate={Routes.live_path(@socket, StridentWeb.TeamProfileLive.Show, team.slug)}>
+      <p class="mb-2 text-primary">
+        <%= team.name %>
+      </p>
+    </.link>
+
+    <.link navigate={Routes.live_path(@socket, StridentWeb.TeamProfileLive.Show, team.slug)}>
+      <img src={team.logo_url} alt="team logo" class="w-32 h-32 mt-2" />
+    </.link>
+  <% end %>
+</div>

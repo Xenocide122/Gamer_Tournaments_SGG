@@ -1,0 +1,362 @@
+<div class="pt-28 pb-32 mb:py-32">
+  <div class="container">
+    <div class="relative">
+      <section
+        :if={!!@current_user && @current_user.is_staff}
+        class="py-20 bg-center bg-cover bg-no-repeat"
+        style={
+      "background-image: url('#{safe_static_url("/images/strident-zoomed.png")}')"
+    }
+      >
+        <div class="text-center w-full font-display font-bold">
+          <div class="text-6xl uppercase">
+            Create Tournaments
+          </div>
+          <div class="text-primary text-4xl font-light">
+            ...in under 60 seconds
+          </div>
+          <div class="flex justify-center mt-12 font-light">
+            <.link
+              navigate={~p"/tournaments/create"}
+              class="px-4 py-3 text-lg !no-underline uppercase border rounded-lg btn--primary font-display md:text-3xl"
+            >
+              <span class="flex gap-x-4 items-center">
+                <div>
+                  Get Started
+                </div>
+                <div>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                  >
+                    <path
+                      d="M3.33789 7C5.06694 4.01099 8.29866 2 12.0001 2C17.5229 2 22.0001 6.47715 22.0001 12C22.0001 17.5228 17.5229 22 12.0001 22C8.29866 22 5.06694 19.989 3.33789 17M12 16L16 12M16 12L12 8M16 12H2"
+                      stroke="#091B1F"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                </div>
+              </span>
+            </.link>
+          </div>
+        </div>
+      </section>
+      <section
+        :if={Enum.any?(@featured_tournaments)}
+        id="featured-tournaments-section"
+        class="pb-14 pt-0 md:py-14"
+      >
+        <h3 class="hidden md:block mb-8 uppercase">Featured Events</h3>
+
+        <.live_component
+          id="tournaments-featured-small-carousel"
+          module={StridentWeb.Components.Tournaments.SmallCarouselTournamentScroll}
+          tournaments={@featured_tournaments}
+          timezone={@timezone}
+          locale={@locale}
+        />
+      </section>
+
+      <section id="genre-controls-and-filters" class="sticky z-20 top-16 md:top-24 bg-blackish/80">
+        <div class="w-full overflow-auto md:overflow-initial">
+          <div>
+            <div
+              class="flex items-center w-full py-4 space-x-4 border-b font-display border-grey-dark profile-menu"
+              x-data="{show: false}"
+            >
+              <div
+                class={"select-none md:text-2xl #{if @filtered_genres==[], do: "text-primary", else: "link text-white"}"}
+                phx-click="unfilter-genres"
+              >
+                All
+              </div>
+              <div class="flex flex-nowrap items-center gap-x-6 md:text-2xl">
+                <div
+                  :for={genre <- Enum.take(@genres, @num_genres_displayed)}
+                  class={[
+                    "uppercase whitespace-nowrap select-none hover:underline ",
+                    if(genre.slug in @filtered_genres, do: "text-primary", else: "link text-white")
+                  ]}
+                  phx-click="filter-genre"
+                  phx-value-genre={genre.slug}
+                >
+                  <%= genre.genre_name %>
+                </div>
+
+                <div
+                  :if={@num_genres_displayed < Enum.count(@genres)}
+                  class="select-none text-grey-light whitespace-nowrap"
+                  phx-click="more-genres"
+                >
+                  more genres...
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="pb-1 border-b md:items-center border-grey-medium" x-data="{show: false}">
+          <div class="flex items-center">
+            <div class="flex items-center space-x-4" x-data="navbar">
+              <button x-bind="searchTrigger">
+                <.svg icon={:search} width="24" height="24" class="fill-primary" />
+              </button>
+
+              <div x-bind="searchBar" x-cloak class="flex items-center">
+                <form phx-submit="filter-search">
+                  <input
+                    x-ref="searchInput"
+                    name="search_term"
+                    type="text"
+                    class="px-0 bg-transparent border-0 border-b-2 w-80 border-primary focus:border-primary focus:ring-0"
+                    placeholder="Search tournaments"
+                  />
+                </form>
+
+                <button @click="closeSearch()">
+                  <.svg icon={:close} width="24" height="24" class="fill-current" />
+                </button>
+              </div>
+            </div>
+
+            <div x-data="dropdown" class="relative">
+              <button x-bind="trigger" class="px-4 py-3 link">Dates</button>
+
+              <div
+                x-bind="menu_wrapper"
+                x-transition
+                class="absolute left-[-34px] md:left-0 z-20 mx-6 overflow-y-hidden border-2 rounded md:right-0 md:mx-0 md:mt-4 md:w-fit md:h-fit bg-grey-medium border-primary"
+              >
+                <div x-bind="menu" class="space-y-2">
+                  <.form
+                    :let={f}
+                    for={to_form(%{}, as: :filtered_dates)}
+                    phx-change="filter-dates"
+                  >
+                    <.form_datetime_local_input
+                      form={f}
+                      field={:date}
+                      mode="range"
+                      notime
+                      inline
+                      class="hidden"
+                      timezone={@timezone}
+                    />
+                  </.form>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-grey-medium w-[1px] h-6" />
+
+            <div x-data="dropdown" class="relative">
+              <button x-bind="trigger" class="px-4 py-3 link">Games</button>
+
+              <div
+                x-bind="menu_wrapper"
+                x-transition
+                class="absolute z-20 mt-4 p-4 overflow-y-auto border-2 rounded -left-20 md:left-0 md:right-0 w-72 md:w-max md:p-6 max-h-80 stride-gg-dark-background border-primary"
+              >
+                <div x-bind="menu" class="space-y-2">
+                  <.form
+                    :let={f}
+                    for={to_form(%{}, as: :filtered_games)}
+                    phx-change="filter-games"
+                  >
+                    <div :for={game <- @displayed_games} class="flex items-center my-2">
+                      <%= checkbox(f, game.slug,
+                        class:
+                          "h-4 w-4 text-primary focus:ring-indigo-500 checkbox-stride-gg-blue rounded",
+                        value: Enum.member?(@filtered_games, game.slug)
+                      ) %>
+
+                      <.form_label
+                        form={f}
+                        field={game.slug}
+                        class="flex-1 pl-2 mb-0 text-white break-words"
+                        label={game.title}
+                      />
+                    </div>
+                  </.form>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-grey-medium w-[1px] h-6" />
+
+            <div x-data="dropdown" class="relative">
+              <button x-bind="trigger" class="px-4 py-3 link">Status</button>
+
+              <div
+                x-bind="menu_wrapper"
+                x-transition
+                class="absolute z-20 w-72 mt-4 p-4 border-2 rounded -left-[158px] sm:left-0 md:right-0 md:w-max md:p-6 stride-gg-dark-background border-primary"
+              >
+                <div x-bind="menu" class="space-y-2">
+                  <.form
+                    :let={f}
+                    for={to_form(%{}, as: :filtered_status)}
+                    phx-change="filter-status"
+                  >
+                    <div :for={status <- status_filters()} class="flex items-center my-2">
+                      <%= checkbox(f, status,
+                        class:
+                          "h-4 w-4 text-primary focus:ring-indigo-500 checkbox-stride-gg-blue rounded",
+                        value: Enum.member?(@filtered_status, status)
+                      ) %>
+                      <.form_label
+                        form={f}
+                        field={status}
+                        class="flex-1 pl-2 mb-0 text-white capitalize break-words"
+                        label={String.replace(status, "-", " ")}
+                      />
+                    </div>
+                  </.form>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-grey-medium w-[1px] h-6" />
+
+            <div>
+              <p class="px-4 py-3 link text-grilla-blue" phx-click="show-scrims">Scrims</p>
+            </div>
+          </div>
+        </div>
+
+        <div
+          :if={
+            Enum.any?(@filtered_dates) or Enum.any?(@filtered_status) or
+              Enum.any?(@filtered_games) or
+              not Strident.StringUtils.is_empty?(@filtered_search) or @show_scrims
+          }
+          class="flex flex-wrap items-center gap-4 mt-3 mb-3"
+        >
+          <div class="text-grey-light">Filters</div>
+
+          <div
+            :if={not Strident.StringUtils.is_empty?(@filtered_search)}
+            class="flex items-center py-1 pl-3 pr-1 border rounded-full border-primary text-primary bg-blackish"
+          >
+            <span>
+              Search: &ldquo;<%= @filtered_search %>&rdquo;
+            </span>
+            <.svg
+              icon={:x}
+              width="20"
+              height="20"
+              class="cursor-pointer fill-primary"
+              phx-click="unfilter-search"
+            />
+          </div>
+
+          <div
+            :if={Enum.any?(@filtered_dates)}
+            class="flex items-center py-1 pl-3 pr-1 border rounded-full border-primary text-primary bg-blackish"
+          >
+            <span>
+              <%= case Enum.dedup(@filtered_dates) do %>
+                <% [date] -> %>
+                  Date: <.localised_date date={date} locale={@locale} />
+                <% [start_date, end_date] -> %>
+                  Dates: <.localised_date date={start_date} locale={@locale} /> -
+                  <.localised_date date={end_date} locale={@locale} />
+              <% end %>
+            </span>
+
+            <.svg
+              icon={:x}
+              width="20"
+              height="20"
+              class="cursor-pointer fill-primary"
+              phx-click="unfilter-date"
+            />
+          </div>
+
+          <div
+            :if={Enum.any?(@filtered_games)}
+            class="flex items-center py-1 pl-3 pr-1 border rounded-full border-primary text-primary bg-blackish"
+          >
+            <span class="flex space-x-1 text-sm">
+              <span :if={length(@filtered_games) == 1}>Game:</span>
+              <span :if={length(@filtered_games) > 1}>Games:</span>
+              <span :for={game <- game_titles(@filtered_games, @games)} class="flex comma-list">
+                <%= game %>
+              </span>
+            </span>
+            <.svg
+              icon={:x}
+              width="14"
+              height="14"
+              class="cursor-pointer fill-primary ml-1 mr-2"
+              phx-click="unfilter-games"
+            />
+          </div>
+
+          <div
+            :if={Enum.any?(@filtered_status)}
+            class="flex items-center py-1 pl-3 pr-1 border rounded-full border-primary text-primary bg-blackish"
+          >
+            <span class="flex space-x-1 text-sm">
+              <span>Status:</span>
+              <span :for={status <- @filtered_status} class="flex capitalize comma-list">
+                <%= String.replace(status, "-", " ") %>
+              </span>
+            </span>
+            <.svg
+              icon={:x}
+              width="14"
+              height="14"
+              class="cursor-pointer fill-primary ml-1 mr-2"
+              phx-click="unfilter-status"
+            />
+          </div>
+
+          <div
+            :if={@show_scrims}
+            class="flex items-center justify-center px-4 py-1 pr-1 border rounded-full border-grilla-blue text-grilla-blue bg-blackish"
+          >
+            <span class="flex space-x-1 text-sm"> Scrims </span>
+            <.svg
+              icon={:x}
+              width="14"
+              height="14"
+              class="cursor-pointer fill-current ml-1 mr-2"
+              phx-click="unfilter-scrims"
+            />
+          </div>
+        </div>
+      </section>
+      <section id="tourn-feed" class="bg-blackish min-h-[480px]" x-data="{show: false}">
+        <div class="grid grid-cols-1 md:grid-cols-2 md:grid-cols-3 md:gap-x-10 md:mt-8 md:mb-12 xl:grid-cols-4 ">
+          <div :for={tournament <- @filtered_tournaments.entries}>
+            <.live_component
+              id={"tournament-hover-#{tournament.id}"}
+              module={StridentWeb.Components.Tournaments.HoverTournamentCard}
+              tournament={tournament}
+              timezone={@timezone}
+              locale={@locale}
+              allow_hover_default={true}
+            />
+          </div>
+        </div>
+      </section>
+      <section id="load-more" class="bg-blackish" x-data="{show: false}">
+        <div :if={@filtered_tournaments.total_pages > 1} class="text-center">
+          <.button
+            id="tournament-load-more-button"
+            class="w-full max-w-xs font-semibold"
+            button_type={:primary}
+            phx-click="load-more"
+          >
+            Load more
+          </.button>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>

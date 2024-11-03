@@ -1,0 +1,99 @@
+<div class="pt-32">
+  <div class="container max-w-5xl">
+    <.card colored id="create-tournament-tournament-info" class="p-0.5 card--glowing-two-tone">
+      <div class="max-w-lg">
+        <h3 class="uppercase">Interested in partnering with us?</h3>
+        <p class="mb-10 text-grey-light">Tell us more about yourself</p>
+
+        <.form
+          :let={f}
+          for={@changeset}
+          id="tournament-info-form"
+          phx-change="validate"
+          phx-submit="create-partnership"
+          autocomplete="off"
+        >
+          <div class="form-group">
+            <.form_label form={f} field={:name} label="Your Name" class="mb-0 text-sm text-white" />
+            <.form_text_input form={f} field={:name} phx-debounce={1000} />
+            <.form_feedback form={f} field={:name} />
+          </div>
+
+          <div class="form-group">
+            <.form_label
+              form={f}
+              field={:partnership_role_id}
+              label="I am a..."
+              class="mb-0 text-sm text-white"
+            />
+            <.form_select
+              form={f}
+              field={:partnership_role_id}
+              values={@roles}
+              prompt="Select one"
+              class="mt-1 mb-3"
+            />
+            <.form_feedback form={f} field={:partnership_role_id} />
+          </div>
+
+          <div class="form-group">
+            <.form_label
+              form={f}
+              field={:email}
+              label="Email Address"
+              class="mb-0 text-sm text-white"
+            />
+            <.form_email_input form={f} field={:email} phx-debounce={1000} />
+            <.form_feedback form={f} field={:email} />
+          </div>
+
+          <div class="form-group">
+            <.form_label
+              form={f}
+              field={:social_media_urls}
+              label="Social Media Profiles"
+              class="mb-0 text-sm text-white"
+            />
+            <%= for {social_media_url, index} <-  Enum.with_index(Ecto.Changeset.get_field(@changeset, :social_media_urls, [""])) do %>
+              <%= text_input(f, :social_media_urls,
+                name: "partnership[social_media_urls][]",
+                value: social_media_url,
+                class: "form-input mb-2",
+                id: "social-media-input-#{index}",
+                placeholder: "e.g. twitter.com/grilla"
+              ) %>
+            <% end %>
+            <.form_feedback form={f} field={:social_media_urls} />
+          </div>
+
+          <div class="flex justify-end">
+            <div
+              class="flex items-center text-primary"
+              phx-click="add-new-social-media-urls"
+              style="cursor: pointer;"
+            >
+              <span class="mr-1">
+                Add another
+              </span>
+
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                <path d={StridentWeb.Common.SvgUtils.path(:add_fill)} />
+              </svg>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <.form_label form={f} field={:about} label="About Me" class="mb-0 text-sm text-white" />
+            <.form_textarea form={f} field={:about} rows="3" />
+            <.form_feedback form={f} field={:about} />
+          </div>
+
+          <%= submit("Send It",
+            phx_disable_with: "Sending...",
+            class: "btn btn--wide btn--primary"
+          ) %>
+        </.form>
+      </div>
+    </.card>
+  </div>
+</div>

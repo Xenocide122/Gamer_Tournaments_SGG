@@ -1,0 +1,85 @@
+<div class="tournament-card">
+  <%= if @open_manage_tournament_participant do %>
+    <.live_component
+      timezone={@timezone}
+      locale={@locale}
+      id={"tournament-participant-modal-#{@tournament.id}"}
+      module={StridentWeb.TeamTournamentsLive.Components.TournamentParticipantModal}
+      tournament={@tournament}
+      team={@team}
+    />
+  <% end %>
+
+  <.link navigate={@link_to}>
+    <div class="relative flex items-center justify-center overflow-hidden max-h-56">
+      <img src={@image_url} alt="Tournament" />
+
+      <div class="absolute bottom-0 left-0 flex items-center">
+        <div class="tournament-card__status">
+          <%= if is_future?(@tournament.registrations_open_at),
+            do: "Contributions open soon",
+            else: "Entry fees open" %>
+        </div>
+
+        <svg
+          width="20"
+          height="28"
+          viewBox="0 0 20 28"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path d="M20 32H0V0L20 32Z" fill="#03d5fb" />
+        </svg>
+      </div>
+    </div>
+  </.link>
+
+  <div class="px-5 py-6">
+    <div>
+      <.link navigate={@link_to}>
+        <div class="text-center heading-4">
+          <%= @tournament.title %>
+        </div>
+      </.link>
+
+      <.localised_datetime
+        datetime={@tournament.starts_at}
+        timezone={@timezone}
+        locale={@locale}
+        class="block mb-8 text-sm text-center text-grey-light"
+      />
+    </div>
+
+    <div class="mb-4">
+      <div class="font-display text-grey-light">
+        Prize pool
+      </div>
+
+      <.live_component
+        id={"tournament-prize-pool-#{@tournament.id}"}
+        module={
+          case @tournament.prize_strategy do
+            :prize_pool -> StridentWeb.Components.PrizePool
+            :prize_distribution -> StridentWeb.Components.PrizeDistribution
+          end
+        }
+        prize_strategy={@tournament.prize_strategy}
+        prize_pool={@tournament.prize_pool}
+        prize_distribution={@tournament.prize_distribution}
+        position={:vertical}
+        timezone={@timezone}
+        locale={@locale}
+      />
+    </div>
+
+    <div class="flex flex-col">
+      <button
+        class="font-bold btn btn--primary"
+        phx-click="open-tournament-participant"
+        phx-value-tournament={@tournament.id}
+      >
+        Manage Roster
+      </button>
+    </div>
+  </div>
+</div>

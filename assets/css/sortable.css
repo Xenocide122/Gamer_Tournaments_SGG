@@ -1,0 +1,7 @@
+.sortable-ghost {
+  opacity: 0.75;
+}
+.sortable-swap-highlight {
+  opacity: 0.5;
+  background-color: #9ab6f1;
+}

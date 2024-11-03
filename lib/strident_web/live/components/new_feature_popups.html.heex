@@ -1,0 +1,103 @@
+<div>
+  <div :if={Enum.any?(@features)} id={@id} class="fixed z-50 overflow-y-auto top-20 left-1/3">
+    <div class="block min-h-screen px-4 text-center">
+      <div
+        class="fixed inset-0 transition-opacity bg-blackish bg-opacity-90"
+        phx-click={hide_modal(@id)}
+      >
+      </div>
+      <div class="inline-block w-full max-w-screen-md m-auto overflow-hidden text-left align-bottom transition-all transform rounded-md shadow-xl bg-blackish sm:my-8 sm:align-middle sm:max-w-screen-md sm:w-full">
+        <div class="relative rounded-md bg-blackish p-px bg-gradient-to-l from-[#03d5fb] to-[#ff6802]">
+          <div class="p-1 rounded-lg bg-blackish xl:p-10">
+            <div class="mb-8">
+              <div class="flex items-center justify-between">
+                <h2 class="text-center">
+                  <%= @features_title || "New Features" %>
+                </h2>
+
+                <div class="flex justify-end" phx-click={hide_modal(@id)}>
+                  <.svg icon={:x} height="20" width="20" class="fill-grey-light" />
+                </div>
+              </div>
+
+              <p :if={@features_description} class="text-center">
+                <%= @features_description %>
+              </p>
+            </div>
+
+            <div class="">
+              <div class="flex flex-col items-center mb-8">
+                <.image
+                  :if={Map.has_key?(@current_feature, :image_url)}
+                  id={"feature-image-#{Map.get(@current_feature, :id, UUID.uuid4)}"}
+                  image_url={Map.get(@current_feature, :image_url)}
+                  alt="feature"
+                  class="mr-2 border-2 border-black bg-gray-dark"
+                  width={100}
+                  height={100}
+                />
+
+                <h3 class="py-2 text-center">
+                  <%= Map.get(@current_feature, :title) %>
+                </h3>
+
+                <p class="pb-8 text-sm text-center">
+                  <%= Map.get(@current_feature, :description) %>
+                </p>
+
+                <.link
+                  :if={Map.has_key?(@current_feature, :blog_url)}
+                  href={Map.get(@current_feature, :blog_url)}
+                  class="rounded text-black uppercase bg-primary border-primary inline-block cursor-pointer font-medium border py-2.5 px-4 select-none"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Learn More
+                </.link>
+              </div>
+
+              <div :if={Enum.count(@features) > 1} class="flex items-center justify-center gap-2">
+                <.svg
+                  :for={%{id: id} <- @features}
+                  icon={:x_circle}
+                  height="15"
+                  width="15"
+                  class={[
+                    "cursor-pointer",
+                    if(Map.get(@current_feature, :id) == id,
+                      do: "fill-primary",
+                      else: "fill-grey-light"
+                    )
+                  ]}
+                  phx-value-feature={id}
+                  phx-click="go-to-feature"
+                  phx-target={@myself}
+                />
+              </div>
+            </div>
+
+            <div class="flex justify-end mt-8 gap-x-4">
+              <.button
+                id="remind-me-later"
+                button_type={:primary_ghost}
+                class="rounded"
+                phx-click={hide_modal(@id)}
+              >
+                Remind me later
+              </.button>
+
+              <.button
+                id="do-not-show-again"
+                button_type={:primary}
+                class="rounded"
+                phx-click={@id |> hide_modal() |> JS.push("do-not-show-again", target: @myself)}
+              >
+                OK, Got it
+              </.button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,469 @@
+<nav class="max-w-full mx-auto fixed inset-x-0 w-full top-0 z-50 bg-strident-black/80 backdrop-blur after:absolute after:inset-x-0 after:bottom-0 after:h-[2px] after:bg-primary after:bg-gradient-to-l from-[#01060F] via-[#03D5FB] to-[#01060F] after:z-[-1]">
+  <div class="flex items-center justify-between mx-4 md:mx-32 h-16 md:h-24">
+    <div class="flex items-center gap-x-12">
+      <.link navigate={~p"/"} class="flex items-center justify-center">
+        <img
+          src={safe_static_url("/images/stride-header-footer-logo.png")}
+          alt="Stride"
+          class="cursor-pointer w-40"
+        />
+      </.link>
+
+      <div class="hidden gap-x-12 md:flex">
+        <.navbar_button
+          id="navbar-go-to-tournaments-link"
+          navigate={~p"/tournaments"}
+          current_view={@socket.private.root_view}
+          current_module={StridentWeb.TournamentsLive.Index}
+        >
+          Tournaments
+        </.navbar_button>
+        <.navbar_button
+          id="navbar-go-to-community-link"
+          navigate={~p"/community"}
+          current_view={@socket.private.root_view}
+          current_module={StridentWeb.CommunityLive.Index}
+        >
+          Community
+        </.navbar_button>
+        <.navbar_button
+          id="navbar-go-to-giveaway-link"
+          navigate={~p"/giveaway"}
+          current_view={@socket.private.root_view}
+          current_module={StridentWeb.GiveawayLive.Index}
+        >
+          Giveaway
+        </.navbar_button>
+      </div>
+    </div>
+
+    <div class="flex items-stretch space-x-5">
+      <div class="items-stretch hidden md:flex space-x-5">
+        <a
+          href={SocialMedia.discord_server_invite_url()}
+          target="_blank"
+          class="flex items-center space-x-1 font-medium text-brands-discord"
+        >
+          <.svg icon={:discord} width="36" height="36" class="fill-current" />
+        </a>
+        <div
+          :if={!!@current_user and (!!@current_user.is_staff or !is_nil(@impersonating_staff_id))}
+          class="flex items-center space-x-10 text-primary"
+        >
+          <.live_component
+            id="location-widget"
+            module={StridentWeb.Live.NavbarLive.Components.Location}
+            can_play={@can_play}
+            can_wager={@can_wager}
+            ip_location={@ip_location}
+          />
+        </div>
+      </div>
+
+      <div class="items-center hidden md:flex">
+        <.svg
+          id="search-navbar-button"
+          icon={:search}
+          width="24"
+          height="24"
+          class="cursor-pointer fill-white"
+          phx-click={
+            JS.remove_class("hidden", to: "#navbar-search-form")
+            |> JS.add_class("flex items-center", to: "#navbar-search-form")
+            |> JS.remove_class("fill-white", to: "#search-navbar-button")
+            |> JS.add_class("fill-primary", to: "#search-navbar-button")
+            |> JS.focus(to: "#navbar-search-input")
+          }
+        />
+
+        <div id="navbar-search-form" class="hidden">
+          <form phx-submit="search" class="w-full">
+            <input
+              id="navbar-search-input"
+              name="search_term"
+              type="text"
+              class="w-64 px-0 bg-transparent border-0 border-b-2 border-primary focus:border-primary focus:ring-0"
+              placeholder="Search users, teams or tournaments"
+            />
+          </form>
+          <.svg
+            icon={:close}
+            width="24"
+            height="24"
+            class="cursor-pointer fill-primary"
+            phx-click={
+              JS.remove_class("flex items-center", to: "#navbar-search-form")
+              |> JS.add_class("hidden", to: "#navbar-search-form")
+              |> JS.remove_class("fill-primary", to: "#search-navbar-button")
+              |> JS.add_class("fill-white", to: "#search-navbar-button")
+            }
+          />
+        </div>
+      </div>
+
+      <.navbar_button
+        :if={!@current_user}
+        id="navbar-login-link"
+        navigate={~p"/users/log_in"}
+        class="hidden md:block"
+      >
+        Login
+      </.navbar_button>
+
+      <div id="user-navbar-web" class="relative flex items-center group">
+        <.navbar_user_icon_button
+          :if={@current_user}
+          id="navbar-web-user-button"
+          class="hidden md:block"
+          avatar_url={@avatar_url}
+          display_name={@display_name}
+          unread_notifications={@unread_notifications}
+          phx-click={
+            JS.toggle(
+              to: "#user-navbar-web-dropdown-menu",
+              in: {"ease-linear duration-75", "opacity-0", "opacity-100"},
+              out: {"ease-in duration-75", "opacity-100", "opacity-0"}
+            )
+            |> JS.remove_class("rotate-90",
+              to: "#navbar-web-user-button-menu-chevron-right.rotate-90"
+            )
+            |> JS.add_class("rotate-90",
+              to: "#navbar-web-user-button-menu-chevron-right:not(.rotate-90)"
+            )
+          }
+        />
+
+        <div
+          class="absolute hidden md:block top-full right-1"
+          phx-click-away={
+            JS.hide(to: "#user-navbar-web-dropdown-menu", transition: "ease-out duration-150")
+            |> JS.remove_class("rotate-90",
+              to: "#navbar-web-user-button-menu-chevron-right.rotate-90"
+            )
+          }
+        >
+          <.dropdown_items :if={@current_user} id="user-navbar-web">
+            <:items>
+              <div class="flex items-center px-5 py-4 space-x-2 border-b border-grey-light/25">
+                <img src={@avatar_url} alt={@display_name} class="rounded-full w-9 h-9" />
+                <div class="flex-1 truncate">
+                  <div class="truncate text-primary"><%= @display_name %></div>
+                  <div class="text-sm truncate text-grey-light">
+                    <%= @user_email %>
+                  </div>
+                </div>
+              </div>
+            </:items>
+
+            <:items>
+              <.navbar_link id="my-profile-navbar-link" navigate={~p"/user/#{@current_user.slug}"}>
+                <.svg
+                  icon={:user}
+                  width="24"
+                  height="24"
+                  class="bg-transparent stroke-current stroke-2"
+                />
+                <span>My Profile</span>
+              </.navbar_link>
+            </:items>
+
+            <:items>
+              <.navbar_link id="my-tournaments-navbar-link" navigate={~p"/my-tournaments"}>
+                <.svg icon={:trophy} width="24" height="24" class="fill-current" />
+                <span>My Tournaments</span>
+              </.navbar_link>
+            </:items>
+
+            <:items>
+              <.navbar_link id="my-settings-navbar-link" navigate={~p"/users/settings"}>
+                <svg width="24" height="24" fill="currentColor">
+                  <path d={StridentWeb.Common.SvgUtils.path(:cog_outer)} />
+                  <path d={StridentWeb.Common.SvgUtils.path(:cog_inner)} />
+                </svg>
+                <span>Settings</span>
+              </.navbar_link>
+            </:items>
+
+            <:items>
+              <.navbar_link id="my-notifications-navbar-link" navigate={~p"/me/notifications"}>
+                <div class="flex gap-2">
+                  <.svg icon={:bell} class="fill-current" width="24" height="24" />
+                  <span>Notifications</span>
+                </div>
+
+                <div
+                  :if={@unread_notifications > 0}
+                  class="inline-flex items-center justify-center flex-shrink-0 w-4 h-4 text-xs rounded-full bg-secondary-dark dark:bg-secondary"
+                >
+                  <%= @unread_notifications %>
+                </div>
+              </.navbar_link>
+            </:items>
+
+            <:items>
+              <.navbar_link
+                :if={@current_user.is_staff}
+                id="administration-navbar-link"
+                navigate={~p"/admin/home"}
+              >
+                <svg
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  class="w-6 h-6"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"
+                  />
+                </svg>
+                <span>Administration</span>
+              </.navbar_link>
+            </:items>
+
+            <:items>
+              <div
+                :if={!!@current_user and @is_using_vpn}
+                class="flex items-center justify-center space-x-2 px-5 py-2.5 bg-secondary border-b border-grey-light/25"
+              >
+                <span>VPN ACTIVE</span>
+              </div>
+            </:items>
+
+            <:items>
+              <.navbar_link id="logout-navbar-link" href={~p"/users/log_out"} method="delete">
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  class="hidden md:block"
+                >
+                  <path d={StridentWeb.Common.SvgUtils.path(:log_out_arrow)}></path>
+                  <path d={StridentWeb.Common.SvgUtils.path(:log_out_circle)}></path>
+                </svg>
+                <span>Logout</span>
+              </.navbar_link>
+            </:items>
+          </.dropdown_items>
+        </div>
+
+        <div class="md:hidden">
+          <.navbar_user_icon_button
+            :if={@current_user}
+            id="navbar-mobile-user-button"
+            class="md:hidden"
+            avatar_url={@avatar_url}
+            display_name={@display_name}
+            unread_notifications={@unread_notifications}
+            phx-click={
+              JS.toggle(
+                to: "#user-navbar-mobile-dropdown-menu",
+                in: {"ease-out duration-150", "opacity-0", "opacity-100"}
+              )
+              |> JS.toggle(to: "#navbar-mobile-user-button")
+              |> JS.toggle(
+                to: "#navbar-close-mobile-button",
+                in: "animate-[spin_1s_ease-out_infinite]"
+              )
+            }
+          />
+
+          <svg
+            :if={!@current_user}
+            id="navbar-mobile-no-user-button"
+            class="block mx-4"
+            width="32"
+            height="32"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            aria-hidden="true"
+            phx-click={
+              JS.toggle(
+                to: "#user-navbar-mobile-dropdown-menu",
+                in: {"ease-out duration-150", "opacity-0", "opacity-100"}
+              )
+              |> JS.toggle(to: "#navbar-mobile-no-user-button")
+              |> JS.toggle(
+                to: "#navbar-close-mobile-button",
+                in: "animate-[spin_1s_ease-out_infinite]"
+              )
+            }
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+            />
+          </svg>
+
+          <.svg
+            id="navbar-close-mobile-button"
+            icon={:x}
+            width="32"
+            height="32"
+            class="hidden mx-4 fill-primary stroke-primary"
+            stroke-width="1.5"
+            aria-hidden="true"
+            phx-click={
+              JS.toggle(
+                to: "#user-navbar-mobile-dropdown-menu",
+                in: {"ease-out duration-150", "opacity-0", "opacity-100"},
+                out: {"ease-out duration-150", "opacity-100", "opacity-0"}
+              )
+              |> JS.toggle(to: "#navbar-close-mobile-button")
+              |> JS.toggle(to: "#navbar-mobile-no-user-button")
+              |> JS.toggle(
+                to: "#navbar-mobile-user-button",
+                in: {"ease-out duration-150", "opacity-0", "opacity-100"}
+              )
+            }
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="md:hidden">
+    <.dropdown_mobile_items id="user-navbar-mobile">
+      <:items>
+        <div class="my-4">
+          <form
+            phx-submit="search"
+            class="flex items-center w-full gap-2 border rounded-full bg-grey-medium border-grey-light"
+          >
+            <.svg icon={:search} class="ml-2 fill-grey-light" />
+            <input
+              id="navbar-search-input-mobile"
+              name="search_term"
+              type="text"
+              class="w-64 px-0 border-none bg-grey-medium"
+              placeholder="Search"
+            />
+          </form>
+        </div>
+      </:items>
+
+      <:items>
+        <.navbar_button
+          id="navbar-mobile-home-link"
+          navigate={~p"/"}
+          current_view={@socket.private.root_view}
+          current_module={StridentWeb.HomeLive}
+          class="my-4"
+        >
+          Home
+        </.navbar_button>
+      </:items>
+
+      <:items>
+        <.navbar_button
+          id="navbar-mobile-go-to-tournaments-link"
+          navigate={~p"/tournaments"}
+          current_view={@socket.private.root_view}
+          current_module={StridentWeb.TournamentsLive.Index}
+          class="my-4"
+        >
+          Tournaments
+        </.navbar_button>
+      </:items>
+
+      <:items>
+        <div :if={@current_user} class="my-4">
+          <div
+            class="flex justify-between"
+            phx-click={
+              JS.remove_class("rotate-90", to: "#my-stuff-chevron-right.rotate-90")
+              |> JS.add_class("rotate-90", to: "#my-stuff-chevron-right:not(.rotate-90)")
+              |> JS.toggle(
+                to: "#my-stuff-navbar-mobile-menu",
+                in: {"ease-out duration-150", "opacity-0", "opacity-100"},
+                out: {"ease-out duration-150", "opacity-100", "opacity-0"}
+              )
+            }
+          >
+            <h5>My Stuff</h5>
+            <.svg
+              id="my-stuff-chevron-right"
+              icon={:chevron_right}
+              width="35"
+              height="35"
+              class="fill-current"
+            />
+          </div>
+
+          <div id="my-stuff-navbar-mobile-menu" class="hidden gap-4">
+            <.navbar_link
+              id="my-profile-navbar-mobile-link"
+              navigate={~p"/user/#{@current_user.slug}"}
+            >
+              My Profile
+            </.navbar_link>
+
+            <.navbar_link id="my-tournaments-navbar-mobile-link" navigate={~p"/my-tournaments"}>
+              My Tournaments
+            </.navbar_link>
+
+            <.navbar_link id="my-settings-navbar-mobile-link" navigate={~p"/users/settings"}>
+              Settings
+            </.navbar_link>
+
+            <.navbar_link
+              id="my-notifications-navbar-mobile-link"
+              navigate={~p"/me/notifications"}
+            >
+              Notifications
+              <div :if={@unread_notifications > 0} class="p-px rounded-full bg-secondary">
+                <%= @unread_notifications %>
+              </div>
+            </.navbar_link>
+
+            <.navbar_link
+              :if={@current_user.is_staff}
+              id="administration-navbar-mobile-link"
+              navigate={~p"/admin/home"}
+            >
+              Administration
+            </.navbar_link>
+          </div>
+        </div>
+      </:items>
+      <:items>
+        <a
+          href={SocialMedia.discord_server_invite_url()}
+          target="_blank"
+          class="flex items-center space-x-1 font-medium text-brands-discord"
+        >
+          <.svg icon={:discord} width="24" height="24" class="fill-current" />
+          <%!-- <span>Discord</span> --%>
+        </a>
+      </:items>
+      <:items>
+        <.navbar_button
+          :if={@current_user}
+          id="navbar-mobile-logout-link"
+          href={~p"/users/log_out"}
+          method="delete"
+          class="my-4"
+        >
+          Logout
+        </.navbar_button>
+      </:items>
+
+      <:items>
+        <.navbar_button
+          :if={!@current_user}
+          id="navbar-mobile-login-link"
+          href={~p"/users/log_in"}
+          class="my-4"
+        >
+          Login
+        </.navbar_button>
+      </:items>
+    </.dropdown_mobile_items>
+  </div>
+</nav>

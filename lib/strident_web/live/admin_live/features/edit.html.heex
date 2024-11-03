@@ -1,0 +1,28 @@
+<div class="py-16 mt-16 text-center md:text-left">
+  <div class="container space-y-8 ">
+    <div class="lg:px-5">
+      <div class="flex items-center justify-between mb-2">
+        <div>
+          <h3 class="text-6xl leading-none tracking-normal font-display">Edit Feature</h3>
+        </div>
+        <div>
+          <.link
+            navigate={Routes.admin_features_index_path(@socket, :index)}
+            class="inline-block cursor-pointer font-medium border rounded py-2.5 px-4 select-none border-primary text-primary"
+          >
+            Back
+          </.link>
+        </div>
+      </div>
+      <div class="pb-5 mb-4 border-b border-gray-200 sm:pb-0"></div>
+      <section class="mt-8">
+        <.live_component
+          module={FeatureFormComponent}
+          id={@feature.id || :new}
+          feature={@feature}
+          return_to="/admin/features"
+        />
+      </section>
+    </div>
+  </div>
+</div>

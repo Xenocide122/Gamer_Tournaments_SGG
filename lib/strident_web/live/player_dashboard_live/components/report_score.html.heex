@@ -1,0 +1,89 @@
+<div id="report-score">
+  <div :if={@allow_reporting?} class="flex flex-col justify-center">
+    <h4 class="mb-8">Report Score:</h4>
+
+    <.slim_card colored={true}>
+      <div :if={@next_match && @changeset} class="px-4">
+        <.form
+          :let={f}
+          id="report-score-form"
+          for={to_form(%{}, as: :report)}
+          phx-change="report-change-score"
+          phx-submit="report-score"
+          phx-target={@myself}
+        >
+          <div class="flex flex-col justify-start mt-8">
+            <%= for {participant, index} <- Enum.with_index(@next_match.participants) do %>
+              <div id={"report-form-for-participant-#{participant.id}"} class="w-full">
+                <div class="flex items-center">
+                  <img
+                    src={
+                      TournamentParticipants.participant_logo_url(
+                        participant.tournament_participant
+                      )
+                    }
+                    alt={
+                      TournamentParticipants.participant_name(participant.tournament_participant)
+                    }
+                    width="50"
+                    height="50"
+                    class="mr-4 rounded-full"
+                  />
+                  <p class="text-start">
+                    <%= TournamentParticipants.participant_name(
+                      participant.tournament_participant
+                    ) %>
+                  </p>
+                </div>
+
+                <.form_text_input
+                  form={f}
+                  field={participant.id}
+                  value={Changeset.get_field(@changeset, :reported_score)[participant.id]}
+                  class="w-full mt-4"
+                  disabled={
+                    @already_reported? or @already_finished? or
+                      Enum.count(@next_match.participants) <= 1
+                  }
+                />
+              </div>
+
+              <h4
+                :if={Enum.count(@next_match.participants) > index + 1}
+                class="my-4 text-center text-grey-light"
+              >
+                VS
+              </h4>
+            <% end %>
+          </div>
+        </.form>
+
+        <p :if={@already_reported?} class="uppercase text-primary">
+          Score Submited
+        </p>
+
+        <p :if={@already_finished?} class="uppercase text-grey-light">
+          Match is finished
+        </p>
+
+        <.button
+          id="report-score-form-submit-button"
+          button_type={:primary}
+          type="submit"
+          form="report-score-form"
+          class="w-full mt-16"
+          disabled={
+            not @changeset.valid? or Enum.empty?(@changeset.changes) or
+              Enum.count(@next_match.participants) <= 1
+          }
+        >
+          Submit Score
+        </.button>
+      </div>
+
+      <div :if={!@next_match || !@changeset} class="flex items-center justify-center my-8">
+        <h3>Your match will start shortly</h3>
+      </div>
+    </.slim_card>
+  </div>
+</div>

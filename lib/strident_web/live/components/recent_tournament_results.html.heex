@@ -1,0 +1,172 @@
+<div>
+  <%= if Enum.any?(@results) do %>
+    <div class="grid grid-cols-1 gap-4 my-4 md:grid-cols-2">
+      <%= for result <- Enum.take(@results, 4) do %>
+        <div class="md:card--colored--thin">
+          <div class="card__inner">
+            <%= case result do %>
+              <% %Strident.Placements.Placement{} -> %>
+                <div class="flex items-center justify-between py-2 md:border-b border-grey-medium md:p-2">
+                  <div class="pr-8 truncate">
+                    <h4 class="hidden truncate md:block"><%= result.title %></h4>
+                    <.link
+                      navigate={result.canonical_url}
+                      class="text-xl md:hidden hover:underline"
+                    >
+                      <%= result.title %>
+                    </.link>
+                    <p class="hidden text-sm text-muted md:block">
+                      <.localised_datetime
+                        datetime={result.date}
+                        timezone={@timezone}
+                        locale={@locale}
+                        type={:date}
+                      />
+                    </p>
+
+                    <div class="flex items-center justify-start space-x-3 md:hidden">
+                      <%= if result.game_title do %>
+                        <div class="flex items-center">
+                          <img class="h-6" src="/images/font-awesome/gamepad.svg" alt="gamepad" />
+                          <p class="text-sm text-muted"><%= result.game_title %></p>
+                        </div>
+                      <% end %>
+
+                      <%= if result.total_players do %>
+                        <div class="flex items-center">
+                          <img class="h-6" src="/images/font-awesome/users.svg" alt="users" />
+                          <p class="text-sm text-muted">
+                            <%= result.total_players %>
+                          </p>
+                        </div>
+                      <% end %>
+                    </div>
+                  </div>
+                  <div>
+                    <%= if result.rank do %>
+                      <%= StridentWeb.Components.Trophies.placement_trophy(%{
+                        rank: result.rank - 1,
+                        tied_ranks: 1
+                      }) %>
+                    <% else %>
+                      <h4 class="text-muted min-w-max">
+                        Rank Unkown
+                      </h4>
+                    <% end %>
+                  </div>
+                </div>
+                <div class="items-center justify-between hidden p-2 space-x-3 md:flex">
+                  <div class="flex items-center space-x-3">
+                    <%= if result.game_title do %>
+                      <div class="flex items-center">
+                        <img class="h-6" src="/images/font-awesome/gamepad.svg" alt="gamepad" />
+                        <p class="text-sm text-muted"><%= result.game_title %></p>
+                      </div>
+                    <% end %>
+
+                    <%= if result.total_players do %>
+                      <div class="flex items-center">
+                        <img class="h-6" src="/images/font-awesome/users.svg" alt="users" />
+                        <p class="text-sm text-muted">
+                          <%= result.total_players %>
+                        </p>
+                      </div>
+                    <% end %>
+                  </div>
+                  <.link navigate={result.canonical_url} type="a" target="_blank">
+                    View on <%= result.source %>
+                  </.link>
+                </div>
+              <% _ -> %>
+                <div class="flex items-center justify-between py-2 md:border-b border-grey-medium md:p-2">
+                  <div>
+                    <h4 class="hidden md:block"><%= result.tournament.title %></h4>
+                    <.link
+                      navigate={
+                        Routes.tournament_show_pretty_path(
+                          @socket,
+                          :show,
+                          result.tournament.slug
+                        )
+                      }
+                      class="text-xl md:hidden hover:underline"
+                    >
+                      <%= result.tournament.title %>
+                    </.link>
+                    <p class="hidden text-sm text-muted md:block">
+                      <.localised_datetime
+                        datetime={result.tournament.starts_at}
+                        timezone={@timezone}
+                        locale={@locale}
+                        type={:date}
+                      />
+                    </p>
+                    <div class="flex items-center justify-between space-x-3 md:hidden">
+                      <div class="flex items-center">
+                        <img class="h-6" src="/images/font-awesome/gamepad.svg" alt="gamepad" />
+                        <p class="text-sm text-muted"><%= result.tournament.game.title %></p>
+                      </div>
+
+                      <div class="flex items-center">
+                        <img class="h-6" src="/images/font-awesome/users.svg" alt="users" />
+                        <p class="text-sm text-muted">
+                          <%= result.tournament.required_participant_count %>
+                        </p>
+                      </div>
+
+                      <div class="flex items-center flex-grow">
+                        <img
+                          class="h-6"
+                          src="/images/font-awesome/money-bill-alt.svg"
+                          alt="money"
+                        />
+                        <p class="text-sm text-muted"><%= result.tournament.buy_in_amount %></p>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <%= StridentWeb.Components.Trophies.placement_trophy(%{
+                      rank: result.rank,
+                      tied_ranks: result.tied_ranks
+                    }) %>
+                  </div>
+                </div>
+                <div class="items-center justify-between hidden p-2 space-x-3 md:flex">
+                  <div class="flex items-center">
+                    <img class="h-6" src="/images/font-awesome/gamepad.svg" alt="gamepad" />
+                    <p class="text-sm text-muted"><%= result.tournament.game.title %></p>
+                  </div>
+
+                  <div class="flex items-center">
+                    <img class="h-6" src="/images/font-awesome/users.svg" alt="users" />
+                    <p class="text-sm text-muted">
+                      <%= result.tournament.required_participant_count %>
+                    </p>
+                  </div>
+
+                  <div class="flex items-center flex-grow">
+                    <img class="h-6" src="/images/font-awesome/money-bill-alt.svg" alt="money" />
+                    <p class="text-sm text-muted"><%= result.tournament.buy_in_amount %></p>
+                  </div>
+
+                  <.link
+                    navigate={
+                      Routes.tournament_show_pretty_path(@socket, :show, result.tournament.slug)
+                    }
+                    type="live_redirect"
+                  >
+                    View
+                  </.link>
+                </div>
+            <% end %>
+          </div>
+        </div>
+        <div class="divider--horizontal last:hidden md:hidden"></div>
+      <% end %>
+    </div>
+  <% else %>
+    <p class="text-grey-light">
+      No recent tournaments.
+    </p>
+  <% end %>
+</div>

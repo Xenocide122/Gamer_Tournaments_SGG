@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="126.333" height="103" viewBox="0 0 126.333 103">
+  <defs>
+    <filter id="Icon_awesome-envelope" x="0" y="0" width="126.333" height="103" filterUnits="userSpaceOnUse">
+      <feOffset input="SourceAlpha"/>
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feFlood flood-color="#03d5fb"/>
+      <feComposite operator="in" in2="blur"/>
+    </filter>
+    <filter id="Icon_awesome-envelope-2" x="0" y="0" width="126.333" height="103" filterUnits="userSpaceOnUse">
+      <feOffset input="SourceAlpha"/>
+      <feGaussianBlur stdDeviation="3.5" result="blur-2"/>
+      <feFlood flood-color="#03d5fb" result="color"/>
+      <feComposite operator="out" in="SourceGraphic" in2="blur-2"/>
+      <feComposite operator="in" in="color"/>
+      <feComposite operator="in" in2="SourceGraphic"/>
+    </filter>
+  </defs>
+  <g data-type="innerShadowGroup">
+    <g transform="matrix(1, 0, 0, 1, 0, 0)" filter="url(#Icon_awesome-envelope)">
+      <path id="Icon_awesome-envelope-3" data-name="Icon awesome-envelope" d="M91.565,27.615a1.1,1.1,0,0,1,1.768.857V65.75a8.752,8.752,0,0,1-8.75,8.75H8.75A8.752,8.752,0,0,1,0,65.75V28.49a1.09,1.09,0,0,1,1.768-.857c4.083,3.172,9.5,7.2,28.091,20.708,3.846,2.807,10.336,8.714,16.807,8.677,6.508.055,13.125-5.979,16.826-8.677C82.086,34.833,87.482,30.786,91.565,27.615Zm-44.9,23.552c4.229.073,10.318-5.323,13.38-7.547,24.19-17.555,26.031-19.086,31.609-23.461a4.362,4.362,0,0,0,1.677-3.445V13.25a8.752,8.752,0,0,0-8.75-8.75H8.75A8.752,8.752,0,0,0,0,13.25v3.464a4.389,4.389,0,0,0,1.677,3.445C7.255,24.516,9.1,26.065,33.286,43.62,36.349,45.844,42.437,51.24,46.667,51.167Z" transform="translate(16.5 12)" fill="none" stroke="#03d5fb" stroke-width="3"/>
+    </g>
+    <g transform="matrix(1, 0, 0, 1, 0, 0)" filter="url(#Icon_awesome-envelope-2)">
+      <path id="Icon_awesome-envelope-4" data-name="Icon awesome-envelope" d="M91.565,27.615a1.1,1.1,0,0,1,1.768.857V65.75a8.752,8.752,0,0,1-8.75,8.75H8.75A8.752,8.752,0,0,1,0,65.75V28.49a1.09,1.09,0,0,1,1.768-.857c4.083,3.172,9.5,7.2,28.091,20.708,3.846,2.807,10.336,8.714,16.807,8.677,6.508.055,13.125-5.979,16.826-8.677C82.086,34.833,87.482,30.786,91.565,27.615Zm-44.9,23.552c4.229.073,10.318-5.323,13.38-7.547,24.19-17.555,26.031-19.086,31.609-23.461a4.362,4.362,0,0,0,1.677-3.445V13.25a8.752,8.752,0,0,0-8.75-8.75H8.75A8.752,8.752,0,0,0,0,13.25v3.464a4.389,4.389,0,0,0,1.677,3.445C7.255,24.516,9.1,26.065,33.286,43.62,36.349,45.844,42.437,51.24,46.667,51.167Z" transform="translate(16.5 12)" fill="#fff"/>
+    </g>
+    <path id="Icon_awesome-envelope-5" data-name="Icon awesome-envelope" d="M91.565,27.615a1.1,1.1,0,0,1,1.768.857V65.75a8.752,8.752,0,0,1-8.75,8.75H8.75A8.752,8.752,0,0,1,0,65.75V28.49a1.09,1.09,0,0,1,1.768-.857c4.083,3.172,9.5,7.2,28.091,20.708,3.846,2.807,10.336,8.714,16.807,8.677,6.508.055,13.125-5.979,16.826-8.677C82.086,34.833,87.482,30.786,91.565,27.615Zm-44.9,23.552c4.229.073,10.318-5.323,13.38-7.547,24.19-17.555,26.031-19.086,31.609-23.461a4.362,4.362,0,0,0,1.677-3.445V13.25a8.752,8.752,0,0,0-8.75-8.75H8.75A8.752,8.752,0,0,0,0,13.25v3.464a4.389,4.389,0,0,0,1.677,3.445C7.255,24.516,9.1,26.065,33.286,43.62,36.349,45.844,42.437,51.24,46.667,51.167Z" transform="translate(16.5 12)" fill="none" stroke="#03d5fb" stroke-width="3"/>
+  </g>
+</svg>

@@ -1,0 +1,81 @@
+<div>
+  <form
+    type="file"
+    phx-hook="FileUpload"
+    id={"dropzone-#{@myself}"}
+    action={@aws.action}
+    method="POST"
+    enctype="multipart/form-data"
+    h-view={@h_view}
+    w-view={@w_view}
+    h-upload={@h_upload}
+    w-upload={@w_upload}
+  >
+    <input type="hidden" name="acl" value={@aws.acl} />
+    <input type="hidden" name="key" value={@aws.key} />
+    <input type="hidden" name="policy" value={@aws.policy} />
+    <input type="hidden" name="x-amz-credential" value={@aws.aws_access_key_id} />
+    <input type="hidden" name="x-amz-signature" value={@aws.signature} />
+    <input type="hidden" name="success_action_status" value={@aws.success_action_status} />
+    <input type="hidden" name="content-type" value={@aws.content_type} />
+    <input type="hidden" name="x-amz-algorithm" value="AWS4-HMAC-SHA256" />
+    <input type="hidden" name="x-amz-date" value={@aws.amz_date} />
+
+    <div class="upload-dialog">
+      <%= if @inner_block do %>
+        <%= render_slot(@inner_block) %>
+      <% else %>
+        <div class="w-fit md:w-min">
+          <p>Current profile picture:</p>
+          <img src={@current_user.avatar_url} class="w-full w-min-0" />
+          <p class="w-fit md:w-max">
+            Drag and drop to upload or
+            <strong class="link cursor-pointer clickable">
+              browse files
+            </strong>
+          </p>
+        </div>
+      <% end %>
+    </div>
+
+    <div id={"uploaded-image-#{@myself}"} class="uploaded-image hidden">
+      <%= if @modalized do %>
+        <div class="modal__overlay">
+          <div class="modal__frame">
+            <div class="modal__backdrop"></div>
+            <div class={"modal__dialog m-20 #{@modal_size}"}>
+              <div class="flex content-center justify-center p-10">
+                <div class="inline-flex flex-col content-center justify-center">
+                  <div id={"croppie-#{@myself}"} class="croppie w-auto inline-block"></div>
+                  <div class="w-full flex flex-row space-x-2 justify-center">
+                    <div class="w-1/2 remove-image btn btn--wide btn--secondary-ghost text-center flex content-center justify-center flex-1">
+                      Cancel
+                    </div>
+                    <%= submit("Save",
+                      phx_disable_with: "Uploading...",
+                      class: "btn btn--wide btn--primary w-1/2 disabled:opacity-75"
+                    ) %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% else %>
+        <div class="inline-flex flex-col content-start justify-end">
+          <div id={"croppie-#{@myself}"} class="croppie w-auto inline-block"></div>
+          <div class="w-auto flex flex-row space-x-2">
+            <div class="w-1/2 remove-image btn btn--secondary-ghost text-center  flex content-center justify-center flex-1">
+              Cancel
+            </div>
+            <%= submit("Save",
+              phx_disable_with: "Uploading...",
+              class: "btn btn--wide btn--primary w-1/2 disabled:opacity-75"
+            ) %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+    <div class="dropzonepreviews hidden"></div>
+  </form>
+</div>

@@ -1,0 +1,289 @@
+<div>
+  <.form :let={f} for={@changeset} phx-change="validate" phx-submit="save" phx-target={@myself}>
+    <div class="form-group">
+      <.form_label form={f} field={:title} label="Game Title" class="mb-0 text-sm text-white" />
+      <.form_text_input form={f} field={:title} phx-debounce={1000} />
+      <.form_feedback form={f} field={:title} />
+    </div>
+
+    <div class="form-group">
+      <.form_label
+        form={f}
+        field={:description}
+        label="Game Description"
+        class="mb-0 text-sm text-white"
+      />
+      <.form_text_input form={f} field={:description} phx-debounce={1000} />
+      <.form_feedback form={f} field={:description} />
+    </div>
+
+    <div class="form-group">
+      <.form_label
+        form={f}
+        field={:default_player_count}
+        label="Default Number of Players"
+        class="mb-0 text-sm text-white"
+      />
+      <.form_text_input form={f} field={:default_player_count} phx-debounce={1000} />
+      <.form_feedback form={f} field={:default_player_count} />
+    </div>
+
+    <div class="form-group">
+      <.form_label
+        form={f}
+        field={:allow_wager}
+        label="Allow wagers on this game?"
+        class="mb-0 text-sm text-white"
+      />
+      <div class="flex flex-row mb-4">
+        <div
+          :for={{allow, label} <- [{true, "Enable"}, {false, "Disable"}]}
+          class="flex items-center grilla-radio"
+        >
+          <%= label(class: "font-light tracking-wider mb-0") do %>
+            <%= radio_button(f, :allow_wager, allow,
+              checked:
+                (Changeset.get_change(@changeset, :allow_wager) ||
+                   Changeset.get_field(@changeset, :allow_wager)) == allow
+            ) %>
+            <%= label %>
+          <% end %>
+        </div>
+      </div>
+      <.form_feedback form={f} field={:description} />
+    </div>
+
+    <div class="form-group">
+      <label>Upload Game Banner Image</label>
+      <%= if not is_nil(@game) and @game.default_game_banner_url do %>
+        <p class="mb-4 text-grey-light">Current Team Logo</p>
+        <img src={@game.default_game_banner_url} alt="Game banner" class="mb-8 h-36" />
+      <% end %>
+
+      <%= label(class: "#{if(Enum.count(@uploads.banner.entries) > 0, do: "hidden")}") do %>
+        <div phx-drop-target={@uploads.banner.ref}>
+          <%= live_file_input(@uploads.banner, class: "hidden") %>
+          <div class="flex justify-start">
+            <div class="grid h-40 upload-box place-items-center w-96">
+              <img class="w-20 mb-1 h-15" src="/images/file_group.png" />
+              <p class="mb-1">
+                Drag and Drop Your File
+              </p>
+
+              <div class="flex text-xs text-grey-light">
+                <p class="mr-1">
+                  Or
+                </p>
+                <p class="mr-1 link clickable">
+                  Select File
+                </p>
+                <p>
+                  from your computer
+                </p>
+              </div>
+            </div>
+          </div>
+          <p class="text-xs font-light tracking-wider text-grey-light">
+            Recommended: 1024x1024px PNG with transparent background
+          </p>
+        </div>
+      <% end %>
+      <.form_feedback form={f} field={:default_game_banner_url} />
+
+      <%= for entry <- @uploads.banner.entries do %>
+        <div class="flex flex-col">
+          <div class="relative">
+            <div phx-click="remove-photo" phx-value-ref={entry.ref}>
+              <.svg
+                icon={:x}
+                class="absolute z-10 fill-primary top-2 left-2"
+                height="20"
+                width="20"
+              />
+            </div>
+
+            <.live_img_preview entry={entry} width={384} />
+          </div>
+
+          <div class="my-2 progress-bar w-96">
+            <div
+              class="progress-bar__fill"
+              style={"transform: translateX(-#{100 - entry.progress}%)"}
+            >
+            </div>
+          </div>
+        </div>
+
+        <%= for error <- upload_errors(@uploads.banner, entry) do %>
+          <p class="alert alert-danger">
+            <%= error_to_string(error) %>
+          </p>
+        <% end %>
+      <% end %>
+    </div>
+
+    <div class="form-group">
+      <label>Upload Game Cover Image</label>
+      <%= if not is_nil(@game) and @game.cover_image_url do %>
+        <p class="mb-4 text-grey-light">Current Team Logo</p>
+        <img src={@game.cover_image_url} alt="Game banner" class="mb-8 h-36" />
+      <% end %>
+
+      <%= label(class: "#{if(Enum.count(@uploads.cover.entries) > 0, do: "hidden")}") do %>
+        <div phx-drop-target={@uploads.cover.ref}>
+          <%= live_file_input(@uploads.cover, class: "hidden") %>
+          <div class="flex justify-start">
+            <div class="grid h-40 upload-box place-items-center w-96">
+              <img class="w-20 mb-1 h-15" src="/images/file_group.png" />
+              <p class="mb-1">
+                Drag and Drop Your File
+              </p>
+
+              <div class="flex text-xs text-grey-light">
+                <p class="mr-1">
+                  Or
+                </p>
+                <p class="mr-1 link clickable">
+                  Select File
+                </p>
+                <p>
+                  from your computer
+                </p>
+              </div>
+            </div>
+          </div>
+          <p class="text-xs font-light tracking-wider text-grey-light">
+            Recommended: 1024x1024px PNG with transparent background
+          </p>
+        </div>
+      <% end %>
+      <.form_feedback form={f} field={:cover_image_url} />
+
+      <%= for entry <- @uploads.cover.entries do %>
+        <div class="flex flex-col">
+          <div class="relative">
+            <div phx-click="remove-photo" phx-value-ref={entry.ref}>
+              <.svg
+                icon={:x}
+                class="absolute z-10 fill-primary top-2 left-2"
+                height="20"
+                width="20"
+              />
+            </div>
+
+            <.live_img_preview entry={entry} width={384} />
+          </div>
+
+          <div class="my-2 progress-bar w-96">
+            <div
+              class="progress-bar__fill"
+              style={"transform: translateX(-#{100 - entry.progress}%)"}
+            >
+            </div>
+          </div>
+        </div>
+
+        <%= for error <- upload_errors(@uploads.cover, entry) do %>
+          <p class="alert alert-danger">
+            <%= error_to_string(error) %>
+          </p>
+        <% end %>
+      <% end %>
+    </div>
+
+    <div class="form-group">
+      <label>Upload Game Logo</label>
+      <%= if not is_nil(@game) and @game.logo_url do %>
+        <p class="mb-4 text-grey-light">Current Game Logo</p>
+        <img src={@game.logo_url} alt="Game banner" class="mb-8 h-36" />
+      <% end %>
+
+      <%= label(class: "#{if(Enum.count(@uploads.logo.entries) > 0, do: "hidden")}") do %>
+        <div phx-drop-target={@uploads.logo.ref}>
+          <%= live_file_input(@uploads.logo, class: "hidden") %>
+          <div class="flex justify-start">
+            <div class="grid h-40 upload-box place-items-center w-96">
+              <img class="w-20 mb-1 h-15" src="/images/file_group.png" />
+              <p class="mb-1">
+                Drag and Drop Your File
+              </p>
+
+              <div class="flex text-xs text-grey-light">
+                <p class="mr-1">
+                  Or
+                </p>
+                <p class="mr-1 link clickable">
+                  Select File
+                </p>
+                <p>
+                  from your computer
+                </p>
+              </div>
+            </div>
+          </div>
+          <p class="text-xs font-light tracking-wider text-grey-light">
+            Recommended: 1024x1024px PNG with transparent background
+          </p>
+        </div>
+      <% end %>
+      <.form_feedback form={f} field={:logo_url} />
+
+      <%= for entry <- @uploads.logo.entries do %>
+        <div class="flex flex-col">
+          <div class="relative">
+            <div phx-click="remove-photo" phx-value-ref={entry.ref}>
+              <.svg
+                icon={:x}
+                class="absolute z-10 fill-primary top-2 left-2"
+                height="20"
+                width="20"
+              />
+            </div>
+
+            <.live_img_preview entry={entry} width={384} />
+          </div>
+
+          <div class="my-2 progress-bar w-96">
+            <div
+              class="progress-bar__fill"
+              style={"transform: translateX(-#{100 - entry.progress}%)"}
+            >
+            </div>
+          </div>
+        </div>
+
+        <%= for error <- upload_errors(@uploads.logo, entry) do %>
+          <p class="alert alert-danger">
+            <%= error_to_string(error) %>
+          </p>
+        <% end %>
+      <% end %>
+    </div>
+
+    <div class="form-group">
+      <div class="mb-0 text-sm text-white">Genres</div>
+      <div class="w-64">
+        <.table rows={@genres}>
+          <:col :let={genre} label="Genre Name">
+            <%= genre.genre_name %>
+          </:col>
+          <:col :let={genre} label="Manage">
+            <%= checkbox(:genre, genre.id,
+              hidden_input: false,
+              class: "h-4 w-4 text-primary focus:ring-indigo-500 border-gray-300 rounded",
+              value: genre_enabled?(@changeset, genre)
+            ) %>
+          </:col>
+        </.table>
+      </div>
+    </div>
+
+    <div class="flex justify-end space-x-4">
+      <.link navigate={@return_to} class="btn btn--primary-ghost">Cancel</.link>
+      <%= submit("Save",
+        phx_disable_with: "Sending...",
+        class: "btn btn--wide btn--primary"
+      ) %>
+    </div>
+  </.form>
+</div>

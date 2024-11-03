@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="44.571" height="36" viewBox="0 0 44.571 36">
+  <defs>
+    <filter id="Icon_awesome-users" x="0" y="0" width="44.571" height="36" filterUnits="userSpaceOnUse">
+      <feOffset input="SourceAlpha"/>
+      <feGaussianBlur stdDeviation="2.5" result="blur"/>
+      <feFlood flood-color="#03d5fb"/>
+      <feComposite operator="in" in2="blur"/>
+    </filter>
+    <filter id="Icon_awesome-users-2" x="0" y="0" width="44.571" height="36" filterUnits="userSpaceOnUse">
+      <feOffset input="SourceAlpha"/>
+      <feGaussianBlur stdDeviation="2" result="blur-2"/>
+      <feFlood flood-color="#03d5fb" result="color"/>
+      <feComposite operator="out" in="SourceGraphic" in2="blur-2"/>
+      <feComposite operator="in" in="color"/>
+      <feComposite operator="in" in2="SourceGraphic"/>
+    </filter>
+  </defs>
+  <g data-type="innerShadowGroup">
+    <g transform="matrix(1, 0, 0, 1, 0, 0)" filter="url(#Icon_awesome-users)">
+      <path id="Icon_awesome-users-3" data-name="Icon awesome-users" d="M4.286,10.821A2.857,2.857,0,1,0,1.429,7.964,2.86,2.86,0,0,0,4.286,10.821Zm20,0a2.857,2.857,0,1,0-2.857-2.857A2.86,2.86,0,0,0,24.286,10.821Zm1.429,1.429H22.857a2.849,2.849,0,0,0-2.013.83A6.53,6.53,0,0,1,24.2,17.964h2.946a1.427,1.427,0,0,0,1.429-1.429V15.107A2.86,2.86,0,0,0,25.714,12.25Zm-11.429,0a5,5,0,1,0-5-5A5,5,0,0,0,14.286,12.25Zm3.429,1.429h-.371a6.9,6.9,0,0,1-6.116,0h-.371a5.144,5.144,0,0,0-5.143,5.143v1.286A2.143,2.143,0,0,0,7.857,22.25H20.714a2.143,2.143,0,0,0,2.143-2.143V18.821A5.144,5.144,0,0,0,17.714,13.679Zm-9.987-.6a2.849,2.849,0,0,0-2.013-.83H2.857A2.86,2.86,0,0,0,0,15.107v1.429a1.427,1.427,0,0,0,1.429,1.429H4.371A6.546,6.546,0,0,1,7.728,13.08Z" transform="translate(8 5.75)" fill="none" stroke="#03d5fb" stroke-width="1"/>
+    </g>
+    <g transform="matrix(1, 0, 0, 1, 0, 0)" filter="url(#Icon_awesome-users-2)">
+      <path id="Icon_awesome-users-4" data-name="Icon awesome-users" d="M4.286,10.821A2.857,2.857,0,1,0,1.429,7.964,2.86,2.86,0,0,0,4.286,10.821Zm20,0a2.857,2.857,0,1,0-2.857-2.857A2.86,2.86,0,0,0,24.286,10.821Zm1.429,1.429H22.857a2.849,2.849,0,0,0-2.013.83A6.53,6.53,0,0,1,24.2,17.964h2.946a1.427,1.427,0,0,0,1.429-1.429V15.107A2.86,2.86,0,0,0,25.714,12.25Zm-11.429,0a5,5,0,1,0-5-5A5,5,0,0,0,14.286,12.25Zm3.429,1.429h-.371a6.9,6.9,0,0,1-6.116,0h-.371a5.144,5.144,0,0,0-5.143,5.143v1.286A2.143,2.143,0,0,0,7.857,22.25H20.714a2.143,2.143,0,0,0,2.143-2.143V18.821A5.144,5.144,0,0,0,17.714,13.679Zm-9.987-.6a2.849,2.849,0,0,0-2.013-.83H2.857A2.86,2.86,0,0,0,0,15.107v1.429a1.427,1.427,0,0,0,1.429,1.429H4.371A6.546,6.546,0,0,1,7.728,13.08Z" transform="translate(8 5.75)" fill="#fff"/>
+    </g>
+    <path id="Icon_awesome-users-5" data-name="Icon awesome-users" d="M4.286,10.821A2.857,2.857,0,1,0,1.429,7.964,2.86,2.86,0,0,0,4.286,10.821Zm20,0a2.857,2.857,0,1,0-2.857-2.857A2.86,2.86,0,0,0,24.286,10.821Zm1.429,1.429H22.857a2.849,2.849,0,0,0-2.013.83A6.53,6.53,0,0,1,24.2,17.964h2.946a1.427,1.427,0,0,0,1.429-1.429V15.107A2.86,2.86,0,0,0,25.714,12.25Zm-11.429,0a5,5,0,1,0-5-5A5,5,0,0,0,14.286,12.25Zm3.429,1.429h-.371a6.9,6.9,0,0,1-6.116,0h-.371a5.144,5.144,0,0,0-5.143,5.143v1.286A2.143,2.143,0,0,0,7.857,22.25H20.714a2.143,2.143,0,0,0,2.143-2.143V18.821A5.144,5.144,0,0,0,17.714,13.679Zm-9.987-.6a2.849,2.849,0,0,0-2.013-.83H2.857A2.86,2.86,0,0,0,0,15.107v1.429a1.427,1.427,0,0,0,1.429,1.429H4.371A6.546,6.546,0,0,1,7.728,13.08Z" transform="translate(8 5.75)" fill="none" stroke="#03d5fb" stroke-width="1"/>
+  </g>
+</svg>

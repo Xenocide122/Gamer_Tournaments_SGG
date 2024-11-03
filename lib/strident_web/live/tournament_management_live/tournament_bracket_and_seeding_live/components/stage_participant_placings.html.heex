@@ -1,0 +1,72 @@
+<div id={"stage-participant-placements-#{@stage_id}"} class="">
+  <%= if @stage_status == :finished or (@stage_status == :requires_tiebreaking and @stage_type in [:single_elimination, :double_elimination]) do %>
+    <%= for %{id: sp_id, tournament_participant_id: participant_id, rank: rank} <- Enum.sort_by(@stage_participants, & &1.rank) do %>
+      <div
+        id={"pool-stage-#{@stage_id}-participant-results-table--#{participant_id}-placing"}
+        class="flex flex-col md:flex-row gap-x-8 "
+      >
+        <div class="flex flex-row gap-4 items-center">
+          <div class="flex justify-start w-auto">
+            <%= if @can_manage_tournament and @stage_status == :requires_tiebreaking do %>
+              <.form
+                :let={f}
+                for={to_form(%{}, as: :stage_participant)}
+                id={"manually-resolve-tied-sp-rank-#{sp_id}-form"}
+                phx-change="resolve-tied-stage-participant"
+              >
+                <%= hidden_input(f, :stage_participant_id,
+                  name: "stage-participant-id",
+                  value: sp_id,
+                  id: "manually-resolve-tied-sp-rank-#{sp_id}-sp-id"
+                ) %>
+                <.form_select
+                  form={f}
+                  field={:new_rank}
+                  id={"manually-resolve-tied-sp-rank-#{sp_id}-select"}
+                  class="px-10"
+                  values={
+                    0..(Enum.count(@stage_participants) - 1)//1
+                    |> Enum.map(&{Strident.Prizes.format_prize_rank(&1), &1})
+                    |> then(&[nil | &1])
+                  }
+                  selected={rank}
+                />
+              </.form>
+            <% else %>
+              <%= StridentWeb.Components.OrdinalPlacing.ordinal_placing(%{rank: rank}) %>
+            <% end %>
+          </div>
+          <div class="flex justify-end ">
+            <img
+              src={Map.get(@participant_details_by_id, participant_id).logo_url}
+              alt=""
+              class="w-10 h-10 bg-gray-900 rounded-full"
+            />
+          </div>
+          <div class="flex justify-start w-auto">
+            <div>
+              <div class="text-lg">
+                <%= Map.get(@participant_details_by_id, participant_id).name %>
+              </div>
+            </div>
+          </div>
+          <div class="flex justify-end ">
+            <h3><%= get_prize(@tournament, rank) %></h3>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  <% end %>
+  <%= if @show_confirmation do %>
+    <.live_component
+      id="stage-participant-placings-confirmation"
+      module={StridentWeb.Components.Confirmation}
+      target={@myself}
+      confirm_event={@confirmation_confirm_event}
+      confirm_values={@confirmation_confirm_values}
+      message={@confirmation_message}
+      timezone={@timezone}
+      locale={@locale}
+    />
+  <% end %>
+</div>

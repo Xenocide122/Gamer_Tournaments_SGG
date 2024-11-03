@@ -1,0 +1,99 @@
+<div class="mb-10">
+  <%= unless (is_nil(@current_user) or @current_user.id != @user.id) and length(@user.favorite_games) == 0 do %>
+    <div class="flex items-end justify-center space-x-2 md:justify-start">
+      <%= StridentWeb.Components.UnderlinedHeader.header("Favorite Games") %>
+      <%= if not is_nil(@current_user) and @current_user.id == @user.id do %>
+        <div class="relative">
+          <%= if @edit_games do %>
+            <div class="text-muted mb-3.5 absolute left-0 bottom-0">
+              Editing
+            </div>
+          <% else %>
+            <div
+              class="link mb-3.5 absolute left-0 bottom-0"
+              phx-click="toggle-edit-games"
+              phx-target={@myself}
+            >
+              Edit
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+
+    <%= if not is_nil(@current_user) and @current_user.id == @user.id and @edit_games do %>
+      <div class="card">
+        <div class="grid grid-cols-3 gap-2 md:grid-cols-8">
+          <%= for game <- @games do %>
+            <div
+              class="flex flex-col items-center justify-start truncate cursor-pointer"
+              phx-click="game-clicked"
+              phx-value-game_id={game.id}
+            >
+              <div class="relative mb-8">
+                <img
+                  class="w-24 h-24 rounded-lg"
+                  src={game.cover_image_url}
+                  alt={game.title}
+                  title={game.title}
+                />
+                <%= if is_game_selected(game, @user.favorite_games) do %>
+                  <div class="h-24 w-24 rounded-lg absolute border-primary top-0 z-[1] border-4">
+                  </div>
+                  <div class="absolute flex justify-center w-full my-1">
+                    <.svg icon={:circle_check} width="32" height="32" class="fill-primary" />
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+        <div class="flex justify-center mt-4">
+          <div
+            class="px-16 text-center uppercase btn btn--primary"
+            phx-click="toggle-edit-games"
+            phx-target={@myself}
+          >
+            Done
+          </div>
+        </div>
+      </div>
+    <% else %>
+      <%= if length(@user.favorite_games) == 0 do %>
+        <div class="text-center text-muted">
+          So empty...
+        </div>
+        <div class="flex justify-center mt-4">
+          <div
+            class="inner-glow p-2.5 md:p-1.5 md:px-4 border border-primary rounded-md uppercase cursor-pointer select-none"
+            phx-click="toggle-edit-games"
+            phx-target={@myself}
+          >
+            Choose some favorites
+          </div>
+        </div>
+      <% else %>
+        <div class="grid grid-cols-3 gap-4 md:grid-cols-8">
+          <%= for game <- @user.favorite_games do %>
+            <.link
+              navigate={Routes.tournament_index_path(@socket, :index, %{games: game.slug})}
+              class="cursor-pointer"
+            >
+              <div class="flex flex-col items-center justify-start w-full">
+                <img
+                  class="h-24 w-24 rounded-lg mb-1.5"
+                  src={game.cover_image_url}
+                  alt={game.title}
+                  title={game.title}
+                />
+                <p class="max-w-full text-sm truncate">
+                  <%= game.title %>
+                </p>
+              </div>
+            </.link>
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+  <% end %>
+</div>

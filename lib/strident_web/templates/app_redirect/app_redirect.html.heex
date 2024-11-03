@@ -1,0 +1,16 @@
+<div class="fixed top-0 left-0 w-screen h-screen flex justify-center items-center bg-blackish/75">
+  <div class="text-center">
+    <p>
+      Trying to open the Stride app...
+    </p>
+
+    <p>
+      Alternatively, <.link navigate={@web_path}>click here</.link>
+      to continue using Stride in the browser.
+    </p>
+  </div>
+
+  <script>
+    window.location.replace('<%= @mobile_path %>');
+  </script>
+</div>

@@ -1,0 +1,52 @@
+<div
+  class="h-96 w-full relative"
+  x-data="tournamentFullscreenScroll"
+  number-tournaments={length(@tournaments)}
+>
+  <div class="h-full relative overflow-clip md:mx-[20px] border-[1.5px] rounded-[10px] md:border-0 md:rounded-none overflow-hidden ">
+    <%= for {tournament, i} <- Enum.with_index(@tournaments) do %>
+      <div class="absolute top-0 left-0 right-0 bottom-0" value={i} x-cloak={i > 0}>
+        <.live_component
+          id={"tournaments-small-featured-#{@myself}-card-#{tournament.id}"}
+          module={StridentWeb.Components.Tournaments.SmallCarouselTournamentCard}
+          tournament={tournament}
+          timezone={@timezone}
+          locale={@locale}
+        />
+      </div>
+    <% end %>
+  </div>
+  <div
+    class="absolute top-0 bottom-0 h-full left-0 -ml-[40px] w-[60px] items-center justify-center cursor-pointer hidden md:flex"
+    x-bind="pageLeft"
+  >
+    <.svg icon={:chevron_left} width="120" height="120" class="fill-current" />
+  </div>
+  <div
+    class="absolute top-0 bottom-0 h-full right-0 -mr-[40px] w-[60px] items-center justify-center cursor-pointer hidden md:flex"
+    x-bind="pageRight"
+  >
+    <.svg icon={:chevron_right} width="120" height="120" class="fill-current" />
+  </div>
+
+  <div class="absolute bottom-[0px] md:bottom-[20px] md:bottom-0 w-full h-[132px] md:h-16 z-[2]">
+    <div class="card--colored md:mx-[20px] h-full" style="border-radius: 0;">
+      <div class="card__inner w-full h-full" style="padding: 0;"></div>
+    </div>
+  </div>
+
+  <div class="absolute bottom-0 -mb-8 right-0 left-0 w-full">
+    <div class="flex justify-center md:justify-center">
+      <div class="flex gap-4 space-x-1 max-w-32 md:w-fit md:mr-[20px] overflow-hidden">
+        <template x-for="i in numberTournaments">
+          <div
+            class="w-4 h-4 rounded-full drop-shadow-lg"
+            x-bind:class="i-1 == position ? 'bg-primary' : 'slider-nav-default cursor-pointer'"
+            @click="() => {pageTo(i-1);}"
+          >
+          </div>
+        </template>
+      </div>
+    </div>
+  </div>
+</div>
